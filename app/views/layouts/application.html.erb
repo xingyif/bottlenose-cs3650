@@ -60,43 +60,35 @@
 </div>
 
 <div class="container">
-
   <div class="row">
     <div class="col-sm-12">
       <%= bootstrap_flash %>
-
       <%= render_breadcrumbs %>
-
-      <h1><%= @page_title || default_page_title %></h1>
     </div>
   </div>
-</div>
 
-<div class="container">
-
-<%= yield %>
-
-<% if @course %>
-<%= raw @course.footer %>
-<% end %>
-
-</div>
-
-<div class="container">
   <div class="row">
-    <div class="col-sm-8 col-sm-offset-2">
-      <div class="footer">
-        Bottlenose copyright &copy; 2012-2015 Nat Tuck. Licensed under the
-        <%= link_to("GNU Affero GPL", "/agpl-3.0.txt") %> v3 or later. Source
-        <%= link_to("at github", "http://www.github.com/NatTuck/bottlenose")
-        %>. The development team takes no responsibility for death or serious
-        injury that may result from use of this program.
-      </div>
+    <div class="col-md-12">
+      <%= yield %>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+      <% if @course %>
+        <%= raw @course.footer %>
+      <% end %>
     </div>
   </div>
 </div>
 
-<div id="ajax-status" style="text-align: center; font-size: 6px">ajax-status: none</div>
+<footer class="footer">
+  Bottlenose copyright &copy; 2012-2015 Nat Tuck. Licensed under the
+  <%= link_to("GNU Affero GPL", "/agpl-3.0.txt") %> v3 or later. Source
+  <%= link_to("at GitHub", "http://www.github.com/NatTuck/bottlenose")
+  %>.
+</footer>
 
 </body>
 </html>
