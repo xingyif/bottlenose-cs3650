@@ -1,17 +1,14 @@
 
 Bottlenose::Application.routes.draw do
   devise_for :users
-  get "main/index"
-  get "main/auth"
-  post "main/resend_auth"
-  get "main/logout"
-  get "main/about"
 
+  # TODO: This page is currently the not logged in landing page.
+  # but it should be meaningful as a dashboard for users.
+  get "main/index"
+
+  # TODO: I'd like things like this to be under an admin namespace.
   get  'settings' => 'settings#index'
   post 'settings/save'
-
-  resources :users
-  post 'users/:id/impersonate' => 'users#impersonate'
 
   resources :terms
 
@@ -53,4 +50,9 @@ Bottlenose::Application.routes.draw do
   resources :submissions, except: [:destroy]
 
   root :to => 'main#index'
+
+  namespace :admin do
+    resources :users
+    post 'users/:id/impersonate' => 'users#impersonate'
+  end
 end
