@@ -12,7 +12,7 @@ Bottlenose::Application.routes.draw do
   resources :courses, only: [:index, :show] do
     resources :reg_requests, only: [:new, :create, :update]  # TODO: Update?
     resources :buckets  # TODO
-    resources :assignments, only: [:index, :show] do
+    resources :assignments, only: :show do
       resources :submissions, except: [:destroy]
       # TODO: Download route?
     end

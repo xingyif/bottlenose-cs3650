@@ -1,18 +1,11 @@
-<% @page_title = "Assignment: #{@assignment.name}" %>
-
-<% if current_user.course_admin?(@course) %>
-  <p><%= link_to 'Edit this Assignment', edit_assignment_path(@assignment) %></p>
-<% end %>
+<% @page_title = "#{@course.name} / #{@assignment.name}" %>
 
 <p>Bucket: <%= @assignment.bucket.name %></p>
 <p>Due Date: <%= @assignment.due_date %></p>
 <p>Grading Hidden? <%= @assignment.hide_grading? ? "yes" : "no" %></p>
 <p>Teams? <%= @assignment.team_subs? ? "yes" : "no" %>
-<% if (current_user.course_admin?(@course) && @assignment.team_subs?) %>
-  (<%= link_to "Manage Teams", course_teams_path(@course) %>)
-<% end %>
-</p>
 
+</p>
   <div class="panel panel-default">
     <div class="panel-heading">
       <p><strong>Description:</strong></p>
@@ -31,62 +24,13 @@
   <%= link_to @assignment.assignment_file_name, @assignment.assignment_file_path %>
 </p>
 
-<% if current_user.course_admin?(@course) %>
-  <p>
-    <b>Grading File Download:</b>
-    <%= link_to @assignment.grading_file_name, @assignment.grading_file_path %>
-  </p>
-
-  <p>
-    <b>Solution File Download:</b>
-    <%= link_to @assignment.solution_file_name, @assignment.solution_file_path %>
-  </p>
-
-  <h1>Student Submissions</h1>
-
-  <p>
-    <%= link_to "Manually Add Student Grade", assignment_path(@assignment) +
-      '/manual_grade' %> |
-    <%= link_to "Tarball of Submissions", assignment_path(@assignment) + '/tarball' %>
-  </p>
-
-  <p>
-    Filter Tags:
-    <select id="tag-filter"></select>
-    <button class="btn btn-default" id="apply-filter">Apply</button>
-  </p>
-
-  <table class="table table-striped">
-    <tr>
-      <th>Student</th>
-      <th>Attempts</th>
-      <th>Date</th>
-      <th>Status</th>
-      <th>Automatic</th>
-      <th>Teacher</th>
-      <th>Score</th>
-      <th>Link</th>
-    </tr>
-
-    <% @students.each do |reg| %>
-      <% sub = @assignment.best_sub_for(reg.user) %>
-      <tr id="sub-for-user-<%= reg.user.id %>" data-tags="<%= reg.tags %>">
-        <%= render 'submissions/row_form', user: reg.user, sub: sub %>
-      </tr>
-    <% end %>
-  </table>
-
-<% end %>
-
-
-
 <h1>Your Submissions</h1>
 
 <% if (@assignment.team_subs? && !current_user.course_admin?(@course)) %>
   <p>Team Members: <%= @team.member_names %></p>
   <p><%= link_to "New Team Submission", new_assignment_submission_path(@assignment) %></p>
 <% else %>
-  <p><%= link_to "New Submission", new_assignment_submission_path(@assignment) %></p>
+  <p><%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment) %></p>
 <% end %>
 
 <table class="table table-striped">
@@ -108,13 +52,8 @@
     <td><%= show_score(sub.score) %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
     <td>
       <%= link_to "View", sub %>
-
-      <% if current_user.course_admin?(@course) %>
-        | <%= link_to "Grade", [:edit, sub] %>
-      <% end %>
     </td>
   </tr>
 <% end %>
 
 </table>
-

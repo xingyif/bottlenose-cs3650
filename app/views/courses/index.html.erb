@@ -2,13 +2,6 @@
 
 <div class="page-header">
   <h1>Courses</h1>
-
-  <% if current_user.site_admin? %>
-    <div class="actions">
-      <%= link_to "Edit Terms", terms_path, class: "btn btn-default" %>
-      <%= link_to "New Course", new_course_path, class: "btn btn-success" %>
-    </div>
-  <% end %>
 </div>
 
 <div class="row">

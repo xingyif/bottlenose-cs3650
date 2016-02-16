@@ -8,9 +8,9 @@ class ApplicationController < ActionController::Base
 
   # Ensure we have a `current_user` for all actions by default. Controllers
   # must manually opt out of this if they wish to be public.
-  before_filter :ensure_current_user!
+  before_filter :require_logged_in_user
   # Allow devise actions for users without active sessions.
-  skip_before_filter :ensure_current_user!, if: :devise_controller?
+  skip_before_filter :require_logged_in_user, if: :devise_controller?
 
   protected
 
@@ -19,9 +19,11 @@ class ApplicationController < ActionController::Base
     ActionMailer::Base.default_url_options[:protocol] = request.protocol
   end
 
-  def ensure_current_user!
-    unless current_user
+  def require_logged_in_user
+    if current_user.nil?
+      show_error "You need to register first"
       redirect_to landing_path
+      return
     end
   end
 
@@ -112,14 +114,6 @@ class ApplicationController < ActionController::Base
     unless current_user.site_admin? or @course.taught_by?(current_user)
       show_error "You're not allowed to go there."
       redirect_to course_url(@course)
-      return
-    end
-  end
-
-  def require_logged_in_user
-    if current_user.nil?
-      show_error "You need to register first"
-      redirect_to '/'
       return
     end
   end
