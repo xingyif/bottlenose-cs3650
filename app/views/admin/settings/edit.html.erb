@@ -1,6 +1,6 @@
 <% @page_title = "Bottlenose Settings" %>
 
-<%= form_tag '/settings/save' do %>
+<%= form_tag :admin_settings, method: :patch do %>
   <div class="form-group">
     <%= label_tag :site_email, "Site Email" %>
     <%= text_field_tag :site_email, @cfg['site_email'], class: 'form-control' %>

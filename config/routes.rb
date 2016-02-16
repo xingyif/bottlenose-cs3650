@@ -6,10 +6,6 @@ Bottlenose::Application.routes.draw do
   # but it should be meaningful as a dashboard for users.
   get "main/index"
 
-  # TODO: I'd like things like this to be under an admin namespace.
-  get  'settings' => 'settings#index'
-  post 'settings/save'
-
   resources :terms
 
   resources :courses do
@@ -52,7 +48,12 @@ Bottlenose::Application.routes.draw do
   root :to => 'main#index'
 
   namespace :admin do
-    resources :users
-    post 'users/:id/impersonate' => 'users#impersonate'
+    resource :settings, only: [:edit, :update]
+
+    resources :users do
+      member do
+        post :impersonate
+      end
+    end
   end
 end
