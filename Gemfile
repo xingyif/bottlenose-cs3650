@@ -5,6 +5,9 @@ gem 'rails', '~> 4.2'
 gem 'rack'
 gem 'i18n'
 
+gem 'devise'
+gem 'devise_ldap_authenticatable'
+
 gem 'pg'
 
 gem 'execjs'

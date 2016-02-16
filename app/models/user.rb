@@ -1,6 +1,10 @@
 require 'securerandom'
 
 class User < ActiveRecord::Base
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable and :omniauthable
+  devise :ldap_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable
   has_many :registrations
   has_many :courses, through: :registrations, :dependent => :restrict_with_error
 
@@ -11,7 +15,6 @@ class User < ActiveRecord::Base
   has_many :teams, through: :team_users, dependent: :destroy
 
   validates :email, :format => { :with => /\@.*\./ }
-  validates :auth_key, :presence => true
 
   validates :email, uniqueness: true
   validates :name,  length: { in: 2..30 }
@@ -20,11 +23,11 @@ class User < ActiveRecord::Base
   # If someone uses two emails, they get two accounts. So sad.
   #validates :name,  :uniqueness => true
 
-  before_validation do
-    if self.auth_key.nil?
-      self.auth_key = SecureRandom.urlsafe_base64
-    end
+  def ldap_before_save
+    self.name = Devise::LDAP::Adapter.get_ldap_param(self.email, "displayname").first
+  end
 
+  before_validation do
     unless self.email.nil?
       self.email = self.email.downcase
       self.email = self.email.strip
@@ -32,12 +35,8 @@ class User < ActiveRecord::Base
     end
   end
 
-  def send_auth_link_email!
-    if self.auth_key.nil?
-        raise Exception.new("Must save User before sending auth link")
-    end
-
-    AuthMailer.auth_link_email(self).deliver_later
+  def to_s
+    self.email
   end
 
   def course_admin?(course)
