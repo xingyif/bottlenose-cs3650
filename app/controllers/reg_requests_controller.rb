@@ -1,6 +1,5 @@
 class RegRequestsController < ApplicationController
   before_filter :find_req_and_course
-  before_filter :setup_breadcrumbs
   before_filter :require_teacher, :except => [:new, :create]
 
   def index
@@ -55,11 +54,6 @@ class RegRequestsController < ApplicationController
       @reg_request = RegRequest.find(params[:id])
       @course      = @reg_request.course
     end
-  end
-
-  def setup_breadcrumbs
-    add_course_breadcrumbs(@course)
-    add_breadcrumb "Registration Requests", course_reg_requests_path(@course)
   end
 
   def reg_request_params

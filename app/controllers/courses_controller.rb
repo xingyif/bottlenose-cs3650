@@ -2,7 +2,6 @@ require 'csv'
 
 class CoursesController < ApplicationController
   before_action :find_course, except: [:index, :new, :create]
-  before_action :setup_breadcrumbs
 
   before_filter :require_course_permission,
     except: [:index, :new, :create, :show, :public]
@@ -29,9 +28,6 @@ class CoursesController < ApplicationController
   end
 
   def bulk_add
-    add_breadcrumb "Registrations", course_registrations_path(@course)
-    add_breadcrumb "Bulk Add Students"
-
     if request.post?
       num_added = 0
 
@@ -81,14 +77,12 @@ class CoursesController < ApplicationController
   end
 
   def new
-    add_breadcrumb "New Course"
 
     @course = Course.new
     @terms = Term.all_sorted
   end
 
   def edit
-    add_breadcrumb "Edit Settings"
 
     @terms = Term.all_sorted
   end
@@ -134,15 +128,6 @@ class CoursesController < ApplicationController
 
   def find_course
     @course = Course.find(params[:id] || params[:course_id])
-  end
-
-  def setup_breadcrumbs
-    add_root_breadcrumb
-    add_breadcrumb "Courses", courses_path
-    unless @course.nil?
-      add_breadcrumb @course.term.name, courses_path
-      add_breadcrumb @course.name, @course
-    end
   end
 
   def course_params

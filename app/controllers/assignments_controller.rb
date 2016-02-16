@@ -1,6 +1,5 @@
 class AssignmentsController < ApplicationController
   before_action :find_assignment
-  before_action :setup_breadcrumbs
 
   before_filter :require_teacher, :except => [:show]
   before_filter :require_course_permission
@@ -11,8 +10,6 @@ class AssignmentsController < ApplicationController
   end
 
   def show
-    add_breadcrumb @assignment.name
-
     @students    = @course.active_registrations
     @submissions = @assignment.submissions.where(user_id: current_user.id)
 
@@ -20,8 +17,6 @@ class AssignmentsController < ApplicationController
   end
 
   def new
-    add_breadcrumb "New Assignment"
-
     bucket = @course.buckets.find_by_id(params[:bucket])
 
     @assignment = Assignment.new
@@ -81,16 +76,6 @@ class AssignmentsController < ApplicationController
       @course = @assignment.course
     end
 
-  end
-
-  def setup_breadcrumbs
-    add_root_breadcrumb
-    add_breadcrumb "Courses", courses_path
-    add_breadcrumb @course.name, @course
-
-    unless (@assignment.nil? || @assignment.bucket.nil?)
-      add_breadcrumb @assignment.bucket.name, @course
-    end
   end
 
   def assignment_params

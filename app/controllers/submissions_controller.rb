@@ -1,6 +1,5 @@
 class SubmissionsController < ApplicationController
   before_action :find_submission_and_assignment
-  before_action :setup_breadcrumbs
 
   before_filter :require_teacher, :except => [:new, :create, :show]
   before_filter :require_student
@@ -10,8 +9,6 @@ class SubmissionsController < ApplicationController
   end
 
   def show
-    add_breadcrumb @submission.name
-
     unless @submission.visible_to?(current_user)
       show_error "That's not your submission."
       redirect_to @assignment
@@ -19,8 +16,6 @@ class SubmissionsController < ApplicationController
   end
 
   def new
-    add_breadcrumb "New Submission"
-
     @submission = Submission.new
     @submission.assignment_id = @assignment.id
     @submission.user_id = current_user.id
@@ -30,9 +25,6 @@ class SubmissionsController < ApplicationController
   end
 
   def edit
-    add_breadcrumb @submission.name, @submission
-    add_breadcrumb "Grading"
-
     @team = current_user.active_team(@course)
   end
 
@@ -115,17 +107,6 @@ class SubmissionsController < ApplicationController
     end
 
     @course = @assignment.course
-  end
-
-  def setup_breadcrumbs
-    add_root_breadcrumb
-    add_breadcrumb "Courses", courses_path
-    add_breadcrumb @course.name, @course
-
-    unless (@assignment.nil? || @assignment.bucket.nil?)
-      add_breadcrumb @assignment.bucket.name, @course
-      add_breadcrumb @assignment.name, @assignment
-    end
   end
 
   def submission_params
