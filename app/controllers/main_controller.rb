@@ -1,10 +1,10 @@
 class MainController < ApplicationController
-  def index
-    @user = User.new
+  skip_before_filter :ensure_current_user!, except: :dashboard
 
-    if current_user
-      redirect_to courses_path
-    end
+  def dashboard
+  end
+
+  def landing
   end
 
   def about

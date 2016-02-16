@@ -7,28 +7,19 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <%= link_to (image_tag "dolphin.svg",
-                   { height: 40, class: 'navbar-brand' }), root_path %>
+      <%= link_to image_tag("dolphin.svg", height: 40, class: 'navbar-brand'), root_path %>
     </div>
+
     <div class="collapse navbar-collapse">
-      <ul class="nav navbar-nav">
-        <li><%= link_to "About", '/main/about' %></li>
-        <% if current_user && current_user.site_admin? %>
-          <li><%= link_to "Manage Users", admin_users_path %></li>
-          <li><%= link_to "Settings", edit_admin_settings_path %></li>
-        <% end %>
-        <% unless current_user.nil? %>
+      <ul class="nav navbar-nav pull-right">
+        <% if current_user %>
           <li><%= link_to "Your Courses", courses_path %></li>
           <li><%= link_to "Log Out", destroy_user_session_path, method: :delete %></li>
+        <% else %>
+          <li><%= link_to "Sign Up", new_user_registration_path %></li>
+          <li><%= link_to "Log In", new_user_session_path %></li>
         <% end %>
       </ul>
-
-      <% unless current_user.nil? %>
-        <div class="header-user-info">
-          &nbsp; &nbsp; &nbsp;
-          (Logged in as <%= current_user.email %>)
-        </div>
-      <% end %>
-    </div><!--/.nav-collapse -->
+    </div>
   </div>
 </div>

@@ -6,11 +6,23 @@ class ApplicationController < ActionController::Base
 
   before_filter :set_mailer_host
 
+  # Ensure we have a `current_user` for all actions by default. Controllers
+  # must manually opt out of this if they wish to be public.
+  before_filter :ensure_current_user!
+  # Allow devise actions for users without active sessions.
+  skip_before_filter :ensure_current_user!, if: :devise_controller?
+
   protected
 
   def set_mailer_host
     ActionMailer::Base.default_url_options[:host] = request.host_with_port
     ActionMailer::Base.default_url_options[:protocol] = request.protocol
+  end
+
+  def ensure_current_user!
+    unless current_user
+      redirect_to landing_path
+    end
   end
 
   def show_notice(msg)
