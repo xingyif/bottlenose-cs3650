@@ -3,7 +3,6 @@ class TeamsController < ApplicationController
 
   before_action :set_course
   before_action :set_team, only: [:show, :edit, :update, :destroy]
-  before_action :setup_breadcrumbs
 
   # GET /teams
   def index
@@ -15,13 +14,10 @@ class TeamsController < ApplicationController
 
   # GET /teams/1
   def show
-    add_breadcrumb "Team ##{@team.id}"
   end
 
   # GET /teams/new
   def new
-    add_breadcrumb "New Team"
-
     @team = Team.new
     @team.course_id = @course.id
 
@@ -96,12 +92,6 @@ class TeamsController < ApplicationController
     @course.students.reject do |student|
       student.teams.where(course: @course).any? { |t| t.active? }
     end
-  end
-
-  def setup_breadcrumbs
-    add_root_breadcrumb
-    add_breadcrumb @course.name, @course
-    add_breadcrumb "Teams", course_teams_path(@course)
   end
 
   # Use callbacks to share common setup or constraints between actions.
