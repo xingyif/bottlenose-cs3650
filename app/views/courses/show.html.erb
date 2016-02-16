@@ -1,7 +1,43 @@
 <% @page_title = @course.name %>
 
-<% if current_user.registration_for(@course) || current_user.site_admin? %>
-  <%= render "registered" %>
-<% else %>
-  <%= render "unregistered" %>
-<% end %>
+<div class="page-header">
+  <h1><%= @course.name %></h1>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <% @course.buckets_sorted.each do |bucket| %>
+      <h2><%= bucket.name %></h2>
+      <table class="table table-striped">
+        <thead>
+          <th>Name</th>
+          <th>Due Date</th>
+        </thead>
+        <tbody>
+        <% bucket.assignments.order(:name).each do |assignment| %>
+          <tr>
+            <td><%= link_to assignment.name, course_assignment_path(@course, assignment) %></td>
+            <td><%= assignment.due_date %></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+
+  <div class="col-md-6">
+    <h2>Current Team</h2>
+    <% if current_user.active_team_for(@course) %>
+      <%= current_user.active_team_for(@course).member_names %>
+    <% else %>
+      No active team.
+    <% end %>
+
+    <h2>All Teams</h2>
+    <ul>
+      <% current_user.teams_for(@course).each do |team| %>
+        <li><%= team.member_names %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>

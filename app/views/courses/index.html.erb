@@ -8,7 +8,27 @@
   <div class="col-md-12">
     <% @courses_by_term.each do |term, courses| %>
       <h2><%= term.name %></h2>
-      <%= render "table", courses: courses %>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% courses.each do |course| %>
+            <tr>
+              <td><%= link_to course.name, course_path(course) %></td>
+              <% unless current_user.registration_for(course) %>
+                <td><%= link_to "Request Registration", new_course_reg_request_path(course), class: "btn btn-success btn-xs pull-right" %></td>
+              <% else %>
+                <td></td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
     <% end %>
   </div>
 </div>

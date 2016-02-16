@@ -32,6 +32,10 @@ gem 'momentjs-rails'
 
 gem 'whenever', :require => false
 
+group :development, :test do
+  gem 'pry'
+end
+
 group :test do
   gem 'database_cleaner'
   gem 'capybara'

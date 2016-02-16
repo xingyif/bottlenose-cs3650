@@ -1,5 +1,5 @@
 class MainController < ApplicationController
-  skip_before_filter :ensure_current_user!, except: :dashboard
+  skip_before_filter :require_logged_in_user, except: :dashboard
 
   def dashboard
   end

@@ -6,19 +6,14 @@ Bottlenose::Application.routes.draw do
   get "landing" => "main#landing"
   get "about" => "main#about"
 
-  # TODO: Should this even be a route?
-  resources :terms, only: [:index, :show]
-
   resources :courses, only: [:index, :show] do
     resources :reg_requests, only: [:new, :create, :update]  # TODO: Update?
-    resources :buckets  # TODO
     resources :assignments, only: :show do
       resources :submissions, except: [:destroy]
       # TODO: Download route?
     end
-    resources :teams, only: [:index, :show]
-    # TODO
-    # get 'courses/:id/public' => 'courses#public'
+    resources :teams, only: :show
+    # TODO: get 'courses/:id/public' => 'courses#public'
   end
 
   # # Admin routes.

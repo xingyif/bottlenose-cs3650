@@ -7,10 +7,9 @@ class CoursesController < ApplicationController
 
   def show
     @course = Course.find(params[:id])
-    @registration = current_user.registration_for(@course)
 
-    unless @registration
-      redirect_to :index, notice: "You are not registered for that course"
+    unless current_user.registration_for(@course)
+      redirect_to courses_path, alert: "You are not registered for that course"
     end
   end
 
