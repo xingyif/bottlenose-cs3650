@@ -7,7 +7,10 @@ class TeamsController < ApplicationController
 
   # GET /teams
   def index
-    @teams = @course.teams
+    partition = @course.teams.partition(&:active?)
+    @active_teams = partition.first
+    @inactive_teams = partition.second
+    @students_without_active_team = students_without_active_team
   end
 
   # GET /teams/1
@@ -22,12 +25,19 @@ class TeamsController < ApplicationController
     @team = Team.new
     @team.course_id = @course.id
 
-    @others = other_users
+    @teams = @course.teams.select(&:active?)
+    @others = students_without_active_team
   end
 
   # GET /teams/1/edit
   def edit
-    @others = other_users
+    @others = students_without_active_team
+  end
+
+  def divorce
+    @team = Team.find(params[:team_id])
+    @team.update_attribute(:end_date, Date.current)
+    redirect_to :back
   end
 
   # POST /teams
@@ -38,9 +48,9 @@ class TeamsController < ApplicationController
     @team.users = users.map {|u_id| User.find(u_id.to_i) }
 
     if @team.save
-      redirect_to course_team_path(@course, @team), notice: 'Team was successfully created.'
+      redirect_to new_course_team_path(@course), notice: 'Team was successfully created.'
     else
-      @others = other_users
+      @others = students_without_active_team
       render :new
     end
   end
@@ -81,8 +91,11 @@ class TeamsController < ApplicationController
   end
 
   private
-  def other_users
-    @course.students.find_all {|uu| not @team.users.include?(uu) }
+  def students_without_active_team
+    # TODO: Optimize.
+    @course.students.reject do |student|
+      student.teams.where(course: @course).any? { |t| t.active? }
+    end
   end
 
   def setup_breadcrumbs
@@ -102,7 +115,6 @@ class TeamsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def team_params
-    params.require(:team).permit(:course_id, :start_date)
+    params.require(:team).permit(:course_id, :start_date, :end_date)
   end
 end
-

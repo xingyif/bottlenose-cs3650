@@ -1,0 +1,19 @@
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Members</th>
+      <th>Start date</th>
+      <th>End date</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% teams.each do |team| %>
+      <tr>
+        <td><%= link_to team.member_names, course_team_path(@course, team) %></td>
+        <td><%= team.start_date %></td>
+        <td><%= team.end_date || "∞" %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
