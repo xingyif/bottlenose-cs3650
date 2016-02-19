@@ -27,8 +27,11 @@
 
   <div class="col-md-6">
     <h2>Current Team</h2>
-    <% if current_user.active_team_for(@course) %>
-      <%= current_user.active_team_for(@course).member_names %>
+    <% active_team = current_user.active_team_for(@course) %>
+    <% if active_team %>
+      <%= link_to course_team_path(@course, active_team) do %>
+        <span><%= active_team.member_names %></span>
+      <% end %>
     <% else %>
       No active team.
     <% end %>
@@ -36,7 +39,7 @@
     <h2>All Teams</h2>
     <ul>
       <% current_user.teams_for(@course).each do |team| %>
-        <li><%= team.member_names %></li>
+        <li><%= link_to team.member_names, course_team_path(@course, team) %></li>
       <% end %>
     </ul>
   </div>

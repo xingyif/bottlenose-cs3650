@@ -1,7 +1,5 @@
 <% @page_title = "#{@course.name} - Team ##{@team.id}" %>
 
-<p id="notice"><%= notice %></p>
-
 <p>
     Team starts on
     <strong><%= @team.start_date.strftime("%b %d, %Y") %></strong>
@@ -19,16 +17,7 @@
 <h4>Members</h4>
 <ul>
     <% @team.users.each do |uu| %>
-        <li><%= link_to uu.name, uu.registration_for(@course) %></li>
+        <!-- TODO: Link to user? -->
+        <li><%= uu.name %></li>
     <% end %>
 </ul>
-
-<% if @team.active? %>
-    <h4>Desolve</h4>
-    <p>
-        A team can be desolved early, this will set it's end date to the current
-        date.
-    </p>
-    <%= link_to "End now", course_team_divorce_path(@course, @team),
-    class: "btn btn-danger btn-xs", method: :patch %>
-<% end %>
