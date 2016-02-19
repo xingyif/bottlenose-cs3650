@@ -32,6 +32,11 @@ gem 'momentjs-rails'
 
 gem 'whenever', :require => false
 
+group :development do
+  gem "better_errors"
+  gem "binding_of_caller"
+end
+
 group :development, :test do
   gem 'pry'
 end
@@ -42,5 +47,4 @@ group :test do
   gem 'capybara-webkit' # Needs qt5-default qt5-qmake libqt5webkit5-dev
   gem 'launchy'
   gem 'factory_girl_rails'
-  gem 'pry'
 end
