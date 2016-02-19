@@ -7,7 +7,7 @@ Bottlenose::Application.routes.draw do
   resources :courses, only: [:index, :show] do
     resources :reg_requests, only: [:new, :create]
     resources :assignments, only: :show do
-      resources :submissions, except: [:destroy]
+      # resources :submissions, except: [:destroy]
     end
     resources :teams, only: :show
     member do

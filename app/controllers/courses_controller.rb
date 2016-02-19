@@ -1,10 +1,12 @@
 class CoursesController < ApplicationController
   skip_before_action :require_logged_in_user, only: :public
 
+  # GET /courses
   def index
     @courses_by_term = Course.order(:name).group_by(&:term)
   end
 
+  # GET /courses/:id
   def show
     @course = Course.find(params[:id])
 
@@ -13,6 +15,7 @@ class CoursesController < ApplicationController
     end
   end
 
+  # GET /courses/:id/public
   def public
     @course = Course.find(params[:id])
 
