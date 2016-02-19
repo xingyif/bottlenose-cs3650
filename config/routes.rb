@@ -10,6 +10,8 @@ Bottlenose::Application.routes.draw do
       resources :submissions, except: [:destroy]
     end
     resources :teams, only: :show
-    # TODO: get 'courses/:id/public' => 'courses#public'
+    member do
+      get :public
+    end
   end
 end

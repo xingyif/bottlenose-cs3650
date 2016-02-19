@@ -9,18 +9,21 @@ class CoursesController < ApplicationController
     @course = Course.find(params[:id])
 
     unless current_user.registration_for(@course)
-      redirect_to courses_path, alert: "You are not registered for that course"
+      redirect_to courses_path, alert: "You are not registered for that course."
     end
   end
 
-  # TODO
   def public
-    unless current_user.nil?
-      redirect_to @course
+    @course = Course.find(params[:id])
+
+    if current_user
+      redirect_to(course_path(@course))
+      return
     end
 
     unless @course.public?
-      redirect_to root_path, notice: 'That course material is not public'
+      redirect_to(root_path, notice: 'That course material is not public.')
+      return
     end
   end
 end
