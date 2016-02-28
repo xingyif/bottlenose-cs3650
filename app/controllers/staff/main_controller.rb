@@ -1,8 +1,6 @@
-module Staff
-  class MainController < ApplicationController
-    # GET /staff
-    def dashboard
-      render "dashboard"
-    end
+class Staff::MainController < Staff::BaseController
+  # GET /staff
+  def dashboard
+    render "dashboard"
   end
 end
