@@ -26,5 +26,6 @@ Bottlenose::Application.routes.draw do
     root to: "main#dashboard"
 
     resources :users
+    resources :terms
   end
 end
