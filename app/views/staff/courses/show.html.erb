@@ -30,7 +30,7 @@
     <tbody>
     <% bb.assignments.order(:name).each do |aa| %>
       <tr>
-        <td><%#= link_to aa.name, aa %></td>
+        <td><%= link_to aa.name, staff_course_assignment_path(@course, aa) %></td>
         <td><%= aa.due_date %></td>
       </tr>
     <% end %>

@@ -28,6 +28,8 @@ Bottlenose::Application.routes.draw do
     resource :settings, only: [:edit, :update]
     resources :users
     resources :terms
-    resources :courses
+    resources :courses do
+        resources :assignments
+    end
   end
 end
