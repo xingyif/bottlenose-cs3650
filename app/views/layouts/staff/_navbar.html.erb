@@ -14,6 +14,7 @@
       <ul class="nav navbar-nav pull-right">
         <% if current_user.site_admin? %>
           <li><%= link_to "Users", staff_users_path %></li>
+          <li><%= link_to "Settings", edit_staff_settings_path %></li>
         <% end %>
       </ul>
     </div>

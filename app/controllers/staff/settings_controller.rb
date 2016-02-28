@@ -1,21 +1,19 @@
-module Staff
-  class SettingsController < ApplicationController
-    before_filter :require_site_admin
+class Staff::SettingsController < Staff::BaseController
+  before_filter :require_site_admin
 
-    def edit
-      @cfg = Settings.load_json
+  def edit
+    @cfg = Settings.load_json
+  end
+
+  def update
+    @cfg = Settings.defaults
+
+    @cfg.each_key do |kk|
+      @cfg[kk] = params[kk]
     end
 
-    def update
-      @cfg = Settings.defaults
+    Settings.save_json(@cfg)
 
-      @cfg.each_key do |kk|
-        @cfg[kk] = params[kk]
-      end
-
-      Settings.save_json(@cfg)
-
-      redirect_to edit_admin_settings_path, notice: "Settings Saved"
-    end
+    redirect_to staff_root_path, notice: "Settings Saved"
   end
 end

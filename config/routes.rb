@@ -25,6 +25,7 @@ Bottlenose::Application.routes.draw do
   namespace :staff do
     root to: "main#dashboard"
 
+    resource :settings, only: [:edit, :update]
     resources :users
     resources :terms
   end
