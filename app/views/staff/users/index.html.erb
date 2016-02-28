@@ -4,7 +4,7 @@
   <h1>Users</h1>
 
   <div class="actions">
-    <%= link_to "New", new_admin_user_path, class: "btn btn-success" %>
+    <%= link_to "New", new_staff_user_path, class: "btn btn-success" %>
   </div>
 </div>
 
@@ -22,12 +22,12 @@
   <tr>
     <td><%= user.name %></td>
     <td><%= user.email %></td>
-    <td><%= link_to 'Show', admin_user_path(user) %></td>
-    <td><%= link_to 'Edit', edit_admin_user_path(user) %></td>
+    <td><%= link_to 'Show', staff_user_path(user) %></td>
+    <td><%= link_to 'Edit', edit_staff_user_path(user) %></td>
     <td>
-      <%= link_to 'Destroy', admin_user_path(user), method: :delete, data: { confirm: 'Are you sure?' } %>
+      <%= link_to 'Destroy', staff_user_path(user), method: :delete, data: { confirm: 'Are you sure?' } %>
     </td>
-    <td><%= link_to('Impersonate', admin_user_path(user) + '/impersonate', method: 'post') %></td>
+    <td><%= link_to('Impersonate', staff_user_path(user) + '/impersonate', method: 'post') %></td>
   </tr>
 <% end %>
 </table>
