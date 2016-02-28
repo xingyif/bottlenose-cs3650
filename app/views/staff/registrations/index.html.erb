@@ -1,0 +1,82 @@
+<% @page_title = "Manage Registrations" %>
+
+<h1>Add a Student or Teacher</h1>
+
+<p><%= link_to "Bulk-Add Students", course_path(@course) + "/bulk_add" %></p>
+
+<p>(A new user will be created and notified if needed.)</p>
+
+<%= form_for [@course, @registration] do |f| %>
+  <%= f.hidden_field :course_id %>
+
+  <div class="form-group">
+    <%= label_tag :user_email, "Email" %>
+    <%= text_field_tag :user_email %>
+  </div>
+  <div class="form-group">
+    <%= label_tag :user_name, "Name" %>
+    <%= text_field_tag :user_name %>
+  </div>
+  <div class="form-group">
+    <%= label_tag :teacher, "Teacher?" %>
+    <%= f.check_box :teacher %>
+  </div>
+  <div class="form-group">
+    <%= f.submit nil, class: 'btn btn-primary' %>
+  </div>
+<% end %>
+
+
+<h1>Current Teachers</h1>
+
+<table class="table table-striped">
+<tr>
+  <th>Name</th>
+  <th>Email</th>
+  <th>Show in Reports</th>
+  <th>&nbsp;</th>
+</tr>
+
+<% @course.teacher_registrations.each do |treg| %>
+  <% teacher = treg.user %>
+<tr>
+  <td><%= teacher.name %></td>
+  <td><%= teacher.email %></td>
+  <td>
+    <span class="show-user-<%= treg.id %>"><%= treg.show_in_lists? ? "Yes" : "No" %></span>
+    (<%= link_to "Toggle", registration_show_toggle_path(treg.id),
+                           remote: true, method: 'post' %>)
+  </td>
+  <td><%= link_to 'Edit', [:edit, @course, treg] %> |
+      <%= link_to 'Remove', [@course, treg],
+            { :method => :delete, :data => { confirm: 'Are you sure?' } } %></td>
+</tr>
+<% end %>
+</table>
+
+<h1>Current Students</h1>
+
+<table class="table table-striped">
+<tr>
+  <th>Name</th>
+  <th>Email</th>
+  <th>Show In Reports</th>
+  <th>&nbsp;</th>
+</tr>
+
+<% @course.student_registrations.each do |sreg| %>
+  <% student = sreg.user %>
+<tr>
+  <td><%= student.name %></td>
+  <td><%= student.email %></td>
+  <td>
+    <span class="show-user-<%= sreg.id %>"><%= sreg.show_in_lists? ? "Yes" : "No" %></span>
+    (<%= link_to "Toggle", registration_show_toggle_path(sreg.id),
+                           remote: true, method: 'post' %>)
+  </td>
+  <td><%= link_to 'Edit', [:edit, @course, sreg] %> |
+      <%= link_to 'Remove', [@course, sreg],
+            { :method => :delete, :data => { confirm: 'Are you sure?' } } %></td>
+</tr>
+<% end %>
+</table>

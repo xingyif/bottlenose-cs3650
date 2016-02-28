@@ -1,0 +1,90 @@
+<% @page_title = "List of Courses" %>
+
+<% if current_user.site_admin? %>
+  <p>
+  <%= link_to "New Course", new_staff_course_path %> |
+  <%= link_to "Edit Terms", staff_terms_path %>
+  </p>
+<% end %>
+
+<p>&nbsp;</p>
+
+<h1>Your Courses</h1>
+
+<% Term.all_sorted.each do |term| %>
+  <% unless @courses_by_term[term.id].empty? %>
+    <h2><%= term.name %></h2>
+
+    <ul>
+    <% @courses_by_term[term.id].each do |course| %>
+      <li>
+      <%= link_to course.name, staff_course_path(course) %>
+      <% if current_user.course_admin?(course) %>
+        (<%= link_to 'Edit Settings', edit_staff_course_path(course) %>)
+      <% end %>
+      <% if current_user.site_admin? %>
+        (<%= link_to 'Destroy', staff_course_path(course), method: :delete, data: { confirm: 'Are you sure?' } %>)
+      <% end %>
+      </li>
+    <% end %>
+    </ul>
+  <% end %>
+<% end %>
+
+<% unless @courses_no_term.empty? %>
+  <h2>No Term</h2>
+
+  <ul>
+  <% @courses_no_term.each do |course| %>
+    <li>
+    <%= link_to course.name, staff_course_path(course) %>
+    <% if current_user.course_admin?(course) %>
+      (<%= link_to 'Edit Settings', edit_staff_course_path(course) %>)
+    <% end %>
+    <% if current_user.site_admin? %>
+      (<%= link_to 'Destroy', staff_course_path(course), method: :delete, data: { confirm: 'Are you sure?' } %>)
+    <% end %>
+    </li>
+  <% end %>
+  </ul>
+<% end %>
+
+<h1>Other Courses</h1>
+
+<% Term.all_sorted.each do |term| %>
+  <% unless @alls_by_term[term.id].empty? %>
+    <h2><%= term.name %></h2>
+
+    <ul>
+    <% @alls_by_term[term.id].each do |course| %>
+      <li>
+      <%= link_to course.name, staff_course_path(course) %>
+      <% if current_user.course_admin?(course) %>
+        (<%= link_to 'Edit Settings', edit_staff_course_path(course) %>)
+      <% end %>
+      <% if current_user.site_admin? %>
+        (<%= link_to 'Destroy', staff_course_path(course), method: :delete, data: { confirm: 'Are you sure?' } %>)
+      <% end %>
+      </li>
+    <% end %>
+    </ul>
+  <% end %>
+<% end %>
+
+<% unless @alls_no_term.empty? %>
+  <h2>No Term</h2>
+
+  <ul>
+  <% @alls_no_term.each do |course| %>
+    <li>
+    <%= link_to course.name, staff_course_path(course) %>
+    <% if current_user.course_admin?(course) %>
+      (<%= link_to 'Edit Settings', edit_staff_course_path(course) %>)
+    <% end %>
+    <% if current_user.site_admin? %>
+      (<%= link_to 'Destroy', staff_course_path(course), method: :delete, data: { confirm: 'Are you sure?' } %>)
+    <% end %>
+    </li>
+  <% end %>
+  </ul>
+<% end %>
