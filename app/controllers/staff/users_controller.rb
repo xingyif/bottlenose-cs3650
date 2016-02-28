@@ -47,7 +47,7 @@ class Staff::UsersController < Staff::BaseController
 
     if @user.update_attributes(user_params)
       if current_user.site_admin?
-        redirect_to @user, notice: 'User was successfully updated.'
+        redirect_to staff_user_path(@user), notice: 'User was successfully updated.'
       else
         redirect_to '/courses', notice: "Name successfully updated"
       end
@@ -65,7 +65,7 @@ class Staff::UsersController < Staff::BaseController
     @user = User.find(params[:id])
     @user.destroy
 
-    redirect_to users_url
+    redirect_to staff_users_path
   end
 
   def impersonate
