@@ -18,4 +18,13 @@ Bottlenose::Application.routes.draw do
       get :public
     end
   end
+
+  # Staff routes.
+  ###############
+
+  namespace :staff do
+    root to: "main#dashboard"
+
+    resources :users
+  end
 end

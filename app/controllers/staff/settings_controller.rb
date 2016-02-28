@@ -1,4 +1,4 @@
-module Admin
+module Staff
   class SettingsController < ApplicationController
     before_filter :require_site_admin
 

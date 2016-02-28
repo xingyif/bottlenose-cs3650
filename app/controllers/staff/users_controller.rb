@@ -1,4 +1,4 @@
-module Admin
+module Staff
   class UsersController < ApplicationController
     before_filter :require_site_admin, except: [:new, :create, :update]
 
