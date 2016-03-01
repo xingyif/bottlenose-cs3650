@@ -29,7 +29,8 @@ Bottlenose::Application.routes.draw do
     resources :users
     resources :terms
     resources :courses do
-        resources :assignments
+      resources :registrations
+      resources :assignments
     end
   end
 end
