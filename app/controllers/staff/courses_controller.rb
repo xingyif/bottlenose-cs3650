@@ -58,29 +58,7 @@ class Staff::CoursesController < Staff::BaseController
   end
 
   def index
-    if current_user.site_admin?
-      @course  = Course.new
-    end
-
-    @courses = current_user.courses.order(:name)
-    @courses_by_term = {}
-    Term.all.each do |term|
-      @courses_by_term[term.id] = @courses.find_all {|cc|
-        cc.term_id == term.id }
-    end
-
-    @courses_no_term = @courses.find_all {|cc| cc.term_id.nil? }
-
-    @alls = Course.order(:name) - @courses
-    @all_by_term = {}
-
-    @alls_by_term = {}
-    Term.all.each do |term|
-      @alls_by_term[term.id] = @alls.find_all {|cc|
-        cc.term_id == term.id }
-    end
-
-    @alls_no_term = @alls.find_all {|cc| cc.term_id.nil? }
+    @courses_by_term = Course.order(:name).group_by(&:term)
   end
 
   def show
