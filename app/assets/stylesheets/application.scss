@@ -1,0 +1,17 @@
+/*
+ *= require_self
+ *= require bootstrap-datepicker3
+ *= require font-awesome
+ */
+
+// Import the bootstrap overrides *before* bootstrap.
+@import "bootstrap-overrides";
+
+// External stylesheets.
+@import "bootstrap-sprockets";
+@import "bootstrap";
+
+// Internal stylesheets.
+@import "old";  // TODO: Delete me.
+@import "footer";
+@import "page-header";

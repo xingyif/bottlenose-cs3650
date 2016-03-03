@@ -1,97 +1,46 @@
-<% @page_title = "Course: #{@course.name}" %>
+<% @page_title = @course.name %>
 
-<p>
-  <% if current_user.registration_for(@course) %>
-    <%= link_to "Status Report", @registration %>
-  <% else %>
-    <%= link_to "Request Registration", new_course_reg_request_path(@course) %>
-  <% end %>
-</p>
+<div class="page-header">
+  <h1><%= @course.name %></h1>
+</div>
 
-<% if current_user.course_admin?(@course) %>
-<p>
-  Course Admin:
-  <%= link_to "Manage Registrations",  course_registrations_path(@course) %> |
-  <%= link_to "View Registration Requests (#{@req_count})", course_reg_requests_path(@course) %> |
-  <%= link_to "Teams", course_teams_path(@course) %> |
-  <%= link_to "Course Settings", [:edit, @course] %> |
-  <%= link_to 'Grade Buckets', course_buckets_path(@course) %></p>
-</p>
-<% end %>
-
-<% @course.buckets_sorted.each do |bb| %>
-
-  <h1><%= bb.name %></h1>
-
-  <% if current_user.course_admin?(@course) %>
-    <p>
-      <%= link_to %Q{Edit Bucket "#{bb.name}"}, edit_course_bucket_path(@course, bb) %> |
-      <%= link_to "New #{bb.name.singularize}", new_course_assignment_path(@course, bucket: bb.id) %>
-    </p>
-  <% end %>
-
-  <table class="table table-striped">
-    <thead>
-      <th>Name</th>
-      <th>Due Date</th>
-    </thead>
-    <tbody>
-    <% bb.assignments.order(:name).each do |aa| %>
-      <tr>
-        <td><%= link_to aa.name, aa %></td>
-        <td><%= aa.due_date %></td>
-      </tr>
+<div class="row">
+  <div class="col-md-6">
+    <% @course.buckets_sorted.each do |bucket| %>
+      <h2><%= bucket.name %></h2>
+      <table class="table table-striped">
+        <thead>
+          <th>Name</th>
+          <th>Due Date</th>
+        </thead>
+        <tbody>
+        <% bucket.assignments.order(:name).each do |assignment| %>
+          <tr>
+            <td><%= link_to assignment.name, course_assignment_path(@course, assignment) %></td>
+            <td><%= assignment.due_date %></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
     <% end %>
-    </tbody>
-  </table>
+  </div>
 
-<% end %>
-
-<% if current_user.course_admin?(@course) %>
-
-<h1>Students</h1>
-
-<p><%= link_to "Manage Registrations",
-         course_registrations_path(@course) %> |
-   <%= link_to "View Registration Requests (#{@req_count})",
-         course_reg_requests_path(@course) %> |
-   <%= link_to "Teams", course_teams_path(@course) %>
-</p>
-
-<p>
-  Filter Tags:
-  <select id="tag-filter"></select>
-  <button class="btn btn-default" id="apply-filter">Apply</button>
-</p>
-
-<table class="table table-striped" id="students-summary">
-  <tr>
-    <th>Name</th>
-    <% @buckets.each do |bb| %>
-      <th><%= bb.name %></th>
+  <div class="col-md-6">
+    <h2>Current Team</h2>
+    <% active_team = current_user.active_team_for(@course) %>
+    <% if active_team %>
+      <%= link_to course_team_path(@course, active_team) do %>
+        <span><%= active_team.member_names %></span>
+      <% end %>
+    <% else %>
+      No active team.
     <% end %>
-    <th>Total</th>
-    <th>Status Report</th>
-  </tr>
 
-<% @active_regs.each do |reg| %>
-  <tr data-tags="<%= reg.tags %>">
-    <td><%= reg.user.name %><br>
-      <%= reg.user.email %></td>
-    <% @buckets.each do |bb| %>
-      <td><%= @scores[reg.user_id][bb.id].round %>%</td>
-    <% end %>
-    <td class="score-total"><%= @totals[reg.user_id].round  %>%</td>
-    <td><%= link_to "View", reg %></td>
-  </tr>
-<% end %>
-
-</table>
-
-<h1>Data Export</h1>
-
-<p><%= link_to("Get CSV for Assignment Grades", course_path(@course) + '/export_grades', method: 'post') %></p>
-<p><%= link_to("Get Summary CSV", course_path(@course) + '/export_summary', method: 'post') %></p>
-
-<% end %>
-
+    <h2>All Teams</h2>
+    <ul>
+      <% current_user.teams_for(@course).each do |team| %>
+        <li><%= link_to team.member_names, course_team_path(@course, team) %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>

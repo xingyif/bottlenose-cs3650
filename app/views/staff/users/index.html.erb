@@ -1,0 +1,33 @@
+<% @page_title = "Manage Users" %>
+
+<div class="page-header">
+  <h1>Users</h1>
+
+  <div class="actions">
+    <%= link_to "New", new_staff_user_path, class: "btn btn-success" %>
+  </div>
+</div>
+
+<table class="table table-striped">
+  <tr>
+    <th>Name</th>
+    <th>Email</th>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @users.each do |user| %>
+  <tr>
+    <td><%= user.name %></td>
+    <td><%= user.email %></td>
+    <td><%= link_to 'Show', staff_user_path(user) %></td>
+    <td><%= link_to 'Edit', edit_staff_user_path(user) %></td>
+    <td>
+      <%= link_to 'Destroy', staff_user_path(user), method: :delete, data: { confirm: 'Are you sure?' } %>
+    </td>
+    <td><%= link_to('Impersonate', staff_user_path(user) + '/impersonate', method: 'post') %></td>
+  </tr>
+<% end %>
+</table>

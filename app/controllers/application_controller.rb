@@ -6,23 +6,25 @@ class ApplicationController < ActionController::Base
 
   before_filter :set_mailer_host
 
-  def add_root_breadcrumb
-    clear_breadcrumbs
-    add_breadcrumb(fa_icon("home"), :root_path)
-  end
-
-  def add_course_breadcrumbs(course)
-    add_root_breadcrumb
-    add_breadcrumb("Courses", courses_path)
-    add_breadcrumb(course.term.name, courses_path)
-    add_breadcrumb(course.name, course)
-  end
+  # Ensure we have a `current_user` for all actions by default. Controllers
+  # must manually opt out of this if they wish to be public.
+  before_filter :require_logged_in_user
+  # Allow devise actions for users without active sessions.
+  skip_before_filter :require_logged_in_user, if: :devise_controller?
 
   protected
 
   def set_mailer_host
     ActionMailer::Base.default_url_options[:host] = request.host_with_port
     ActionMailer::Base.default_url_options[:protocol] = request.protocol
+  end
+
+  def require_logged_in_user
+    if current_user.nil?
+      show_error "You need to register first"
+      redirect_to landing_path
+      return
+    end
   end
 
   def show_notice(msg)
@@ -112,14 +114,6 @@ class ApplicationController < ActionController::Base
     unless current_user.site_admin? or @course.taught_by?(current_user)
       show_error "You're not allowed to go there."
       redirect_to course_url(@course)
-      return
-    end
-  end
-
-  def require_logged_in_user
-    if current_user.nil?
-      show_error "You need to register first"
-      redirect_to '/'
       return
     end
   end

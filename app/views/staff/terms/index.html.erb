@@ -1,0 +1,25 @@
+<% @page_title = "List of Terms" %>
+
+<p><%= link_to 'New Term', new_staff_term_path %></p>
+
+<table class="table table-striped">
+  <tr>
+    <th>Name</th>
+    <th>Archived?</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @terms.each do |term| %>
+  <tr>
+    <td><%= term.name %></td>
+    <td style="text-align: center"><%= term.archived? ? "yes" : "no" %></td>
+    <td><%= link_to 'Show', staff_term_path(term) %></td>
+    <td><%= link_to 'Edit', edit_staff_term_path(term) %></td>
+    <td>
+      <%= link_to 'Destroy', staff_term_path(term), method: :delete, data: { confirm: 'Are you sure?' } %>
+    </td>
+  </tr>
+<% end %>
+</table>

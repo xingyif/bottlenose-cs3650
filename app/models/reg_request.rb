@@ -11,4 +11,22 @@ class RegRequest < ActiveRecord::Base
   def registered?
     course.users.any? {|uu| uu.id == user_id }
   end
+
+  # Accept this registration, adding a new Registration for
+  # the user to the requested course.
+  def accept!
+    Registration.create!(course: self.course,
+                         user: self.user,
+                         teacher: false,
+                         show_in_lists: true)
+    # It's safe to call destroy here since `create!` will raise an
+    # exception if it fails.
+    destroy
+  end
+
+  # Reject this registration request, simply deleting it without
+  # adding the user to the requested course.
+  def reject!
+    destroy
+  end
 end

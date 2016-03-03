@@ -1,14 +1,16 @@
 class MainController < ApplicationController
-  def index
-    @user = User.new
+  skip_before_filter :require_logged_in_user
 
+  # GET /
+  def home
     if current_user
-      redirect_to courses_path
+      render "dashboard"
+    else
+      render "landing"
     end
   end
 
+  # GET /about
   def about
-    add_root_breadcrumb
-    add_breadcrumb "About"
   end
 end

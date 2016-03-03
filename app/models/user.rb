@@ -4,7 +4,7 @@ class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :ldap_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable
   has_many :registrations
   has_many :courses, through: :registrations, :dependent => :restrict_with_error
 
@@ -64,12 +64,15 @@ class User < ActiveRecord::Base
   end
 
   def active_team(course)
-    teams = Team.joins(:team_users).where("team_users.user_id = ?", self.id).
-      where("course_id = ?", course.id).where("start_date <= now()").order(:start_date)
-    if teams.size > 0
-      teams.first
-    else
-      nil
-    end
+    warn "[DEPRECATED] `active_team` use `active_team_for` instead."
+    active_team_for(course)
+  end
+
+  def active_team_for(course)
+    @active_team ||= teams_for(course).select(&:active?).first
+  end
+
+  def teams_for(course)
+    @teams ||= teams.where(course: course)
   end
 end
