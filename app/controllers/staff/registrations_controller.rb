@@ -1,7 +1,10 @@
+require 'csv'
+
 class Staff::RegistrationsController < Staff::BaseController
   before_filter :require_teacher, :except => [:show, :submissions_for_assignment]
   before_filter :require_course_permission
-  prepend_before_filter :find_registration, :except => [:index, :new, :create]
+  prepend_before_filter :find_registration,
+                        except: [:index, :new, :create, :bulk]
 
   def index
     add_breadcrumb "Registrations"
@@ -51,6 +54,23 @@ class Staff::RegistrationsController < Staff::BaseController
     else
       render action: :new
     end
+  end
+
+  def bulk
+    @course = Course.find(params[:course_id])
+    num_added = 0
+
+    CSV.parse(params[:emails]) do |row|
+      email = row[0]
+      if email =~ /\@.*\./
+        name, _ = email.split('@')
+        @course.add_registration(name.downcase, email)
+        num_added += 1
+      end
+    end
+
+    redirect_to staff_course_registrations_path(@course),
+                notice: "Added #{num_added} students."
   end
 
   def update
