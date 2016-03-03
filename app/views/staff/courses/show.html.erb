@@ -43,8 +43,8 @@
 
 <h1>Students</h1>
 
-<p><%#= link_to "Manage Registrations",
-         course_registrations_path(@course) %> |
+<p><%= link_to "Manage Registrations",
+         staff_course_registrations_path(@course) %> |
    <%#= link_to "View Registration Requests (#{@req_count})",
          course_reg_requests_path(@course) %> |
    <%#= link_to "Teams", course_teams_path(@course) %>
