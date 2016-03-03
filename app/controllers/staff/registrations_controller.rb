@@ -96,14 +96,6 @@ class Staff::RegistrationsController < Staff::BaseController
     @user   = @registration.user
   end
 
-  def setup_breadcrumbs
-    if @course.nil?
-      @course = Course.find(param[:course_id])
-    end
-
-    add_course_breadcrumbs(@course)
-  end
-
   def registration_params
     params[:registration].permit(:course_id, :teacher, :user_id, :show_in_lists, :tags)
   end
