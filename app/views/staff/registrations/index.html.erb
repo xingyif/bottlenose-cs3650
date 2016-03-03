@@ -25,11 +25,11 @@
   <td><%= teacher.email %></td>
   <td>
     <span class="show-user-<%= treg.id %>"><%= treg.show_in_lists? ? "Yes" : "No" %></span>
-    (<%= link_to "Toggle", staff_registration_show_toggle_path(treg.id),
+    (<%#= link_to "Toggle", staff_registration_show_toggle_path(treg.id),
                            remote: true, method: 'post' %>)
   </td>
-  <td><%= link_to 'Edit', [:edit, @course, treg] %> |
-      <%= link_to 'Remove', [@course, treg],
+  <td><%#= link_to 'Edit', [:edit, @course, treg] %> |
+      <%#= link_to 'Remove', [@course, treg],
             { :method => :delete, :data => { confirm: 'Are you sure?' } } %></td>
 </tr>
 <% end %>

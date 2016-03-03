@@ -31,30 +31,25 @@ class Staff::RegistrationsController < Staff::BaseController
   end
 
   def create
+    # Create @registration object for errors.
     @registration = Registration.new(registration_params)
 
-    name, email = params[:user_name], params[:user_email]
-    if name.blank? or email.blank?
-      @registration.errors[:base] << "Must provide name and email"
+    if params[:user_name].blank? || params[:user_email].blank?
+      @registration.errors[:base] << "Must provide both name and email."
       render action: "new"
       return
     end
 
-    @registration = @course.add_registration(name, email,
+    # Set the @registration to the new registration on @course.
+    @registration = @course.add_registration(params[:user_name],
+                                             params[:user_email],
                                              @registration.teacher?)
 
-    respond_to do |format|
-      unless @registration.save
-        render action: "new"
-        return
-      end
-
-      format.html do
-        redirect_to course_registrations_path(@course),
-        notice: 'Registration was successfully created.'
-      end
-
-      format.js {}
+    if @registration.save
+      redirect_to staff_course_registrations_path(@course),
+                  notice: 'Registration was successfully created.'
+    else
+      render action: :new
     end
   end
 
@@ -97,6 +92,7 @@ class Staff::RegistrationsController < Staff::BaseController
   end
 
   def registration_params
-    params[:registration].permit(:course_id, :teacher, :user_id, :show_in_lists, :tags)
+    params.require(:registration)
+          .permit(:course_id, :teacher, :user_id, :show_in_lists, :tags)
   end
 end

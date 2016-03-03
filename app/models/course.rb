@@ -76,19 +76,17 @@ class Course < ActiveRecord::Base
   def add_registration(name, email, teacher = false)
     email.downcase!
 
-    uu = User.find_by_email(email)
-    if uu.nil?
-      # TODO: Check LDAP for user.
-      uu = User.create!(name: name, email: email)
-    end
+    # TODO: Check LDAP for user.
+    uu = User.where(email: email)
+             .first_or_create(name: name)
 
-    rr = registrations.where(user_id: uu.id).first
-    if rr.nil?
-      rr = Registration.create(user_id: uu.id, course_id: self.id,
-                               teacher: teacher, show_in_lists: !teacher)
-    end
-
-    rr
+    # If creating the user fails, this will not create a registration
+    # because there is a validation on user.
+    registrations.where(user: uu)
+                 .first_or_create(user_id: uu.id,
+                                  course_id: self.id,
+                                  teacher: teacher,
+                                  show_in_lists: !teacher)
   end
 
   def score_summary

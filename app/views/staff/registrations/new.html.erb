@@ -1,3 +1,54 @@
 <% @page_title = "New Course" %>
 
-<%= render 'form' %>
+<div class="row">
+  <div class="col-md-6">
+    <h1>New Registration</h1>
+
+    <div class="well">
+      <%= form_for [:staff, @course, @registration] do |f| %>
+        <% if @registration.errors.any? %>
+          <div id="error_explanation">
+            <p>
+              <%= pluralize(@registration.errors.count, "error") %>
+              prohibited this registration from being saved:
+            </p>
+            <ul>
+              <% @registration.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <%= f.hidden_field :course_id %>
+        <div class="form-group">
+          <%= label_tag :user_email, "Email" %>
+          <%= email_field_tag :user_email, nil, { class: "form-control" } %>
+        </div>
+        <div class="form-group">
+          <%= label_tag :user_name, "Name" %>
+          <%= text_field_tag :user_name, nil, { class: "form-control" } %>
+        </div>
+        <div class="form-group">
+          <div class="checkbox">
+            <%= label_tag :teacher do %>
+              <%= f.check_box :teacher %>
+              Teacher
+            <% end %>
+          </div>
+        </div>
+        <div class="form-group">
+          <%= f.submit nil, class: 'btn btn-primary' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <h1>Bulk Registrations</h1>
+
+    <div class="well">
+      TODO
+    </div>
+  </div>
+</div>
