@@ -48,7 +48,7 @@
 <% @course.student_registrations.each do |sreg| %>
   <% student = sreg.user %>
 <tr>
-  <td><%= student.name %></td>
+  <td><%= link_to student.name, staff_user_path(student) %></td>
   <td><%= student.email %></td>
   <td>
     <span class="show-user-<%= sreg.id %>"><%= sreg.show_in_lists? ? "Yes" : "No" %></span>
