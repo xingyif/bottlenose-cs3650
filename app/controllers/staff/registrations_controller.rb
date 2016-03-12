@@ -84,11 +84,13 @@ class Staff::RegistrationsController < Staff::BaseController
     @submissions = @assignment.submissions_for(@user)
   end
 
-  def toggle_show
+  def toggle
     @registration.show_in_lists = ! @registration.show_in_lists?
     @registration.save
 
     @show = @registration.show_in_lists? ? "Yes" : "No"
+
+    redirect_to :back
   end
 
   private

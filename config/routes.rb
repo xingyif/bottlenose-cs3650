@@ -33,6 +33,9 @@ Bottlenose::Application.routes.draw do
         collection do
           post :bulk
         end
+        member do
+          post :toggle
+        end
       end
       resources :assignments
     end
