@@ -26,7 +26,14 @@ Bottlenose::Application.routes.draw do
     root to: "main#dashboard"
 
     resource :settings, only: [:edit, :update]
-    resources :users
+    resources :users do
+      collection do
+        post :stop_impersonating
+      end
+      member do
+        post :impersonate
+      end
+    end
     resources :terms
     resources :courses do
       resources :registrations, except: [:edit, :update] do

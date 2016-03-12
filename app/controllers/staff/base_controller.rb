@@ -1,6 +1,6 @@
 class Staff::BaseController < ApplicationController
   # TODO: What exactly should we verify here?
-  before_filter :require_staff
+  before_action :require_staff
 
   protected
 

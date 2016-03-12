@@ -1,5 +1,6 @@
 class Staff::UsersController < Staff::BaseController
-  before_filter :require_site_admin, except: [:new, :create, :update]
+  skip_before_action :require_staff, only: :stop_impersonating
+  before_action :require_site_admin, except: [:new, :create, :update, :stop_impersonating]
 
   def index
     @users = User.order(:name)
@@ -69,11 +70,14 @@ class Staff::UsersController < Staff::BaseController
   end
 
   def impersonate
-    raise "TODO"
     @user = User.find(params[:id])
-    session[:user_id] = @user.id
-    show_notice "You are now #{@user.name}"
-    redirect_to courses_url
+    impersonate_user(@user)
+    redirect_to root_path, notice: "You are impersonating #{@user.name}."
+  end
+
+  def stop_impersonating
+    stop_impersonating_user
+    redirect_to root_path, notice: "You are not impersonating anyone anymore."
   end
 
   private

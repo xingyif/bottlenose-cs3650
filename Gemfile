@@ -32,6 +32,8 @@ gem 'momentjs-rails'
 
 gem 'whenever', :require => false
 
+gem 'pretender'
+
 group :development do
   gem "better_errors"
   gem "binding_of_caller"
