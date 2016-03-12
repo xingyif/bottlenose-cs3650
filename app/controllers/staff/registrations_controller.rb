@@ -64,15 +64,6 @@ class Staff::RegistrationsController < Staff::BaseController
                 notice: "Added #{num_added} students."
   end
 
-  def update
-    if @registration.update_attributes(registration_params)
-      redirect_to [:edit, @registration],
-        notice: 'Registration was successfully updated.'
-    else
-      render action: "edit"
-    end
-  end
-
   def destroy
     @registration.destroy
 
