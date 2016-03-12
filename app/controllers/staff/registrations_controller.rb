@@ -76,7 +76,7 @@ class Staff::RegistrationsController < Staff::BaseController
   def destroy
     @registration.destroy
 
-    redirect_to course_registrations_path(@course)
+    redirect_to staff_course_registrations_path(@course)
   end
 
   def submissions_for_assignment
