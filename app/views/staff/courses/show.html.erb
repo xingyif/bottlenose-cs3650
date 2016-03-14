@@ -1,26 +1,22 @@
 <% @page_title = "Course: #{@course.name}" %>
 
-<% if current_user.course_admin?(@course) %>
-<p>
-  Course Admin:
-  <%#= link_to "Manage Registrations",  course_registrations_path(@course) %> |
-  <%#= link_to "View Registration Requests (#{@req_count})", course_reg_requests_path(@course) %> |
-  <%= link_to "Teams", staff_course_teams_path(@course) %> |
-  <%= link_to "Course Settings", edit_staff_course_path(@course) %> |
-  <%#= link_to 'Grade Buckets', course_buckets_path(@course) %></p>
-</p>
-<% end %>
+<div class="page-header">
+  <h1><%= @course.name %></h1>
+
+  <div class="actions">
+    <%= link_to "Registrations", staff_course_registrations_path(@course), class: "btn btn-default" %>
+    <%= link_to "Teams", staff_course_teams_path(@course), class: "btn btn-default" %>
+    <%= link_to "Settings", edit_staff_course_path(@course), class: "btn btn-default" %>
+  </div>
+</div>
+
+<%#= link_to "View Registration Requests (#{@req_count})", course_reg_requests_path(@course) %>
+<%#= link_to 'Grade Buckets', course_buckets_path(@course) %>
+<%#= link_to %Q{Edit Bucket "#{bb.name}"}, edit_course_bucket_path(@course, bb) %>
+<%#= link_to "New #{bb.name.singularize}", new_course_assignment_path(@course, bucket: bb.id) %>
 
 <% @course.buckets_sorted.each do |bb| %>
-
-  <h1><%= bb.name %></h1>
-
-  <% if current_user.course_admin?(@course) %>
-    <p>
-      <%#= link_to %Q{Edit Bucket "#{bb.name}"}, edit_course_bucket_path(@course, bb) %> |
-      <%#= link_to "New #{bb.name.singularize}", new_course_assignment_path(@course, bucket: bb.id) %>
-    </p>
-  <% end %>
+  <h3><%= bb.name %></h3>
 
   <table class="table table-striped">
     <thead>
@@ -36,19 +32,10 @@
     <% end %>
     </tbody>
   </table>
-
 <% end %>
 
-<% if current_user.course_admin?(@course) %>
 
-<h1>Students</h1>
-
-<p><%= link_to "Manage Registrations",
-         staff_course_registrations_path(@course) %> |
-   <%#= link_to "View Registration Requests (#{@req_count})",
-         course_reg_requests_path(@course) %> |
-   <%#= link_to "Teams", course_teams_path(@course) %>
-</p>
+<h3>Students</h3>
 
 <p>
   Filter Tags:
@@ -80,9 +67,10 @@
 
 </table>
 
-<h1>Data Export</h1>
+
+<% if false %>
+<h3>Data Export</h3>
 
 <p><%= link_to("Get CSV for Assignment Grades", staff_course_path(@course) + '/export_grades', method: 'post') %></p>
 <p><%= link_to("Get Summary CSV", staff_course_path(@course) + '/export_summary', method: 'post') %></p>
-
 <% end %>
