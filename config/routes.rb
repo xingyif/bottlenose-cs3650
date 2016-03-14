@@ -44,6 +44,11 @@ Bottlenose::Application.routes.draw do
           post :toggle
         end
       end
+      resources :teams do
+        member do
+          patch :disolve
+        end
+      end
       resources :assignments
     end
   end
