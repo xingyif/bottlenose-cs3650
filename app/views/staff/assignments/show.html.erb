@@ -1,4 +1,4 @@
-<% @page_title = "Assignment: #{@assignment.name}" %>
+<% @page_title = "#{@course.name}: #{@assignment.name}" %>
 
 <% if current_user.course_admin?(@course) %>
   <p><%= link_to 'Edit this Assignment', edit_staff_course_assignment_path(@course, @assignment) %></p>
