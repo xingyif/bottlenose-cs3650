@@ -5,6 +5,10 @@
         <%= @course.name %>
         <small>Teams</small>
     </h1>
+
+    <div class="actions">
+        <%= link_to "New", new_staff_course_team_path(@course), class: "btn btn-success" %>
+    </div>
 </div>
 
 <h3>Active Teams</h3>
