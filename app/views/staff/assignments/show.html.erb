@@ -1,18 +1,22 @@
 <% @page_title = "#{@course.name}: #{@assignment.name}" %>
 
-<% if current_user.course_admin?(@course) %>
-  <p><%= link_to 'Edit this Assignment', edit_staff_course_assignment_path(@course, @assignment) %></p>
-<% end %>
+<div class="page-header">
+  <h1>
+    <%= @course.name %>
+    <small><%= @assignment.name %></small>
+  </h1>
 
-<p>Bucket: <%= @assignment.bucket.name %></p>
-<p>Due Date: <%= @assignment.due_date %></p>
-<p>Grading Hidden? <%= @assignment.hide_grading? ? "yes" : "no" %></p>
-<p>Teams? <%= @assignment.team_subs? ? "yes" : "no" %>
-<% if (current_user.course_admin?(@course) && @assignment.team_subs?) %>
-  (<%= link_to "Manage Teams", course_teams_path(@course) %>)
-<% end %>
-</p>
+  <div class="actions">
+    <%= link_to 'Edit', edit_staff_course_assignment_path(@course, @assignment), class: "btn btn-default" %>
+  </div>
+</div>
 
+<p><strong>Bucket</strong> <%= @assignment.bucket.name %></p>
+<p><strong>Due Date</strong> <%= @assignment.due_date %></p>
+<p><strong>Grading Hidden</strong> <%= @assignment.hide_grading? ? "yes" : "no" %></p>
+<p><strong>Teams</strong> <%= @assignment.team_subs? ? "yes" : "no" %></p>
+
+<% unless @assignment.assignment.blank? %>
   <div class="panel panel-default">
     <div class="panel-heading">
       <p><strong>Description:</strong></p>
@@ -23,62 +27,68 @@
       </div>
     </div>
   </div>
+<% end %>
 
-<br>
+<% unless @assignment.assignment_file_name.blank? %>
+  <p>
+    <b>Assignment Download:</b>
+    <%= link_to @assignment.assignment_file_name, @assignment.assignment_file_path %>
+  </p>
+<% end %>
 
-<p>
-  <b>Assignment Download:</b>
-  <%= link_to @assignment.assignment_file_name, @assignment.assignment_file_path %>
-</p>
-
-<% if current_user.course_admin?(@course) %>
+<% unless @assignment.grading_file_name.blank? %>
   <p>
     <b>Grading File Download:</b>
     <%= link_to @assignment.grading_file_name, @assignment.grading_file_path %>
   </p>
+<% end %>
 
+<% unless @assignment.solution_file_name.blank? %>
   <p>
     <b>Solution File Download:</b>
     <%= link_to @assignment.solution_file_name, @assignment.solution_file_path %>
   </p>
-
-  <h1>Student Submissions</h1>
-
-  <p>
-    <%= link_to "Manually Add Student Grade", staff_course_assignment_path(@course, @assignment) +
-      '/manual_grade' %> |
-    <%= link_to "Tarball of Submissions", staff_course_assignment_path(@course, @assignment) + '/tarball' %>
-  </p>
-
-  <p>
-    Filter Tags:
-    <select id="tag-filter"></select>
-    <button class="btn btn-default" id="apply-filter">Apply</button>
-  </p>
-
-  <table class="table table-striped">
-    <tr>
-      <th>Student</th>
-      <th>Attempts</th>
-      <th>Date</th>
-      <th>Status</th>
-      <th>Automatic</th>
-      <th>Teacher</th>
-      <th>Score</th>
-      <th>Link</th>
-    </tr>
-
-    <% @students.each do |reg| %>
-      <% sub = @assignment.best_sub_for(reg.user) %>
-      <tr id="sub-for-user-<%= reg.user.id %>" data-tags="<%= reg.tags %>">
-        <%#= render 'submissions/row_form', user: reg.user, sub: sub %>
-      </tr>
-    <% end %>
-  </table>
-
 <% end %>
 
+<h3>Student Submissions</h3>
 
+<% # TODO
+   if false %>
+<p>
+  <%= link_to "Manually Add Student Grade", staff_course_assignment_path(@course, @assignment) +
+    '/manual_grade' %> |
+  <%= link_to "Tarball of Submissions", staff_course_assignment_path(@course, @assignment) + '/tarball' %>
+</p>
+<% end %>
+
+<p>
+  Filter Tags:
+  <select id="tag-filter"></select>
+  <button class="btn btn-default" id="apply-filter">Apply</button>
+</p>
+
+<table class="table table-striped">
+  <tr>
+    <th>Student</th>
+    <th>Attempts</th>
+    <th>Date</th>
+    <th>Status</th>
+    <th>Automatic</th>
+    <th>Teacher</th>
+    <th>Score</th>
+    <th>Link</th>
+  </tr>
+
+  <% @students.each do |reg| %>
+    <% sub = @assignment.best_sub_for(reg.user) %>
+    <tr id="sub-for-user-<%= reg.user.id %>" data-tags="<%= reg.tags %>">
+      <%#= render 'submissions/row_form', user: reg.user, sub: sub %>
+    </tr>
+  <% end %>
+</table>
+
+<% # TODO: This should be a section for graders to see what they need to grade.
+   if false %>
 
 <h1>Your Submissions</h1>
 
@@ -117,3 +127,5 @@
 <% end %>
 
 </table>
+
+<% end %>
