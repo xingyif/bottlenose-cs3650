@@ -1,0 +1,14 @@
+<% @page_title = "#{@course.name}: Teams" %>
+
+<div class="page-header">
+    <h1>
+        <%= @course.name %>
+        <small>Teams</small>
+    </h1>
+</div>
+
+<h3>Active Teams</h3>
+<%= render "table", teams: @active_teams %>
+
+<h3>Inactive Teams</h3>
+<%= render "table", teams: @inactive_teams %>
