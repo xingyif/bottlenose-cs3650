@@ -1,59 +1,91 @@
 <% @page_title = "#{@course.name} / #{@assignment.name}" %>
 
-<p>Bucket: <%= @assignment.bucket.name %></p>
-<p>Due Date: <%= @assignment.due_date %></p>
-<p>Grading Hidden? <%= @assignment.hide_grading? ? "yes" : "no" %></p>
-<p>Teams? <%= @assignment.team_subs? ? "yes" : "no" %>
+<div class="page-header">
+  <h1>
+    <%= @course.name %>
+    <small><%= @assignment.name %></small>
+  </h1>
 
-</p>
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <p><strong>Description:</strong></p>
-    </div>
-    <div class="panel-body">
-      <div class="prose">
-        <%= raw @assignment.assignment %>
+  <div class="actions">
+    <%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment), class: "btn btn-success" %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <p>
+      <b>Bucket:</b>
+      <%= @assignment.bucket.name %>
+    </p>
+    <p>
+      <b>Due Date:</b>
+      <%= @assignment.due_date %>
+    </p>
+    <p>
+      <b>Grading Hidden:</b>
+      <%= @assignment.hide_grading? ? "Yes" : "No" %>
+    </p>
+    <p>
+      <b>Teams:</b>
+      <%= @assignment.team_subs? ? "Yes" : "No" %>
+    </p>
+    <% unless @assignment.assignment_file_name.blank? %>
+      <p>
+        <b>Assignment Download:</b>
+        <%= link_to @assignment.assignment_file_name, @assignment.assignment_file_path %>
+      </p>
+    <% end %>
+  </div>
+
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Description</h3>
+      </div>
+      <div class="panel-body">
+        <div class="prose">
+          <%= raw @assignment.assignment %>
+        </div>
       </div>
     </div>
   </div>
-
-<br>
+</div>
 
 <p>
-  <b>Assignment Download:</b>
-  <%= link_to @assignment.assignment_file_name, @assignment.assignment_file_path %>
+
 </p>
 
-<h1>Your Submissions</h1>
+<h3>Your Submissions</h3>
 
-<% if (@assignment.team_subs? && !current_user.course_admin?(@course)) %>
-  <p>Team Members: <%= @team.member_names %></p>
-  <p><%= link_to "New Team Submission", new_assignment_submission_path(@assignment) %></p>
+<%# TODO: Show team members if this is a team assignment. %>
+
+<% if @submissions.empty? %>
+  <div class="well">
+    No submissions yet.
+  </div>
 <% else %>
-  <p><%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment) %></p>
+  <table class="table table-striped">
+    <tr>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Automatic</th>
+      <th>Teacher</th>
+      <th>Score</th>
+      <th>Link</th>
+    </tr>
+
+  <% @submissions.each do |sub| %>
+    <tr>
+      <td><span class="local-time"><%= sub.created_at %></span></td>
+      <td><%= status_image(sub) %></td>
+      <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
+      <td><%= show_score(sub.teacher_score) %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
+      <td><%= show_score(sub.score) %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
+      <td>
+        <%= link_to "View", sub %>
+      </td>
+    </tr>
+  <% end %>
+
+  </table>
 <% end %>
-
-<table class="table table-striped">
-  <tr>
-    <th>Date</th>
-    <th>Status</th>
-    <th>Automatic</th>
-    <th>Teacher</th>
-    <th>Score</th>
-    <th>Link</th>
-  </tr>
-
-<% @submissions.each do |sub| %>
-  <tr>
-    <td><span class="local-time"><%= sub.created_at %></span></td>
-    <td><%= status_image(sub) %></td>
-    <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
-    <td><%= show_score(sub.teacher_score) %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
-    <td><%= show_score(sub.score) %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
-    <td>
-      <%= link_to "View", sub %>
-    </td>
-  </tr>
-<% end %>
-
-</table>
