@@ -26,12 +26,8 @@
           <%= email_field_tag :user_email, nil, { class: "form-control" } %>
         </div>
         <div class="form-group">
-          <%= label_tag :user_name, "Name" %>
-          <%= text_field_tag :user_name, nil, { class: "form-control" } %>
-        </div>
-        <div class="form-group">
           <div class="checkbox">
-            <%= label_tag :teacher do %>
+            <%= f.label :teacher do %>
               <%= f.check_box :teacher %>
               Teacher
             <% end %>

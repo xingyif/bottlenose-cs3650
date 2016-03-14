@@ -73,8 +73,11 @@ class Course < ActiveRecord::Base
     buckets.reduce(0) {|sum, bb| sum + bb.weight }
   end
 
-  def add_registration(name, email, teacher = false)
+  def add_registration(email, teacher = false)
     email.downcase!
+
+    name, _ = email.split('@')
+    name.downcase!
 
     # TODO: Check LDAP for user.
     uu = User.where(email: email)

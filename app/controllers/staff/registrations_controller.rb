@@ -28,15 +28,14 @@ class Staff::RegistrationsController < Staff::BaseController
     # Create @registration object for errors.
     @registration = Registration.new(registration_params)
 
-    if params[:user_name].blank? || params[:user_email].blank?
-      @registration.errors[:base] << "Must provide both name and email."
+    if params[:user_email].blank?
+      @registration.errors[:base] << "Must provide an email."
       render action: "new"
       return
     end
 
     # Set the @registration to the new registration on @course.
-    @registration = @course.add_registration(params[:user_name],
-                                             params[:user_email],
+    @registration = @course.add_registration(params[:user_email],
                                              @registration.teacher?)
 
     if @registration.save
@@ -54,8 +53,7 @@ class Staff::RegistrationsController < Staff::BaseController
     CSV.parse(params[:emails]) do |row|
       email = row[0]
       if email =~ /\@.*\./
-        name, _ = email.split('@')
-        @course.add_registration(name.downcase, email)
+        @course.add_registration(email)
         num_added += 1
       end
     end
