@@ -12,12 +12,14 @@
         <thead>
           <th>Name</th>
           <th>Due Date</th>
+          <th>Team</th>
         </thead>
         <tbody>
         <% bucket.assignments.order(:name).each do |assignment| %>
           <tr>
             <td><%= link_to assignment.name, course_assignment_path(@course, assignment) %></td>
             <td><%= assignment.due_date %></td>
+            <td><%= assignment.team_subs ? "Yes" : "No" %></td>
           </tr>
         <% end %>
         </tbody>
