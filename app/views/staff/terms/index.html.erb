@@ -1,25 +1,28 @@
-<% @page_title = "List of Terms" %>
+<% @page_title = "Terms" %>
 
-<p><%= link_to 'New Term', new_staff_term_path %></p>
+<div class="page-header">
+  <h1>Terms</h1>
 
-<table class="table table-striped">
-  <tr>
-    <th>Name</th>
-    <th>Archived?</th>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
+  <div class="actions">
+    <%= link_to "New Term", new_staff_term_path, class: "btn btn-success" %>
+  </div>
+</div>
 
-<% @terms.each do |term| %>
-  <tr>
-    <td><%= term.name %></td>
-    <td style="text-align: center"><%= term.archived? ? "yes" : "no" %></td>
-    <td><%= link_to 'Show', staff_term_path(term) %></td>
-    <td><%= link_to 'Edit', edit_staff_term_path(term) %></td>
-    <td>
-      <%= link_to 'Destroy', staff_term_path(term), method: :delete, data: { confirm: 'Are you sure?' } %>
-    </td>
-  </tr>
-<% end %>
-</table>
+<div class="row">
+  <div class="col-md-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Archived</th>
+        </tr>
+      </thead>
+      <% @terms.each do |term| %>
+        <tr>
+          <td><%= link_to term.name, staff_term_path(term) %></td>
+          <td style="text-align: center"><%= term.archived? ? "archived" : "active" %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</div>
