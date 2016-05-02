@@ -1,13 +1,11 @@
 .page-header {
     margin-top: 0;
 
-    h1, .actions {
+    h1 {
         display: inline-block;
     }
 
     .actions {
-        float: right;
-        position: relative;
-        top: 25px;
+        margin-top: 25px;
     }
 }

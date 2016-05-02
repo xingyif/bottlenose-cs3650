@@ -12,11 +12,16 @@
 
 <%#= link_to "View Registration Requests (#{@req_count})", course_reg_requests_path(@course) %>
 <%#= link_to 'Grade Buckets', course_buckets_path(@course) %>
-<%#= link_to %Q{Edit Bucket "#{bb.name}"}, edit_course_bucket_path(@course, bb) %>
-<%#= link_to "New #{bb.name.singularize}", new_course_assignment_path(@course, bucket: bb.id) %>
 
 <% @course.buckets_sorted.each do |bb| %>
-  <h3><%= bb.name %></h3>
+  <h3>
+    <%= bb.name %>
+
+    <div class="actions">
+      <%#= link_to %Q{Edit Bucket "#{bb.name}"}, edit_course_bucket_path(@course, bb) %>
+      <%= link_to "New #{bb.name.singularize}", new_staff_course_assignment_path(@course, bucket: bb.id), class: "btn btn-success" %>
+    </div>
+  </h3>
 
   <table class="table table-striped">
     <thead>
