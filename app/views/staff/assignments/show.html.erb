@@ -82,7 +82,7 @@
   <% @students.each do |reg| %>
     <% sub = @assignment.best_sub_for(reg.user) %>
     <tr id="sub-for-user-<%= reg.user.id %>" data-tags="<%= reg.tags %>">
-      <%= render 'submissions/row_form', user: reg.user, sub: sub %>
+      <%= render 'staff/submissions/row_form', user: reg.user, sub: sub %>
     </tr>
   <% end %>
 </table>

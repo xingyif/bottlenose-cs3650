@@ -49,7 +49,9 @@ Bottlenose::Application.routes.draw do
           patch :disolve
         end
       end
-      resources :assignments
+      resources :assignments do
+        resources :submissions
+      end
     end
   end
 end
