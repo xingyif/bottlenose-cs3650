@@ -37,6 +37,8 @@ development:
   ssl: true
   # <<: *AUTHORIZATIONS
 
+# TODO: The configurations below are untested.
+
 test:
   host: localhost
   port: 3389
