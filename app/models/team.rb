@@ -9,6 +9,10 @@ class Team < ActiveRecord::Base
   validates :users, presence: true
   validate :end_not_before_start
 
+  def to_s
+    "Team #{self.id} - #{self.member_names}"
+  end
+
   def member_names
     users.sort_by {|uu| uu.invert_name }.map {|uu| uu.name }.join(", ")
   end

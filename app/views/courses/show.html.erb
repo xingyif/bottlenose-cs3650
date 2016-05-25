@@ -32,7 +32,7 @@
     <% active_team = current_user.active_team_for(@course) %>
     <% if active_team %>
       <%= link_to course_team_path(@course, active_team) do %>
-        <span><%= active_team.member_names %></span>
+        <span><%= active_team %></span>
       <% end %>
     <% else %>
       No active team.
@@ -41,7 +41,7 @@
     <h2>All Teams</h2>
     <ul>
       <% current_user.teams_for(@course).each do |team| %>
-        <li><%= link_to team.member_names, course_team_path(@course, team) %></li>
+        <li><%= link_to team, course_team_path(@course, team) %></li>
       <% end %>
     </ul>
   </div>

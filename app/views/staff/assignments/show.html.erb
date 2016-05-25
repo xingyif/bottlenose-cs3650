@@ -87,45 +87,4 @@
   <% end %>
 </table>
 
-<% # TODO: This should be a section for graders to see what they need to grade.
-   if false %>
-
-<h1>Your Submissions</h1>
-
-<% if (@assignment.team_subs? && !current_user.course_admin?(@course)) %>
-  <p>Team Members: <%= @team.member_names %></p>
-  <p><%= link_to "New Team Submission", new_assignment_submission_path(@assignment) %></p>
-<% else %>
-  <p><%#= link_to "New Submission", new_assignment_submission_path(@assignment) %></p>
-<% end %>
-
-<table class="table table-striped">
-  <tr>
-    <th>Date</th>
-    <th>Status</th>
-    <th>Automatic</th>
-    <th>Teacher</th>
-    <th>Score</th>
-    <th>Link</th>
-  </tr>
-
-<% @submissions.each do |sub| %>
-  <tr>
-    <td><span class="local-time"><%= sub.created_at %></span></td>
-    <td><%= status_image(sub) %></td>
-    <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
-    <td><%= show_score(sub.teacher_score) %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
-    <td><%= show_score(sub.score) %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
-    <td>
-      <%#= link_to "View", sub %>
-
-      <% if current_user.course_admin?(@course) %>
-        | <%#= link_to "Grade", [:edit, sub] %>
-      <% end %>
-    </td>
-  </tr>
-<% end %>
-
-</table>
-
-<% end %>
+<!-- # TODO: This should be a section for graders to see what they need to grade. -->

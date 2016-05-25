@@ -15,8 +15,7 @@
   <% end %>
 
   <% unless @team.nil? %>
-    <p>This will be a team submission.</p>
-    <p>Team members: <%= @team.member_names %>
+    <p>This will be a team submission for <strong><%= @team %></strong>.</p>
   <% end %>
 
   <div class="form-group">

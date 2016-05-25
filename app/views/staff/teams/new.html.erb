@@ -66,7 +66,7 @@
                 <tbody>
                     <% @teams.each do |team| %>
                         <tr>
-                            <td><%= team.member_names %></td>
+                            <td><%= team %></td>
                             <td>
                                 <%= link_to "Disolve", disolve_staff_course_team_path(@course, team), class: "btn btn-danger btn-xs pull-right", method: :patch, data: { confirm: "Are you sure?" } %>
                             </td>
