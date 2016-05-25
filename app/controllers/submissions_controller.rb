@@ -17,8 +17,10 @@ class SubmissionsController < ApplicationController
     @submission.assignment_id = @assignment.id
     @submission.user_id = current_user.id
 
-    @team = current_user.active_team(@course)
-    @submission.team = @team
+    if @assignment.team_subs?
+      @team = current_user.active_team(@course)
+      @submission.team = @team
+    end
   end
 
   def create
