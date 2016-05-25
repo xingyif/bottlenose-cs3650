@@ -95,7 +95,7 @@
 
 <script>
   function reload_bottom() {
-    window.location.href = "<%= url_for(@submission) + '#bottom' %>";
+    window.location.href = window.location.href + "#bottom";
     window.location.reload(true);
   }
 </script>
