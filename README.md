@@ -4,6 +4,21 @@ Bottlenose is a web app for managing assignment submission and grading in comput
 
 For detailed documentation, see the [Wiki](https://github.com/NatTuck/bottlenose/wiki).
 
+## Linux
+
+I'm developing this on OS X with [Vagrant](https://www.vagrantup.com). To get
+started with virtualized development run the following commands from this
+directory after installing Vagrant.
+
+```sh
+vagrant init debian/jessie64
+vagrant up --provider virtualbox
+```
+
+Now that you have a working VM running Debian 8.4 we can SSH into it and begin
+setting it up. Note that the bottlenose project files are linked to the VM in
+the folder `/vagrant`.
+
 ## Setup
 
 This is a Rails app, and as such requires Ruby as well as a few other system dependencies.
