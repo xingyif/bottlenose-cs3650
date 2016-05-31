@@ -1,12 +1,13 @@
 class ApplicationController < ActionController::Base
   impersonates :user
-  
+
   rescue_from DeviseLdapAuthenticatable::LdapException do |exception|
     render :text => exception, :status => 500
   end
   protect_from_forgery
 
   before_filter :set_mailer_host
+  before_filter :configure_permitted_parameters, if: :devise_controller?
 
   # Ensure we have a `current_user` for all actions by default. Controllers
   # must manually opt out of this if they wish to be public.
@@ -117,6 +118,12 @@ class ApplicationController < ActionController::Base
       show_error "You're not allowed to go there."
       redirect_to course_url(@course)
       return
+    end
+  end
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.for(:sign_up) do |user|
+      user.permit(:name, :email, :password, :password_confirmation)
     end
   end
 end
