@@ -1,0 +1,2 @@
+1. Write a BSL expression that turns the strings "hello" and "world" into
+"hello world". Save this as a file named `strings.rkt`.
