@@ -36,7 +36,7 @@ class Staff::AssignmentsController < Staff::BaseController
 
     if @assignment.save
       @assignment.save_uploads!
-      redirect_to @assignment, notice: 'Assignment was successfully created.'
+      redirect_to staff_course_assignment_path(@course, @assignment), notice: 'Assignment was successfully created.'
     else
       render action: "new"
     end
