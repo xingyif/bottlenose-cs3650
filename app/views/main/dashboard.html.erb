@@ -1,3 +1,31 @@
 <% @page_title = "Dashboard" %>
 
 <h1>Dashboard</h1>
+
+<% @courses.each do |course| %>
+    <h3><%= course.name %></h3>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Assignments</h3>
+        </div>
+
+        <ul class="list-group">
+            <% course.assignments.sort_by(&:due_date).each do |assignment| %>
+                <%
+                    c = "list-group-item"
+                    submissions = assignment.submissions.where(user: current_user)
+                    if submissions.any?
+                        c += " list-group-item-success"
+                    end
+                %>
+                <%= link_to course_assignment_path(course, assignment), class: c do %>
+                    <span class="badge"><%= submissions.count %></span>
+                    <%= assignment.name %>
+                    due
+                    <%= assignment.due_date.strftime("%b %e, %l:%M %p") %>
+                <% end %>
+            <% end %>
+        </ul>
+    </div>
+<% end %>
