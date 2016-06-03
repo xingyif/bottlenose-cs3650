@@ -4,8 +4,6 @@ class MainController < ApplicationController
   # GET /
   def home
     if current_user
-      @courses = current_user.courses
-
       render "dashboard"
     else
       render "landing"

@@ -21,6 +21,8 @@
 $.fn.datepicker.defaults.format = "yyyy-mm-dd";
 
 $(function() {
+    $('[data-toggle="tooltip"]').tooltip()
+
     $('.local-time').each(function(_) {
         var dd = new Date($(this).text());
 
