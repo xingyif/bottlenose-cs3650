@@ -24,11 +24,12 @@
                             <%
                                 submissions = assignment.submissions.where(user: current_user)
                                 best = assignment.best_subs.where(user: current_user).first
+                                score = best.nil? ? nil : best.score
                             %>
                             <tr>
                                 <td><%= link_to assignment.name, course_assignment_path(course, assignment) %></td>
                                 <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>
-                                <td><%= best.nil? ? "None" : best.score %></td>
+                                <td><%= show_score(score, assignment) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
                                 <td>
                                     <% submissions.limit(5).each do |submission| %>
                                         <%= link_to course_assignment_submission_path(course, assignment, submission) do %>
