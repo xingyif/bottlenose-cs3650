@@ -1,44 +1,73 @@
 <% @page_title = "Dashboard" %>
 
-<h1>Dashboard</h1>
-
 <% current_user.courses.each do |course| %>
     <h3><%= course.name %></h3>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Assignments</h3>
+    <div class="row">
+        <div class="col-md-7">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Assignments</h3>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Due Date</th>
+                            <th>Score</th>
+                            <th>Submissions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% course.assignments.sort_by(&:due_date).each do |assignment| %>
+                            <%
+                                submissions = assignment.submissions.where(user: current_user)
+                                best = assignment.best_subs.where(user: current_user).first
+                            %>
+                            <tr>
+                                <td><%= link_to assignment.name, course_assignment_path(course, assignment) %></td>
+                                <td><span class="label label-default"><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></span></td>
+                                <td><%= best.nil? ? "None" : best.score %></td>
+                                <td>
+                                    <% submissions.each do |submission| %>
+                                        <%= link_to course_assignment_submission_path(course, assignment, submission) do %>
+                                            <span class="label label-default" data-toggle="tooltip" data-placement="top" title="<%= submission.student_notes %>"><%= submission.score %></span>
+                                        <% end %>
+                                    <% end %>
+                                </td>
+                            </tr>
+                        <% end %>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Assignment</th>
-                    <th>Due Date</th>
-                    <th>Score</th>
-                    <th>Submissions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% course.assignments.sort_by(&:due_date).each do |assignment| %>
-                    <%
-                        submissions = assignment.submissions.where(user: current_user)
-                        best = assignment.best_subs.where(user: current_user).first
-                    %>
-                    <tr>
-                        <td><%= link_to assignment.name, course_assignment_path(course, assignment) %></td>
-                        <td><span class="label label-default"><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></span></td>
-                        <td><%= best.nil? ? "None" : best.score %></td>
-                        <td>
-                            <% submissions.each do |submission| %>
-                                <%= link_to course_assignment_submission_path(course, assignment, submission) do %>
-                                    <span class="label label-default" data-toggle="tooltip" data-placement="top" title="<%= submission.student_notes %>"><%= submission.score %></span>
-                                <% end %>
-                            <% end %>
-                        </td>
-                    </tr>
-                <% end %>
-            </tbody>
-        </table>
+        <div class="col-md-5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Teams</h3>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Start</th>
+                            <th>End</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% current_user.teams.where(course: course).order(end_date: :desc).each do |team| %>
+                            <tr class="<%= team.active? ? "success" : "" %>">
+                                <td><%= team %></td>
+                                <td><%= team.start_date %></td>
+                                <td><%= team.end_date %></td>
+                            </tr>
+                        <% end %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 <% end %>
