@@ -30,7 +30,7 @@
                                 <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>
                                 <td><%= best.nil? ? "None" : best.score %></td>
                                 <td>
-                                    <% submissions.each do |submission| %>
+                                    <% submissions.limit(5).each do |submission| %>
                                         <%= link_to course_assignment_submission_path(course, assignment, submission) do %>
                                             <span class="label label-default" data-toggle="tooltip" data-placement="top" title="<%= submission.student_notes %>"><%= submission.score %></span>
                                         <% end %>
