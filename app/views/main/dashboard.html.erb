@@ -27,7 +27,7 @@
                             %>
                             <tr>
                                 <td><%= link_to assignment.name, course_assignment_path(course, assignment) %></td>
-                                <td><span class="label label-default"><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></span></td>
+                                <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>
                                 <td><%= best.nil? ? "None" : best.score %></td>
                                 <td>
                                     <% submissions.each do |submission| %>
