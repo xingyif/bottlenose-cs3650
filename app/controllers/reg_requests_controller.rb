@@ -8,7 +8,7 @@ class RegRequestsController < ApplicationController
   # POST /courses/:course_id/reg_requests
   def create
     @course = Course.find(params[:course_id])
-    @reg_request = @course.reg_requests.new
+    @reg_request = @course.reg_requests.new(reg_request_params)
     @reg_request.user = current_user
 
     if @reg_request.save
