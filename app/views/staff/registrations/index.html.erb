@@ -8,53 +8,100 @@
   </div>
 </div>
 
-<h2>Teachers</h2>
+<div class="row">
+  <div class="col-md-6">
+    <h2>Teachers</h2>
+    <% if @course.teacher_registrations.empty? %>
+      <div class="well">
+        No teachers.
+      </div>
+    <% else %>
+      <table class="table table-striped">
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Show in Reports</th>
+          <th>&nbsp;</th>
+        </tr>
 
-<table class="table table-striped">
-<tr>
-  <th>Name</th>
-  <th>Email</th>
-  <th>Show in Reports</th>
-  <th>&nbsp;</th>
-</tr>
+        <% @course.teacher_registrations.each do |treg| %>
+          <% teacher = treg.user %>
+          <tr>
+            <td><%= teacher.name %></td>
+            <td><%= teacher.email %></td>
+            <td>
+              <span class="show-user-<%= treg.id %>"><%= treg.show_in_lists? ? "Yes" : "No" %></span>
+              (<%= link_to "Toggle", toggle_staff_course_registration_path(@course, treg), method: :post %>)
+            </td>
+            <td>
+              <%= link_to 'Remove', staff_course_registration_path(@course, treg), method: :delete, data: { confirm: 'Are you sure?' } %></td>
+          </tr>
+        <% end %>
+      </table>
+    <% end %>
 
-<% @course.teacher_registrations.each do |treg| %>
-  <% teacher = treg.user %>
-<tr>
-  <td><%= teacher.name %></td>
-  <td><%= teacher.email %></td>
-  <td>
-    <span class="show-user-<%= treg.id %>"><%= treg.show_in_lists? ? "Yes" : "No" %></span>
-    (<%= link_to "Toggle", toggle_staff_course_registration_path(@course, treg), method: :post %>)
-  </td>
-  <td>
-    <%= link_to 'Remove', staff_course_registration_path(@course, treg), method: :delete, data: { confirm: 'Are you sure?' } %></td>
-</tr>
-<% end %>
-</table>
+    <h2>Students</h2>
+    <% if @course.student_registrations.empty? %>
+      <div class="well">
+        No students.
+      </div>
+    <% else %>
+      <table class="table table-striped">
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Show In Reports</th>
+          <th>&nbsp;</th>
+        </tr>
 
-<h2>Students</h2>
+        <% @course.student_registrations.each do |sreg| %>
+          <% student = sreg.user %>
+          <tr>
+            <td><%= link_to student.name, staff_user_path(student) %></td>
+            <td><%= student.email %></td>
+            <td>
+              <span class="show-user-<%= sreg.id %>"><%= sreg.show_in_lists? ? "Yes" : "No" %></span>
+              (<%= link_to "Toggle", toggle_staff_course_registration_path(@course, sreg), method: :post %>)
+            </td>
+            <td>
+              <%= link_to 'Remove', staff_course_registration_path(@course, sreg), method: :delete, data: { confirm: 'Are you sure?' } %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
 
-<table class="table table-striped">
-<tr>
-  <th>Name</th>
-  <th>Email</th>
-  <th>Show In Reports</th>
-  <th>&nbsp;</th>
-</tr>
+  <div class="col-md-6">
+    <h2>Requests</h2>
+    <% if @course.reg_requests.empty? %>
+      <div class="well">
+        No requests.
+      </div>
+    <% else %>
+      <table class="table table-striped">
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Note</th>
+          <th>&nbsp;</th>
+        </tr>
 
-<% @course.student_registrations.each do |sreg| %>
-  <% student = sreg.user %>
-<tr>
-  <td><%= link_to student.name, staff_user_path(student) %></td>
-  <td><%= student.email %></td>
-  <td>
-    <span class="show-user-<%= sreg.id %>"><%= sreg.show_in_lists? ? "Yes" : "No" %></span>
-    (<%= link_to "Toggle", toggle_staff_course_registration_path(@course, sreg), method: :post %>)
-  </td>
-  <td>
-    <%= link_to 'Remove', staff_course_registration_path(@course, sreg), method: :delete, data: { confirm: 'Are you sure?' } %>
-  </td>
-</tr>
-<% end %>
-</table>
+        <% @course.reg_requests.each do |request| %>
+          <% user = request.user %>
+          <tr>
+            <td><%= link_to user.name, staff_user_path(user) %></td>
+            <td><%= user.email %></td>
+            <td><%= request.notes %></td>
+            <td>
+              <div class="btn-group pull-right" role="group">
+                <%= link_to "Accept", "#", class: "btn btn-success btn-xs" %>
+                <%= link_to "Reject", "#", class: "btn btn-danger btn-xs" %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    <% end %>
+  </div>
+</div>
