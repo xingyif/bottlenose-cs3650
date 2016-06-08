@@ -95,8 +95,8 @@
             <td><%= request.notes %></td>
             <td>
               <div class="btn-group pull-right" role="group">
-                <%= link_to "Accept", "#", class: "btn btn-success btn-xs" %>
-                <%= link_to "Reject", "#", class: "btn btn-danger btn-xs" %>
+                <%= link_to "Accept", staff_course_reg_request_accept_path(@course, request), method: :delete, class: "btn btn-success btn-xs" %>
+                <%= link_to "Reject", staff_course_reg_request_reject_path(@course, request), method: :delete, class: "btn btn-danger btn-xs" %>
               </div>
             </td>
           </tr>

@@ -36,6 +36,8 @@ Bottlenose::Application.routes.draw do
     end
     resources :terms
     resources :courses do
+      delete 'reg_requests/:id/accept', to: 'reg_requests#accept', as: 'reg_request_accept'
+      delete 'reg_requests/:id/reject', to: 'reg_requests#reject', as: 'reg_request_reject'
       resources :registrations, except: [:edit, :update] do
         collection do
           post :bulk
