@@ -22,7 +22,7 @@
                     <tbody>
                         <% course.assignments.sort_by(&:due_date).each do |assignment| %>
                             <%
-                                submissions = assignment.submissions.where(user: current_user)
+                                submissions = assignment.submissions.where(user: current_user).order(created_at: :desc)
                                 best = assignment.best_subs.where(user: current_user).first
                                 score = best.nil? ? nil : best.score
                             %>
