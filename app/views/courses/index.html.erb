@@ -20,7 +20,13 @@
             <tr>
               <td><%= link_to course.name, course_path(course) %></td>
               <% unless current_user.registration_for(course) %>
-                <td><%= link_to "Request Registration", new_course_reg_request_path(course), class: "btn btn-success btn-xs pull-right" %></td>
+                <%
+                  css_class = "btn btn-success btn-xs pull-right"
+                  if current_user.reg_requests.map { |r| r.course }.include?(course)
+                     css_class += ' disabled'
+                  end
+                %>
+                <td><%= link_to "Request Registration", new_course_reg_request_path(course), class: css_class %></td>
               <% else %>
                 <td></td>
               <% end %>
