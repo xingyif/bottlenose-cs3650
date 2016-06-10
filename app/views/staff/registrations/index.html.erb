@@ -73,7 +73,15 @@
   </div>
 
   <div class="col-md-6">
-    <h2>Requests</h2>
+    <h2>
+      Requests
+
+      <div class="actions btn-group">
+        <%= link_to "Accept All", staff_course_reg_request_accept_all_path(@course), method: :delete, class: 'btn btn-success' %>
+        <%= link_to "Reject All", staff_course_reg_request_reject_all_path(@course), method: :delete, class: 'btn btn-danger' %>
+      </div>
+    </h2>
+
     <% if @course.reg_requests.empty? %>
       <div class="well">
         No requests.
