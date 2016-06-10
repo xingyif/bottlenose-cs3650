@@ -8,7 +8,6 @@ Rails.application.require_environment!
 nat = User.first_or_create(
   name:  "Nat Tuck",
   email: "nat@ferrus.net",
-  auth_key: "insecure",
   site_admin: true,
 )
 
