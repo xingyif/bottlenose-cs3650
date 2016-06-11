@@ -7,7 +7,7 @@ class SubmissionsController < ApplicationController
 
     unless @submission.visible_to?(current_user)
       show_error "That's not your submission."
-      redirect_to @assignment
+      redirect_to course_assignment_path(@course, @assignment)
     end
   end
 
