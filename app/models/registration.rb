@@ -1,4 +1,6 @@
 class Registration < ActiveRecord::Base
+  enum role: [:student, :staff, :professor]
+
   belongs_to :user
   belongs_to :course
 
