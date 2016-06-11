@@ -3,9 +3,9 @@ require 'csv'
 class Staff::CoursesController < Staff::BaseController
   before_action :find_course, except: [:index, :new, :create]
 
-  before_filter :require_course_permission,
-    except: [:index, :new, :create, :show, :public]
-  before_filter :require_logged_in_user, except: [:public]
+  # Permissions.
+  before_action :require_course_permission, except: [:index, :new, :create, :show, :public]
+  before_filter :require_current_user, except: [:public]
   before_filter :require_teacher,    only: [:export_grades, :edit, :update]
   before_filter :require_site_admin, only: [:new, :create, :destroy]
 

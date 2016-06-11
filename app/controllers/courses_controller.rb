@@ -1,5 +1,6 @@
 class CoursesController < ApplicationController
-  skip_before_action :require_logged_in_user, only: :public
+  skip_before_action :require_current_user, only: :public
+  before_action :require_course_permission, only: :show
 
   # GET /courses
   def index
@@ -8,11 +9,6 @@ class CoursesController < ApplicationController
 
   # GET /courses/:id
   def show
-    @course = Course.find(params[:id])
-
-    unless current_user.registration_for(@course)
-      redirect_to courses_path, alert: "You are not registered for that course."
-    end
   end
 
   # GET /courses/:id/public

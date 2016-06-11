@@ -11,9 +11,9 @@ class ApplicationController < ActionController::Base
 
   # Ensure we have a `current_user` for all actions by default. Controllers
   # must manually opt out of this if they wish to be public.
-  before_filter :require_logged_in_user
+  before_filter :require_current_user
   # Allow devise actions for users without active sessions.
-  skip_before_filter :require_logged_in_user, if: :devise_controller?
+  skip_before_filter :require_current_user, if: :devise_controller?
 
   protected
 
@@ -22,42 +22,48 @@ class ApplicationController < ActionController::Base
     ActionMailer::Base.default_url_options[:protocol] = request.protocol
   end
 
-  def require_logged_in_user
-    if current_user.nil?
-      show_error "You need to register first"
-      redirect_to landing_path
-      return
+  def find_course
+    if params[:course_id].nil?
+      @course ||= Course.find(params[:id])
+    else
+      @course ||= Course.find(params[:course_id])
     end
   end
 
+  # TODO: Delete.
   def show_notice(msg)
     flash[:notice] = msg
   end
+  deprecate :show_notice
 
+  # TODO: Delete.
   def show_error(msg)
     flash[:error] = msg
   end
+  deprecate :show_error
 
-  def require_site_admin
-    unless current_user && current_user.site_admin?
-      show_error "You don't have permission to access that page."
-      redirect_to '/courses'
+  # Require that there is a `current_user` indicating that a user is currently
+  # logged in.
+  def require_current_user
+    if current_user.nil?
+      msg = "You need to log in first."
+      redirect_to landing_path, alert: msg
       return
     end
   end
 
-  def find_course
-    @course ||= Course.find(params[:course_id])
+  # Require that the `current_user` is a site admin.
+  def require_site_admin
+    unless current_user && current_user.site_admin?
+      msg = "You don't have permission to access that page."
+      redirect_to landing_path, alert: msg
+      return
+    end
   end
 
   def require_course_permission
     find_course
-
-    if current_user.nil?
-      show_error "You need to register first"
-      redirect_to '/'
-      return
-    end
+    require_current_user
 
     if current_user.course_admin?(@course)
       return
@@ -65,8 +71,8 @@ class ApplicationController < ActionController::Base
 
     reg = current_user.registration_for(@course)
     if reg.nil?
-      show_error "You're not registered for that course."
-      redirect_to courses_url
+      msg = "You're not registered for that course."
+      redirect_to courses_url, alert: msg
       return
     end
   end
