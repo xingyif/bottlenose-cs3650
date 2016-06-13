@@ -5,6 +5,18 @@
     <%= @course.name %>
     <small><%= @course.term.name %></small>
   </h1>
+
+  <% if current_user.registration_for(@course) %>
+    <p>
+      You are a
+      <strong><%= current_user.registration_for(@course).role %></strong>
+      of this course.
+    </p>
+  <% else %>
+    <p>
+      You are not registered for this course.
+    </p>
+  <% end %>
 </div>
 
 <div class="row">
