@@ -40,7 +40,7 @@ class User < ActiveRecord::Base
   end
 
   def course_admin?(course)
-    self.site_admin? or course.taught_by?(self)
+    self.site_admin? || course.taught_by?(self)
   end
 
   def registration_for(course)

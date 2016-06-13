@@ -26,10 +26,15 @@ class Course < ActiveRecord::Base
     os.map {|oo| oo.to_i}
   end
 
-  def taught_by?(user)
+  def taught_by?(user, options: {})
     return false if user.nil?
-    reg = Registration.find_by_course_id_and_user_id(self.id, user.id)
-    reg and reg.teacher?
+    registration = Registration.find_by_course_id_and_user_id(self.id, user.id)
+    return false if registration.nil?
+    if options[:as]
+      options[:as] == registration.role
+    else
+      registration.role == :staff || registration.role == :professor
+    end
   end
 
   def regs_sorted
