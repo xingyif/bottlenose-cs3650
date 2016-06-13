@@ -22,6 +22,11 @@
   </p>
 
   <div class="form-group">
+    <%= f.label :role %><br />
+    <%= f.select :role, RegRequest.roles.to_a.map { |w| [w[0].humanize, w[0]] } %>
+  </div>
+
+  <div class="form-group">
     <%= f.label :notes %><br />
     <%= f.text_area :notes, class: 'form-control' %>
   </div>

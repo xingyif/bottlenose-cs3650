@@ -11,7 +11,7 @@
 <div class="row">
   <div class="col-md-6">
     <h2>Teachers</h2>
-    <% if @course.teacher_registrations.empty? %>
+    <% if @course.staff_registrations.empty? %>
       <div class="well">
         No teachers.
       </div>
@@ -24,7 +24,7 @@
           <th>&nbsp;</th>
         </tr>
 
-        <% @course.teacher_registrations.each do |treg| %>
+        <% @course.staff_registrations.each do |treg| %>
           <% teacher = treg.user %>
           <tr>
             <td><%= teacher.name %></td>
@@ -83,21 +83,26 @@
       <table class="table table-striped">
         <tr>
           <th>Name</th>
+          <th>Role</th>
           <th>Email</th>
           <th>Note</th>
           <th>&nbsp;</th>
         </tr>
 
         <% @course.reg_requests.each do |request| %>
-          <% user = request.user %>
           <tr>
-            <td><%= link_to user.name, staff_user_path(user) %></td>
-            <td><%= user.email %></td>
+            <td><%= link_to request.user.name, staff_user_path(request.user) %></td>
+            <td><%= request.role %></td>
+            <td><%= request.user.email %></td>
             <td><%= request.notes %></td>
-            <td>
+            <td width="65">
               <div class="btn-group pull-right" role="group">
-                <%= link_to "Accept", staff_course_reg_request_accept_path(@course, request), method: :delete, class: "btn btn-success btn-xs" %>
-                <%= link_to "Reject", staff_course_reg_request_reject_path(@course, request), method: :delete, class: "btn btn-danger btn-xs" %>
+                <%= link_to staff_course_reg_request_accept_path(@course, request), method: :delete, class: "btn btn-success btn-xs" do %>
+                  <span class="glyphicon glyphicon-ok"></span>
+                <% end %>
+                <%= link_to staff_course_reg_request_reject_path(@course, request), method: :delete, class: "btn btn-danger btn-xs" do %>
+                  <span class="glyphicon glyphicon-remove"></span>
+                <% end %>
               </div>
             </td>
           </tr>

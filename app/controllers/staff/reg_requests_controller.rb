@@ -4,8 +4,8 @@ class Staff::RegRequestsController < Staff::BaseController
 
     if Registration.create(user: @request.user,
                            course: @request.course,
-                           teacher: false,
-                           show_in_lists: true)
+                           role: @request.role,
+                           show_in_lists: @request.role == :student)
       @request.destroy
       redirect_to :back
     end

@@ -47,16 +47,22 @@ class Course < ActiveRecord::Base
     buckets.order(:name)
   end
 
-  def teacher_registrations
-    regs_sorted.find_all {|reg| reg.teacher? }
+  def staff_registrations
+    regs_sorted.find_all { |reg| reg.role == :professor || reg.role == :staff }
   end
 
+  def professor_registrations
+    regs_sorted.find_all { |reg| reg.role == :professor }
+  end
+
+  # TODO: Need to rethink roles. Should be professor, assistant, and student.
+
   def student_registrations
-    regs_sorted.find_all {|reg| !reg.teacher? }
+    regs_sorted.find_all { |reg| reg.role == :student }
   end
 
   def active_registrations
-    regs_sorted.find_all {|reg| reg.show_in_lists? }
+    regs_sorted.find_all { |reg| reg.show_in_lists? }
   end
 
   # TODO: Make these kinds of things return relations, not arrays. This

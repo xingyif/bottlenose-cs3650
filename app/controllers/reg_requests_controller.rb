@@ -26,6 +26,6 @@ class RegRequestsController < ApplicationController
   private
 
   def reg_request_params
-    params[:reg_request].permit(:notes)
+    params[:reg_request].permit(:notes, :role)
   end
 end
