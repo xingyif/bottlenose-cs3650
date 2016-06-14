@@ -1,4 +1,4 @@
-class TeamsController < ApplicationController
+class TeamsController < CoursesController
   # GET /courses/:course_id/teams/:id
   def show
     @course = Course.find(params[:course_id])

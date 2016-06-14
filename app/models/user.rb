@@ -39,8 +39,20 @@ class User < ActiveRecord::Base
     self.email
   end
 
-  def course_admin?(course)
-    self.site_admin? || course.taught_by?(self)
+  def course_staff?(course)
+    course.registered_by?(self)
+  end
+
+  def course_professor?(course)
+    course.registered_by?(self, as: 'professor')
+  end
+
+  def course_assistant?(course)
+    course.registered_by?(self, as: 'assistant')
+  end
+
+  def course_student?(course)
+    course.registered_by?(self, as: 'student')
   end
 
   def registration_for(course)

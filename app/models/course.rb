@@ -26,14 +26,14 @@ class Course < ActiveRecord::Base
     os.map {|oo| oo.to_i}
   end
 
-  def taught_by?(user, options: {})
+  def registered_by?(user, options: {})
     return false if user.nil?
     registration = Registration.find_by_course_id_and_user_id(self.id, user.id)
     return false if registration.nil?
     if options[:as]
       options[:as] == registration.role
     else
-      registration.role == :staff || registration.role == :professor
+      registration.role == 'assistant' || registration.role == 'professor'
     end
   end
 
@@ -48,17 +48,17 @@ class Course < ActiveRecord::Base
   end
 
   def staff_registrations
-    regs_sorted.find_all { |reg| reg.role == :professor || reg.role == :staff }
+    regs_sorted.find_all { |reg| reg.role == 'professor' || reg.role == 'staff' }
   end
 
   def professor_registrations
-    regs_sorted.find_all { |reg| reg.role == :professor }
+    regs_sorted.find_all { |reg| reg.role == 'professor' }
   end
 
   # TODO: Need to rethink roles. Should be professor, assistant, and student.
 
   def student_registrations
-    regs_sorted.find_all { |reg| reg.role == :student }
+    regs_sorted.find_all { |reg| reg.role == 'student' }
   end
 
   def active_registrations
@@ -72,12 +72,12 @@ class Course < ActiveRecord::Base
     student_registrations.map {|reg| reg.user}
   end
 
-  def teachers
-    teacher_registrations.map {|reg| reg.user}
+  def staff
+    staff_registrations.map {|reg| reg.user}
   end
 
-  def first_teacher
-    teachers.first
+  def first_professor
+    professors.first
   end
 
   def total_bucket_weight

@@ -1,5 +1,5 @@
-class SubmissionsController < ApplicationController
-  before_filter :require_student
+class SubmissionsController < CoursesController
+  # before_filter :require_student
 
   def show
     @submission = Submission.find(params[:id])

@@ -1,0 +1,37 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Assignments</h3>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Due Date</th>
+                <th>Score</th>
+                <th>Submissions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% assignments.sort_by(&:due_date).each do |assignment| %>
+                <%
+                    submissions = assignment.submissions.where(user: current_user).order(created_at: :desc)
+                    best = assignment.best_subs.where(user: current_user).first
+                    score = best.nil? ? nil : best.score
+                %>
+                <tr>
+                    <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
+                    <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>
+                    <td><%= show_score(score, assignment) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
+                    <td>
+                        <% submissions.limit(5).each do |submission| %>
+                            <%= link_to course_assignment_submission_path(assignment.course, assignment, submission) do %>
+                                <span class="label label-default" data-toggle="tooltip" data-placement="top" title="<%= submission.student_notes %>"><%= submission.score %></span>
+                            <% end %>
+                        <% end %>
+                    </td>
+                </tr>
+            <% end %>
+        </tbody>
+    </table>
+</div>

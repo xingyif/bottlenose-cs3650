@@ -1,4 +1,4 @@
-class RegRequestsController < ApplicationController
+class RegRequestsController < CoursesController
   # GET /courses/:course_id/reg_requests/new
   def new
     @course = Course.find(params[:course_id])

@@ -1,5 +1,5 @@
 class MainController < ApplicationController
-  skip_before_filter :require_current_user
+  # skip_before_filter :require_current_user
 
   # GET /
   def home
