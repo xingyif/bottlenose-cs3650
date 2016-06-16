@@ -19,7 +19,7 @@
   <% end %>
 
   <div>
-    <%= link_to "Teams", '#', class: "btn btn-sm btn-default" %>
+    <%= link_to "Teams", course_teams_path(@course), class: "btn btn-sm btn-default" %>
     <% if current_user.course_staff?(@course) %>
       <%= link_to "Registrations", course_registrations_path(@course), class: "btn btn-sm btn-default" %>
     <% end %>

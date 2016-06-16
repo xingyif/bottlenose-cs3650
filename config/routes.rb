@@ -23,7 +23,11 @@ Bottlenose::Application.routes.draw do
     resources :assignments, only: :show do
       resources :submissions, only: [:new, :create, :show]
     end
-    resources :teams, only: :show
+    resources :teams do
+      member do
+        patch :disolve
+      end
+    end
     member do
       get :public
     end
