@@ -4,13 +4,6 @@ end
 
 case Rails.env
 when "development"
-    # Create one and only one admin.
-    admin = User.create!(
-        email: "admin@example.com",
-        name: "Adam Admin",
-        site_admin: true,
-    )
-
     # Create four users.
     ben = User.create!(
         email: "blerner@ccs.neu.edu",
