@@ -33,6 +33,11 @@ class CoursesController < ApplicationController
   protected
 
   def find_course
+    # We can't find the course for the action 'courses#index'.
+    if controller_name == 'courses' && action_name == 'index'
+      return
+    end
+
     @course = Course.find(params[:course_id] || params[:id])
   end
 end
