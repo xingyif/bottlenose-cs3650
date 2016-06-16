@@ -1,4 +1,4 @@
-class Staff::TermsController < Staff::BaseController
+class TermsController < ApplicationController
   def index
     @terms = Term.all_sorted
   end
@@ -19,7 +19,7 @@ class Staff::TermsController < Staff::BaseController
     @term = Term.new(term_params)
 
     if @term.save
-      redirect_to staff_term_path(@term), notice: 'Term was successfully created.'
+      redirect_to term_path(@term), notice: 'Term was successfully created.'
     else
       render action: "new"
     end
@@ -29,7 +29,7 @@ class Staff::TermsController < Staff::BaseController
     @term = Term.find(params[:id])
 
     if @term.update_attributes(term_params)
-      redirect_to staff_term_path(@term), notice: 'Term was successfully updated.'
+      redirect_to term_path(@term), notice: 'Term was successfully updated.'
     else
       render action: "edit"
     end
@@ -39,7 +39,7 @@ class Staff::TermsController < Staff::BaseController
     @term = Term.find(params[:id])
     @term.destroy
 
-    redirect_to staff_terms_url
+    redirect_to terms_url
   end
 
   private

@@ -4,7 +4,7 @@
   <h1>Terms</h1>
 
   <div class="actions">
-    <%= link_to "New Term", new_staff_term_path, class: "btn btn-success" %>
+    <%= link_to "New Term", new_term_path, class: "btn btn-success" %>
   </div>
 </div>
 
@@ -19,7 +19,7 @@
       </thead>
       <% @terms.each do |term| %>
         <tr>
-          <td><%= link_to term.name, staff_term_path(term) %></td>
+          <td><%= link_to term.name, term_path(term) %></td>
           <td style="text-align: center"><%= term.archived? ? "archived" : "active" %></td>
         </tr>
       <% end %>

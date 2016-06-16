@@ -1,0 +1,1 @@
+{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"/Users/nixpulvis/Code/bottlenose","disabled":false,"__vagrantfile":true,"owner":"vagrant","group":"vagrant"}}}

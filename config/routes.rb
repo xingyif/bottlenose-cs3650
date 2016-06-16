@@ -8,6 +8,8 @@ Bottlenose::Application.routes.draw do
   root to: "main#home"
   get "about" => "main#about"
 
+  resources :terms
+
   resources :courses, only: [:index, :show] do
     resources :reg_requests, only: [:new, :create]
     resources :assignments, only: :show do
