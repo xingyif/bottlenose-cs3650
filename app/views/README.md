@@ -1,4 +1,4 @@
-# Bottlenose Views
+## Templates
 
 By default Rails associates each directory in `app/views/` with a controller. For example the controller `CoursesController` will look for view in `app/views/courses/` by default. The files in each directory here are of two kinds, either action templates, or partials. Action templates are the files which Rails uses to render a complete page (within a layout). For example the route `courses#index` points to the `CoursesController` and asks to call the `index` method on it. This then by default renders the template located at `app/views/courses/index.html.erb`. The complete process is actually a bit more complicated, but this is generally how we use it. A partial is a file prepended with an underscore like `_form.html.erb`, and is used to modularize views.
 
