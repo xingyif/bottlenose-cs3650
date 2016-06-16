@@ -39,3 +39,5 @@ db/dump.sql.gz
 
 # Other stuff
 .rbx
+
+.vagrant
