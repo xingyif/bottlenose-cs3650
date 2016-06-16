@@ -2,7 +2,16 @@
 
 Bottlenose is a web app for managing assignment submission and grading in computer science courses. It provides a flexible mechanism for automatic grading of programming assignments.
 
-For detailed documentation, see the [Wiki](https://github.com/NatTuck/bottlenose/wiki).
+## Documentation
+
+The documentation for each part of the system is broken up in the same way Rails organizes it's projects. Below are links to each main section.
+
+- [Models](app/models/)
+- [Controllers](app/controllers/)
+- [Views](app/views/)
+- [Jobs](app/jobs/)
+- [Mailers](app/mailers/)
+- [Configuration](config/)
 
 ## Linux Setup (Vagrant)
 
