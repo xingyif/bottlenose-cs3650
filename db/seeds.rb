@@ -53,7 +53,7 @@ when "development"
         Registration.create!(
             user: staff,
             course: fundies1,
-            role: :staff,
+            role: :assistant,
             show_in_lists: false,
         )
     end

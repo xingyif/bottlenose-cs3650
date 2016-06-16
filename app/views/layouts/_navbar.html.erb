@@ -37,4 +37,9 @@
       </ul>
     </div>
   </div>
+
+  <% if current_user && current_user.site_admin? %>
+    <!-- Site Admin Bar (currently just for a visual que) -->
+    <div style="height: 2px; background-color: #222;"></div>
+  <% end %>
 </div>
