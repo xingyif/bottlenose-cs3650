@@ -11,7 +11,7 @@ Generally we'll have the following views for each controller.
 
 To make things more modular we should have the following partials defined for each model.
 
-- `_form.html.erb` a form used for creating **and** updating records.
+- `_form.html.erb` a form used for creating **and** updating records. The local variable by the pluralized name of the corresponding model should hold the appropriate iterable collection of records.
 - `_table.html.erb` a table view for listing all records (might be scoped).
 
 ## Layouts
