@@ -11,6 +11,14 @@ Bottlenose::Application.routes.draw do
   resources :terms
 
   resources :courses, only: [:index, :show] do
+    resources :registrations, except: [:edit, :update] do
+      collection do
+        post :bulk
+      end
+      member do
+        post :toggle
+      end
+    end
     resources :reg_requests, only: [:new, :create]
     resources :assignments, only: :show do
       resources :submissions, only: [:new, :create, :show]

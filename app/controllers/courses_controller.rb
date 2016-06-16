@@ -11,8 +11,6 @@ class CoursesController < ApplicationController
 
   # GET /courses/:id
   def show
-    @students = @course.students
-    @staff = @course.staff
   end
 
   # GET /courses/:id/public

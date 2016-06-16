@@ -26,12 +26,12 @@ class Course < ActiveRecord::Base
     os.map {|oo| oo.to_i}
   end
 
-  def registered_by?(user, options: {})
+  def registered_by?(user, as: nil)
     return false if user.nil?
     registration = Registration.find_by_course_id_and_user_id(self.id, user.id)
     return false if registration.nil?
-    if options[:as]
-      options[:as] == registration.role
+    if as
+      as == registration.role
     else
       registration.role == 'assistant' || registration.role == 'professor'
     end

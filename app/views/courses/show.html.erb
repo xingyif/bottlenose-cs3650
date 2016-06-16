@@ -17,6 +17,16 @@
       You are not registered for this course.
     </p>
   <% end %>
+
+  <div>
+    <%= link_to "Teams", '#', class: "btn btn-sm btn-default" %>
+    <% if current_user.course_staff?(@course) %>
+      <%= link_to "Registrations", course_registrations_path(@course), class: "btn btn-sm btn-default" %>
+    <% end %>
+    <% if current_user.course_professor?(@course) %>
+      <%= link_to "Settings", '#', class: "btn btn-sm btn-default" %>
+    <% end %>
+  </div>
 </div>
 
 <div class="row">
@@ -35,25 +45,5 @@
     <% else %>
       No active team.
     <% end %>
-
-    <h2>All Teams</h2>
-    <ul>
-      <% current_user.teams_for(@course).each do |team| %>
-        <li><%= link_to team, course_team_path(@course, team) %></li>
-      <% end %>
-    </ul>
   </div>
 </div>
-
-<% if current_user.course_staff?(@course) %>
-  <hr />
-
-  <div class="row">
-    <div class="col-md-6">
-      <%= render "users/table", header: "Students", users: @students %>
-    </div>
-    <div class="col-md-6">
-      <%= render "users/table", header: "Staff", users: @staff %>
-    </div>
-  </div>
-<% end %>

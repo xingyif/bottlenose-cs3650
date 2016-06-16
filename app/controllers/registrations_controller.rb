@@ -1,13 +1,12 @@
 require 'csv'
 
-class Staff::RegistrationsController < Staff::BaseController
-  before_filter :require_teacher, :except => [:show, :submissions_for_assignment]
-  before_filter :require_course_permission
+class RegistrationsController < CoursesController
   prepend_before_filter :find_registration,
                         except: [:index, :new, :create, :bulk]
 
   def index
-    @registration = Registration.new(course_id: @course.id)
+    @students = @course.students
+    @staff = @course.staff
   end
 
   def show
