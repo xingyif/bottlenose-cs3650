@@ -1,4 +1,6 @@
 class CoursesController < ApplicationController
+  layout 'course'
+
   before_action :find_course
 
   # skip_before_action :require_current_user, only: :public
@@ -7,6 +9,9 @@ class CoursesController < ApplicationController
   # GET /courses
   def index
     @courses_by_term = Course.order(:name).group_by(&:term)
+
+    # We can't use the course layout if we don't have a @course.
+    render layout: 'application'
   end
 
   # GET /courses/:id

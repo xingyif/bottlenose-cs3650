@@ -1,34 +1,5 @@
 <% @page_title = @course.name %>
 
-<div class="page-header">
-  <h1>
-    <%= @course.name %>
-    <small><%= @course.term.name %></small>
-  </h1>
-
-  <% if current_user.registration_for(@course) %>
-    <p>
-      You are a
-      <strong><%= current_user.registration_for(@course).role %></strong>
-      of this course.
-    </p>
-  <% else %>
-    <p>
-      You are not registered for this course.
-    </p>
-  <% end %>
-
-  <div>
-    <%= link_to "Teams", course_teams_path(@course), class: "btn btn-sm btn-default" %>
-    <% if current_user.course_staff?(@course) %>
-      <%= link_to "Registrations", course_registrations_path(@course), class: "btn btn-sm btn-default" %>
-    <% end %>
-    <% if current_user.course_professor?(@course) %>
-      <%= link_to "Settings", '#', class: "btn btn-sm btn-default" %>
-    <% end %>
-  </div>
-</div>
-
 <div class="row">
   <div class="col-md-6">
     <% @course.buckets_sorted.each do |bucket| %>

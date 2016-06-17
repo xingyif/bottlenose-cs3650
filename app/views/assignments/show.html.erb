@@ -1,16 +1,5 @@
 <% @page_title = "#{@course.name} / #{@assignment.name}" %>
 
-<div class="page-header">
-  <h1>
-    <%= @course.name %>
-    <small><%= @assignment.name %></small>
-  </h1>
-
-  <div class="actions">
-    <%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment), class: "btn btn-success" %>
-  </div>
-</div>
-
 <div class="row">
   <div class="col-md-6">
     <p>
@@ -51,7 +40,10 @@
   </div>
 </div>
 
-<h3>Submissions</h3>
+<h3>
+  Submissions
+  <%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment), class: "btn btn-success" %>
+</h3>
 
 <%# TODO: Show team members if this is a team assignment. %>
 

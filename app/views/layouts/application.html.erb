@@ -28,7 +28,7 @@ window.current_page_name = "<%= params[:controller] %>/<%= params[:action] %>";
 <%= render "layouts/flash" %>
 
 <div class="container">
-    <%= yield %>
+    <%= content_for?(:content) ? yield(:content) : yield %>
 </div>
 
 <!-- TODO: Should this footer be here, or inside course templates? -->
