@@ -1,10 +1,16 @@
 <h2>Registrations</h2>
 
 <div class="row">
-<div class="col-md-6">
-  <%= render "users/table", header: "Students", users: @students %>
+  <div class="col-md-12">
+    <%= render "reg_requests/table", requests: @requests %>
+  </div>
 </div>
-<div class="col-md-6">
-  <%= render "users/table", header: "Staff", users: @staff %>
-</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <%= render "users/table", header: "Students", users: @students %>
+  </div>
+  <div class="col-md-6">
+    <%= render "users/table", header: "Staff", users: @staff %>
+  </div>
 </div>

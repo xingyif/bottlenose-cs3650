@@ -7,6 +7,7 @@ class RegistrationsController < CoursesController
   def index
     @students = @course.students
     @staff = @course.staff
+    @requests = @course.reg_requests
   end
 
   def show
