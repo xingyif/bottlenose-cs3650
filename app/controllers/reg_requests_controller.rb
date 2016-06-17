@@ -12,7 +12,7 @@ class RegRequestsController < CoursesController
     @reg_request.user = current_user
 
     if @reg_request.save
-      @course.teachers.each do |teacher|
+      @course.professors.each do |teacher|
         NotificationMailer.got_reg_request(teacher,
           @reg_request, root_url).deliver_later
       end

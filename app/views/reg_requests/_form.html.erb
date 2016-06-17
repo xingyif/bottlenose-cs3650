@@ -11,14 +11,13 @@
     </div>
   <% end %>
 
-  <p>You are requesting access to:
-  <br>Course: <strong><%= @course.name %></strong>
-  <br>Term: <%= @course.term.name %>
-  </p>
-
-  <p>You are:
-  <br>Name: <%= current_user.name %>
-  <br>Email: <%= current_user.email %>
+  <p>
+    You are requesting registration as
+    <strong>
+      <%= current_user.name %>
+      &lt;<%= current_user.email %>&gt;
+    </strong>
+    .
   </p>
 
   <div class="form-group">

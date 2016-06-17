@@ -1,6 +1,6 @@
 class Staff::UsersController < Staff::BaseController
-  skip_before_action :require_staff, only: :stop_impersonating
-  before_action :require_site_admin, except: [:new, :create, :update, :stop_impersonating]
+  # skip_before_action :require_staff, only: :stop_impersonating
+  # before_action :require_site_admin, except: [:new, :create, :update, :stop_impersonating]
 
   def index
     @users = User.order(:name)

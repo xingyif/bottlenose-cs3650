@@ -72,6 +72,10 @@ class Course < ActiveRecord::Base
     student_registrations.map {|reg| reg.user}
   end
 
+  def professors
+    professor_registrations.map(&:user)
+  end
+
   def staff
     staff_registrations.map {|reg| reg.user}
   end
