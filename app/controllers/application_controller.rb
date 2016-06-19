@@ -42,40 +42,25 @@ class ApplicationController < ActionController::Base
   end
   deprecate :show_error
 
-  # # Require that there is a `current_user` indicating that a user is currently
-  # # logged in.
-  # def require_current_user
-  #   if current_user.nil?
-  #     msg = "You need to log in first."
-  #     redirect_to landing_path, alert: msg
-  #     return
-  #   end
-  # end
-  #
-  # # Require that the `current_user` is a site admin.
-  # def require_site_admin
-  #   unless current_user && current_user.site_admin?
-  #     msg = "You don't have permission to access that page."
-  #     redirect_to landing_path, alert: msg
-  #     return
-  #   end
-  # end
-  #
-  # def require_course_permission
-  #   find_course
-  #   require_current_user
-  #
-  #   if current_user.course_admin?(@course)
-  #     return
-  #   end
-  #
-  #   reg = current_user.registration_for(@course)
-  #   if reg.nil?
-  #     msg = "You're not registered for that course."
-  #     redirect_to courses_url, alert: msg
-  #     return
-  #   end
-  # end
+  # Require that there is a `current_user` indicating that a user is currently
+  # logged in.
+  def require_current_user
+    if current_user.nil?
+      msg = "You need to log in first."
+      redirect_to landing_path, alert: msg
+      return
+    end
+  end
+
+  # Require that the `current_user` is a site admin.
+  def require_site_admin
+    unless current_user && current_user.site_admin?
+      msg = "You don't have permission to access that page."
+      redirect_to landing_path, alert: msg
+      return
+    end
+  end
+
   #
   # def require_student
   #   find_course

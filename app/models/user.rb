@@ -40,7 +40,7 @@ class User < ActiveRecord::Base
   end
 
   def course_staff?(course)
-    course.registered_by?(self)
+    course_professor?(course) || course_assistant?(course)
   end
 
   def course_professor?(course)

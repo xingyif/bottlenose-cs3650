@@ -30,7 +30,7 @@ class SubmissionsController < CoursesController
 
     @row_user = User.find_by_id(params[:row_user_id])
 
-    if current_user.course_admin?(@course)
+    if current_user.course_staff?(@course)
       @submission.user ||= current_user
     else
       @submission.user = current_user
@@ -54,7 +54,7 @@ class SubmissionsController < CoursesController
   private
 
   def submission_params
-    if current_user.course_admin?(@course)
+    if current_user.course_professor?(@course)
       params[:submission].permit(:assignment_id, :user_id, :student_notes,
                                  :auto_score, :calc_score, :updated_at, :upload,
                                  :grading_output, :grading_uid, :team_id,

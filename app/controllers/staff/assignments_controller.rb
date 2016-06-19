@@ -69,13 +69,6 @@ class Staff::AssignmentsController < Staff::BaseController
     if params[:id]
       @assignment = Assignment.find(params[:id])
     end
-
-    if params[:course_id]
-      @course = Course.find(params[:course_id])
-    else
-      @course = @assignment.course
-    end
-
   end
 
   def assignment_params
