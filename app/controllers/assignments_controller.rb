@@ -26,6 +26,7 @@ class AssignmentsController < CoursesController
   end
 
   def edit
+    @assignment = Assignment.find(params[:id])
   end
 
   def create
