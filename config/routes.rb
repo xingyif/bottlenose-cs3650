@@ -20,6 +20,8 @@ Bottlenose::Application.routes.draw do
       end
     end
     resources :reg_requests, only: [:new, :create]
+    delete 'reg_requests/:id/accept', to: 'reg_requests#accept', as: 'reg_request_accept'
+    delete 'reg_requests/:id/reject', to: 'reg_requests#reject', as: 'reg_request_reject'
     resources :assignments do
       resources :submissions
     end

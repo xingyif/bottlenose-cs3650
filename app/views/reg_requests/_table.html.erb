@@ -20,10 +20,10 @@
         <td><%= request.notes %></td>
         <td width="65">
           <div class="btn-group pull-right" role="group">
-            <%= link_to staff_course_reg_request_accept_path(@course, request), method: :delete, class: "btn btn-success btn-xs" do %>
+            <%= link_to course_reg_request_accept_path(@course, request), method: :delete, class: "btn btn-success btn-xs" do %>
               <span class="glyphicon glyphicon-ok"></span>
             <% end %>
-            <%= link_to staff_course_reg_request_reject_path(@course, request), method: :delete, class: "btn btn-danger btn-xs" do %>
+            <%= link_to course_reg_request_reject_path(@course, request), method: :delete, class: "btn btn-danger btn-xs" do %>
               <span class="glyphicon glyphicon-remove"></span>
             <% end %>
           </div>
