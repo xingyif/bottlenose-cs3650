@@ -1,12 +1,8 @@
 class CoursesController < ApplicationController
-  layout 'course', except: :new
+  layout 'course'
 
   before_action :load_and_verify_course_registration
 
-  # skip_before_action :require_current_user, only: :public
-  # before_action :require_course_permission, only: :show
-
-  # GET /courses
   def index
     @courses_by_term = Course.order(:name).group_by(&:term)
 
@@ -14,8 +10,17 @@ class CoursesController < ApplicationController
     render layout: 'application'
   end
 
+  def show
+  end
+
   def new
     @course = Course.new
+
+    # We can't use the course layout if we don't have a @course.
+    render layout: 'application'
+  end
+
+  def edit
   end
 
   def create
@@ -32,15 +37,33 @@ class CoursesController < ApplicationController
     if @course.save
       redirect_to course_path(@course), notice: 'Course was successfully created.'
     else
-      render :new
+      render :new, layout: 'application'
     end
   end
 
-  # GET /courses/:id
-  def show
+  def update
+    @course.assign_attributes(course_params)
+
+    unless params[:late_penalty].nil?
+      @course.late_options = [
+        params[:late_penalty],
+        params[:late_repeat],
+        params[:late_maximum]
+      ].join(',')
+    end
+
+    if @course.save
+      redirect_to course_path(@course), notice: 'Course was successfully updated.'
+    else
+      render :edit, layout: 'application'
+    end
   end
 
-  # GET /courses/:id/public
+  def destroy
+    @course.destroy
+    redirect_to courses_path
+  end
+
   def public
     @course = Course.find(params[:id])
 
