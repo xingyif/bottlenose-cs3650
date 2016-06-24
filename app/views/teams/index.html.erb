@@ -1,6 +1,6 @@
 <% @page_title = "#{@course.name}: Teams" %>
 
-<%= link_to "New Team", new_staff_course_team_path(@course), class: "btn btn-success" %>
+<%= link_to "New Team", new_course_team_path(@course), class: "btn btn-success" %>
 
 <h3>Active Teams</h3>
 <%= render "table", teams: @active_teams %>

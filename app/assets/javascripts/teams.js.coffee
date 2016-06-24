@@ -17,6 +17,6 @@ setup_form = () ->
     $('#users option').each (i, opt) ->
       opt.selected = true
 
-run_on_page "staff/teams/create", setup_form
-run_on_page "staff/teams/new", setup_form
-run_on_page "staff/teams/edit", setup_form
+run_on_page "teams/create", setup_form
+run_on_page "teams/new", setup_form
+run_on_page "teams/edit", setup_form

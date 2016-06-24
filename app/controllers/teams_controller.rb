@@ -24,7 +24,7 @@ class TeamsController < CoursesController
     @team.users = users.map { |user_id| User.find(user_id.to_i) }
 
     if @team.save
-      redirect_to new_staff_course_team_path(@course),
+      redirect_to new_course_team_path(@course),
         notice: 'Team was successfully created.'
     else
       @teams = @course.teams.select(&:active?)
