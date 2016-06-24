@@ -36,10 +36,10 @@ class RegistrationsController < CoursesController
 
     # Set the @registration to the new registration on @course.
     @registration = @course.add_registration(params[:user_email],
-                                             @registration.teacher?)
+                                             @registration.role)
 
     if @registration.save
-      redirect_to staff_course_registrations_path(@course),
+      redirect_to course_registrations_path(@course),
                   notice: 'Registration was successfully created.'
     else
       render action: :new
@@ -58,14 +58,14 @@ class RegistrationsController < CoursesController
       end
     end
 
-    redirect_to staff_course_registrations_path(@course),
+    redirect_to course_registrations_path(@course),
                 notice: "Added #{num_added} students."
   end
 
   def destroy
     @registration.destroy
 
-    redirect_to staff_course_registrations_path(@course)
+    redirect_to course_registrations_path(@course)
   end
 
   def submissions_for_assignment
@@ -92,6 +92,6 @@ class RegistrationsController < CoursesController
 
   def registration_params
     params.require(:registration)
-          .permit(:course_id, :teacher, :user_id, :show_in_lists, :tags)
+          .permit(:course_id, :role, :user_id, :show_in_lists, :tags)
   end
 end

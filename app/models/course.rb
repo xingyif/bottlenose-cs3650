@@ -48,7 +48,7 @@ class Course < ActiveRecord::Base
   end
 
   def staff_registrations
-    regs_sorted.find_all { |reg| reg.role == 'professor' || reg.role == 'staff' }
+    regs_sorted.find_all { |reg| reg.role == 'professor' || reg.role == 'assistant' }
   end
 
   def professor_registrations
@@ -77,7 +77,7 @@ class Course < ActiveRecord::Base
   end
 
   def staff
-    staff_registrations.map {|reg| reg.user}
+    staff_registrations.map { |reg| reg.user }
   end
 
   def first_professor
@@ -88,7 +88,7 @@ class Course < ActiveRecord::Base
     buckets.reduce(0) {|sum, bb| sum + bb.weight }
   end
 
-  def add_registration(email, teacher = false)
+  def add_registration(email, role = :student)
     email.downcase!
 
     name, _ = email.split('@')
@@ -103,8 +103,8 @@ class Course < ActiveRecord::Base
     registrations.where(user: uu)
                  .first_or_create(user_id: uu.id,
                                   course_id: self.id,
-                                  teacher: teacher,
-                                  show_in_lists: !teacher)
+                                  role: role,
+                                  show_in_lists: role == 'student')
   end
 
   def score_summary

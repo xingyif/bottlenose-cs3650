@@ -1,5 +1,7 @@
 <h2>Registrations</h2>
 
+<%= link_to "New", new_course_registration_path %>
+
 <div class="row">
   <div class="col-md-12">
     <%= render "reg_requests/table", requests: @requests %>
