@@ -1,6 +1,9 @@
 class AssignmentsController < CoursesController
 
-  # GET /courses/:course_id/assignments/:id
+  def index
+    raise "Not implemented."
+  end
+
   def show
     @assignment = Assignment.find(params[:id])
 
@@ -51,6 +54,13 @@ class AssignmentsController < CoursesController
     @assignment.destroy
     show_notice "Assignment has been deleted."
     redirect_to @course
+  end
+
+  # TODO: There is no route for this currently.
+  def tarball
+    tb = SubTarball.new(@assignment.id)
+    tb.update!
+    redirect_to tb.path
   end
 
   protected
