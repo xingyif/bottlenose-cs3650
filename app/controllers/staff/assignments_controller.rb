@@ -1,8 +1,8 @@
 class Staff::AssignmentsController < Staff::BaseController
   before_action :find_assignment
 
-  before_filter :require_teacher, :except => [:show]
-  before_filter :require_course_permission
+  # before_filter :require_teacher, :except => [:show]
+  # before_filter :require_course_permission
 
   def index
     @assignments = @chapter.assignments
@@ -17,6 +17,7 @@ class Staff::AssignmentsController < Staff::BaseController
   end
 
   def new
+    @course = Course.find(params[:course_id])
     bucket = @course.buckets.find_by_id(params[:bucket])
 
     @assignment = Assignment.new

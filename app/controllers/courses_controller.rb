@@ -60,9 +60,9 @@ class CoursesController < ApplicationController
   def load_and_verify_course_registration
     # We can't find the course for the action 'courses#index'.
     if controller_name == 'courses' &&
-       action_name == 'index' ||
-       action_name == 'new' ||
-       action_name == 'create'
+       (action_name == 'index' ||
+        action_name == 'new' ||
+        action_name == 'create')
       return
     end
 

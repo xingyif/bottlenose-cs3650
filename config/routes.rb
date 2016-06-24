@@ -20,8 +20,8 @@ Bottlenose::Application.routes.draw do
       end
     end
     resources :reg_requests, only: [:new, :create]
-    resources :assignments, only: :show do
-      resources :submissions, only: [:new, :create, :show]
+    resources :assignments do
+      resources :submissions
     end
     resources :teams do
       member do
