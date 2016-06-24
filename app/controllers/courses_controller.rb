@@ -1,10 +1,7 @@
 class CoursesController < ApplicationController
-  layout 'course'
+  layout 'course', except: :new
 
-  before_action :find_course
-
-  before_action :require_current_user, except: :public
-  before_action :require_course_registration
+  before_action :load_and_verify_course_registration
 
   # skip_before_action :require_current_user, only: :public
   # before_action :require_course_permission, only: :show
@@ -15,6 +12,28 @@ class CoursesController < ApplicationController
 
     # We can't use the course layout if we don't have a @course.
     render layout: 'application'
+  end
+
+  def new
+    @course = Course.new
+  end
+
+  def create
+    @course = Course.new(course_params)
+
+    unless params[:late_penalty].nil?
+      @course.late_options = [
+        params[:late_penalty],
+        params[:late_repeat],
+        params[:late_maximum]
+      ].join(',')
+    end
+
+    if @course.save
+      redirect_to course_path(@course), notice: 'Course was successfully created.'
+    else
+      render :new
+    end
   end
 
   # GET /courses/:id
@@ -38,20 +57,16 @@ class CoursesController < ApplicationController
 
   protected
 
-  def find_course
+  def load_and_verify_course_registration
     # We can't find the course for the action 'courses#index'.
-    if controller_name == 'courses' && action_name == 'index'
+    if controller_name == 'courses' &&
+       action_name == 'index' ||
+       action_name == 'new' ||
+       action_name == 'create'
       return
     end
 
     @course = Course.find(params[:course_id] || params[:id])
-  end
-
-  def require_course_registration
-    # You don't need to be registered to visit the course index page.
-    if controller_name == 'courses' && action_name == 'index'
-      return
-    end
 
     require_current_user
 
@@ -65,5 +80,10 @@ class CoursesController < ApplicationController
       redirect_to courses_url, alert: msg
       return
     end
+  end
+
+  def course_params
+    params[:course].permit(:name, :footer, :late_options, :private, :public,
+                           :term_id, :sub_max_size)
   end
 end
