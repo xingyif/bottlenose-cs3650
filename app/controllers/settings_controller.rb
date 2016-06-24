@@ -1,6 +1,4 @@
-class Staff::SettingsController < Staff::BaseController
-  before_filter :require_site_admin
-
+class SettingsController < ApplicationController
   def edit
     @cfg = Settings.load_json
   end
@@ -14,6 +12,6 @@ class Staff::SettingsController < Staff::BaseController
 
     Settings.save_json(@cfg)
 
-    redirect_to staff_root_path, notice: "Settings Saved"
+    redirect_to root_path, notice: "Settings Saved"
   end
 end

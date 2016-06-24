@@ -5,6 +5,17 @@ Bottlenose::Application.routes.draw do
   root to: "main#home"
   get "about" => "main#about"
 
+  resource :settings, only: [:edit, :update]
+
+  resources :users do
+    collection do
+      post :stop_impersonating
+    end
+    member do
+      post :impersonate
+    end
+  end
+
   resources :terms
 
   resources :courses do
