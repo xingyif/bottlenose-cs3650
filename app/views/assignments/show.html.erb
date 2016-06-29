@@ -47,7 +47,11 @@
 
 <h3>
   Submissions
-  <%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment), class: "btn btn-success" %>
+  <% if current_user.registration_for(@course).staff? %>
+    <%= link_to "Download", download_course_assignment_submissions_path(@course, @assignment), class: "btn btn-default" %>
+  <% else %>
+    <%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment), class: "btn btn-success" %>
+  <% end %>
 </h3>
 
 <%# TODO: Show team members if this is a team assignment. %>
@@ -59,6 +63,7 @@
 <% else %>
   <table class="table table-striped">
     <tr>
+      <th>Submitter</th>
       <th>Date</th>
       <th>Status</th>
       <th>Automatic</th>
@@ -69,6 +74,7 @@
 
   <% @submissions.each do |sub| %>
     <tr>
+      <td><%= sub.user %></td>
       <td><span class="local-time"><%= sub.created_at %></span></td>
       <td><%= status_image(sub) %></td>
       <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>

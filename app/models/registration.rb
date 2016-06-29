@@ -18,7 +18,7 @@ class Registration < ActiveRecord::Base
 
   # Return true if the registration is a staff role (professor or assistant).
   def staff?
-    self.role == 'staff' || self.role == 'assistant'
+    self.role == 'professor' || self.role == 'assistant'
   end
 
   # Return the submissions to the course the user is registered for.

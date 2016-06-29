@@ -8,9 +8,9 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.find(params[:id])
 
     if current_user.site_admin? || current_user.registration_for(@course).staff?
-      @submissions = @assignment.submissions.where(user_id: current_user.id)
-    else
       @submissions = @assignment.submissions
+    else
+      @submissions = @assignment.submissions.where(user_id: current_user.id)
     end
   end
 
