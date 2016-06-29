@@ -70,25 +70,19 @@ when "development"
         )
     end
 
-    # subs = []
-    # hws.each do |hw|
-    #   regs.each do |reg|
-    #     0.upto(4) do |ii|
-    #       sub = Submission.find_or_create_by(
-    #         student_notes: "sub #{ii}",
-    #         assignment_id: hw.id,
-    #         user_id: reg.user.id,
-    #         auto_score: 50 + rand(50),
-    #         teacher_score: 50 + rand(50),
-    #       )
-    #       sub.save!
-    #       subs << sub
-    #     end
-    #   end
-    # end
-
-    # course_b = Course.first_or_create!(name: "Course B", term: fall)
-    # course_c = Course.first_or_create!(name: "Course B", term: spring)
+    fundies1.assignments.each do |assignment|
+        fundies1.students.each do |student|
+            0.upto(4) do |i|
+                Submission.create!(
+                    student_notes: "Submission #{i}",
+                    assignment_id: assignment.id,
+                    user_id: student.id,
+                    auto_score: 50 + rand(50),
+                    teacher_score: 50 + rand(50),
+                )
+            end
+        end
+    end
 when "production"
    # I can't think of any seed data for productions.
 end
