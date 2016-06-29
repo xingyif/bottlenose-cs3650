@@ -43,6 +43,8 @@ class AssignmentsController < CoursesController
   end
 
   def update
+    @assignment = Assignment.find(params[:id])
+
     if @assignment.update_attributes(assignment_params)
       @assignment.save_uploads!
       redirect_to course_assignment_path(@course, @assignment), notice: 'Assignment was successfully updated.'
@@ -52,6 +54,8 @@ class AssignmentsController < CoursesController
   end
 
   def destroy
+    @assignment = Assignment.find(params[:id])
+
     @assignment.destroy
     show_notice "Assignment has been deleted."
     redirect_to @course
