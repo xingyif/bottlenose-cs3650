@@ -43,6 +43,8 @@ Bottlenose::Application.routes.draw do
     end
   end
 
+  get 'assignments/:id/tarball' => 'assignments#tarball', as: 'assignment_tarball'
+
   # # Staff routes.
   # ###############
   #

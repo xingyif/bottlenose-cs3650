@@ -59,7 +59,7 @@ class AssignmentsController < CoursesController
 
   # TODO: There is no route for this currently.
   def tarball
-    tb = SubTarball.new(@assignment.id)
+    tb = SubTarball.new(params[:id])
     tb.update!
     redirect_to tb.path
   end
