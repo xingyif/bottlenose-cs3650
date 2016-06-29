@@ -171,6 +171,7 @@ class Submission < ActiveRecord::Base
   def grade!
     return if upload_id.nil?
     return if assignment.grading_upload_id.nil?
+    # TODO: This looks strange to me.
     return if student_notes == "@@@skip tests@@@"
 
     root = Rails.root.to_s
