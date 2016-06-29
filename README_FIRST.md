@@ -22,3 +22,12 @@ Overview
 I've confirmed that registration management, and team management works as
 intended. Tarballs of submissions are now also implemented for download, and
 view ing contents on submission show page.
+
+There is a line that concerns me in app/models/submission.rb
+
+    return if student_notes == "@@@skip tests@@@"
+
+To Do
+-----
+
+- [ ] Need an edit link for assignments.
