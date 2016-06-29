@@ -28,7 +28,17 @@
   </tr>
   <tr>
     <td><strong>Submitted File</strong></td>
-    <td><%= link_to @submission.file_name, @submission.file_path %></td>
+    <td>
+      <%= link_to @submission.file_name, @submission.file_path %>
+      <% if @submission.file_name =~ /.*\.(tar|tgz|tar.gz)/ %>
+        <ul>
+          <% stats = `tar tvf #{@submission.file_full_path}`.split("\n") %>
+          <% stats.each do |s| %>
+            <li><%= s %></li>
+          <% end %>
+        </ul>
+      <% end %>
+    </td>
   </tr>
   <tr>
     <td><strong>Student Notes</strong></td>

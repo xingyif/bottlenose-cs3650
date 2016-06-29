@@ -20,4 +20,5 @@ Overview
 --------
 
 I've confirmed that registration management, and team management works as
-intended.
+intended. Tarballs of submissions are now also implemented for download, and
+view ing contents on submission show page.
