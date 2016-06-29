@@ -72,15 +72,30 @@ when "development"
 
     fundies1.assignments.each do |assignment|
         fundies1.students.each do |student|
-            0.upto(4) do |i|
-                Submission.create!(
-                    student_notes: "Submission #{i}",
-                    assignment_id: assignment.id,
-                    user_id: student.id,
-                    auto_score: 50 + rand(50),
-                    teacher_score: 50 + rand(50),
-                )
-            end
+            upload = Upload.new
+            upload.user_id = student.id
+            upload.store_meta!({
+                type:       "Submission File",
+                user:       "#{student.name} (#{student.id})",
+                course:     "#{assignment.course.name} (#{assignment.course.id})",
+                date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
+            })
+            submission_path = "#{Rails.root}/hw1/strings.rkt"
+            submission_file = File.new(submission_path)
+            upload.store_upload!(ActionDispatch::Http::UploadedFile.new(
+                filename: File.basename(submission_file),
+                tempfile: submission_file,
+            ))
+            upload.save!
+
+            Submission.create!(
+                upload_id: upload.id,
+                student_notes: "A submission",
+                assignment_id: assignment.id,
+                user_id: student.id,
+                auto_score: 50 + rand(50),
+                teacher_score: 50 + rand(50),
+            )
         end
     end
 when "production"
