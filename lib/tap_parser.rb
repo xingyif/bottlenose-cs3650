@@ -106,7 +106,7 @@ class TapParser
 
     # Count passing tests.
     points = 0
-    1.upto(test_count) do |ii|
+    1.upto(@test_count) do |ii|
       points += 1 if tests[ii]
     end
 
@@ -114,7 +114,7 @@ class TapParser
   end
 
   def points_available
-    total_points = test_count
+    total_points = @test_count
 
     @text.split("\n").each do |line|
       mm = line.match(/# TOTAL POINTS: (\d+)/)
@@ -127,7 +127,7 @@ class TapParser
   end
 
   def points_earned
-    points = tests_ok
+    points = @tests_ok
 
     @text.split("\n").each do |line|
       mm = line.match(/# POINTS: (\d+)/)
@@ -146,7 +146,7 @@ class TapParser
     # Points available:  #{points_available}
     # Points earned:     #{points_earned}
     # SUMMARY
-    
+
     nums = @tests.map {|t| t[:num] }
 
     <<-"SUMMARY"
