@@ -30,6 +30,11 @@ There is a line that concerns me in app/models/submission.rb
 I'm working on getting the expectations from script/grade-submission and the
 grader scripts that Ben provided to mesh.
 
+Right now the system works by calling `grade!` on a submission, which kicks off
+`script/grade-submission` on the corresponding submission. This in turn, untars
+and runs `test.sh` from within the grading tarball. An example of this can be
+found in `hw1/` from this directory.
+
 To Do
 -----
 
