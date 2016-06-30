@@ -4,7 +4,9 @@
             Assignments
 
             <div class="pull-right">
-                <%= link_to "New", new_course_assignment_path(assignments.first.course), class: 'btn btn-xs btn-success' %>
+                <% if current_user.registration_for(@course).professor? %>
+                    <%= link_to "New", new_course_assignment_path(assignments.first.course), class: 'btn btn-xs btn-success' %>
+                <% end %>
             </div>
         </h3>
     </div>
