@@ -27,6 +27,9 @@ There is a line that concerns me in app/models/submission.rb
 
     return if student_notes == "@@@skip tests@@@"
 
+I'm working on getting the expectations from script/grade-submission and the
+grader scripts that Ben provided to mesh.
+
 To Do
 -----
 

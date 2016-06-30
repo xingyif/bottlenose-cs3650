@@ -48,32 +48,33 @@ FileUtils.cp(sub.assignment.grading_full_path, "#{test_dir}/grading.tar.gz")
 # Run the grading process.
 # pipe = File.popen(["/usr/local/bottlenose/bin/sandbox",
 #                    "#{test_dir}", "#{sub.grading_uid}", "#{output_key}"])
-pipe = File.popen([
-  "echo",
-  "#{output_key}
-1..1
-ok 1 - This is great.
-#{output_key}"
-])
 
-output_lines = []
+output_lines = [output_key]
+Dir.chdir(test_dir) do
+  system("tar xf grading.tar.gz")
+  system("tar xf sub.tar.gz -C grading")
+  pipe = File.popen(["sh", "grading/test.sh"])
 
-begin
-  while not pipe.eof?
-    line = pipe.readline()
-    if line
-      puts line
-      output_lines << line
-      sub.grading_output = output_lines.join
-      sub.save!
+  begin
+    while not pipe.eof?
+      line = pipe.readline()
+      if line
+        puts line
+        output_lines << line
+        sub.grading_output = output_lines.join
+        sub.save!
+      end
     end
-  end
-rescue Exception => ee
-  output_lines << ee.to_s
-  sub.grading_output = output_lines.join
-  sub.save!
+  rescue Exception => ee
+    p ee
+    output_lines << ee.to_s
+    sub.grading_output = output_lines.join
+    sub.save!
 
-  output_lines = []
+    output_lines = []
+  end
+
+  output_lines << output_key
 end
 
 # TODO: Add sandboxing back.

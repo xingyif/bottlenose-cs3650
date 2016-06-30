@@ -1,5 +1,5 @@
 #!/bin/bash
-OUTPUT=$(cat ../strings.rkt | racket | grep "\"hello world\"")
+OUTPUT=$(cat strings.rkt | racket | grep "\"hello world\"")
 
 echo "1..1"
 
