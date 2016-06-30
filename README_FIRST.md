@@ -33,4 +33,4 @@ grader scripts that Ben provided to mesh.
 To Do
 -----
 
-- [ ] Need an edit link for assignments.
+- [x] Need an edit link for assignments.
