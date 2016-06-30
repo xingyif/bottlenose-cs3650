@@ -77,23 +77,6 @@ Dir.chdir(test_dir) do
   output_lines << output_key
 end
 
-# NOTE: This is added here to give an example of simple parsing of JUnit output
-# into TAP format, this should probably live in the test.sh for the java
-# assignment itself.
-results = output_lines[2]
-errors = results.count('E')
-successes = results.count('.')
-total = errors + successes
-output_lines = [output_key, "1..#{total}\n"]
-results.each_char.with_index do |c, i|
-  if c == '.'
-    output_lines << "ok #{i + 1} - TODO\n"
-  elsif c == 'E'
-    output_lines << "not ok #{i + 1} - TODO\n"
-  end
-end
-output_lines << output_key
-
 # TODO: Add sandboxing back.
 # # Make sure everything's cleaned up.
 # system("/usr/local/bottlenose/bin/sandbox", "-reap", "#{sub.grading_uid}")
