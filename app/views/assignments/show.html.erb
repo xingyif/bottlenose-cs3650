@@ -1,5 +1,7 @@
 <% @page_title = "#{@course.name} / #{@assignment.name}" %>
 
+<%= link_to "Edit", edit_course_assignment_path(@course, @assignment), class: "btn btn-default" %>
+
 <div class="row">
   <div class="col-md-6">
     <p>
