@@ -1,18 +1,38 @@
 class UsersController < ApplicationController
   def index
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin"
+      return
+    end
+
     @users = User.order(:name)
     @user  = User.new
   end
 
   def show
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin"
+      return
+    end
+
     @user = User.find(params[:id])
   end
 
   def edit
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin"
+      return
+    end
+
     @user = User.find(params[:id])
   end
 
   def update
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin"
+      return
+    end
+
     @user = User.find(params[:id])
 
     if @user.update_attributes(user_params)
@@ -32,6 +52,11 @@ class UsersController < ApplicationController
   end
 
   def destroy
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin"
+      return
+    end
+
     @user = User.find(params[:id])
     @user.destroy
 
@@ -39,6 +64,11 @@ class UsersController < ApplicationController
   end
 
   def impersonate
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin"
+      return
+    end
+
     @user = User.find(params[:id])
     impersonate_user(@user)
     redirect_to root_path, notice: "You are impersonating #{@user.name}."

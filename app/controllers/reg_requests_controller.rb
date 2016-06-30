@@ -1,4 +1,6 @@
 class RegRequestsController < CoursesController
+  skip_before_action :load_and_verify_course_registration
+
   # GET /courses/:course_id/reg_requests/new
   def new
     @course = Course.find(params[:course_id])

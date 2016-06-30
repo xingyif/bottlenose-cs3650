@@ -16,6 +16,11 @@ class TermsController < ApplicationController
   end
 
   def create
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin."
+      return
+    end
+
     @term = Term.new(term_params)
 
     if @term.save
@@ -26,6 +31,11 @@ class TermsController < ApplicationController
   end
 
   def update
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin."
+      return
+    end
+
     @term = Term.find(params[:id])
 
     if @term.update_attributes(term_params)
@@ -36,6 +46,11 @@ class TermsController < ApplicationController
   end
 
   def destroy
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin."
+      return
+    end
+
     @term = Term.find(params[:id])
     @term.destroy
 

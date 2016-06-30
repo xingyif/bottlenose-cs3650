@@ -24,6 +24,11 @@ class CoursesController < ApplicationController
   end
 
   def create
+    unless current_user.site_admin?
+      redirect_to(root_path, alert: 'Must be an admin to update a course.')
+      return
+    end
+
     @course = Course.new(course_params)
 
     unless params[:late_penalty].nil?
@@ -42,6 +47,11 @@ class CoursesController < ApplicationController
   end
 
   def update
+    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+      redirect_to(root_path, notice: 'Must be an admin or professor to update a course.')
+      return
+    end
+
     @course.assign_attributes(course_params)
 
     unless params[:late_penalty].nil?
@@ -60,6 +70,11 @@ class CoursesController < ApplicationController
   end
 
   def destroy
+    unless current_user.site_admin?
+      redirect_to(root_path, notice: 'Must be an admin to destroy a course.')
+      return
+    end
+
     @course.destroy
     redirect_to courses_path
   end

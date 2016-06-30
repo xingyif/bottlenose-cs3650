@@ -5,6 +5,11 @@ class RegistrationsController < CoursesController
                         except: [:index, :new, :create, :bulk]
 
   def index
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
     @students = @course.students
     @staff = @course.staff
     @requests = @course.reg_requests
@@ -25,6 +30,11 @@ class RegistrationsController < CoursesController
   end
 
   def create
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
     # Create @registration object for errors.
     @registration = Registration.new(registration_params)
 
@@ -47,6 +57,11 @@ class RegistrationsController < CoursesController
   end
 
   def bulk
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
     @course = Course.find(params[:course_id])
     num_added = 0
 
@@ -63,6 +78,11 @@ class RegistrationsController < CoursesController
   end
 
   def destroy
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
     @registration.destroy
 
     redirect_to course_registrations_path(@course)

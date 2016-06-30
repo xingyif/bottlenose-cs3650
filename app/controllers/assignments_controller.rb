@@ -1,9 +1,4 @@
 class AssignmentsController < CoursesController
-
-  def index
-    raise "Not implemented."
-  end
-
   def show
     @assignment = Assignment.find(params[:id])
 
@@ -30,6 +25,11 @@ class AssignmentsController < CoursesController
   end
 
   def create
+    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+      redirect_to root_path, alert: "Must be an admin or professor."
+      return
+    end
+
     @assignment = Assignment.new(assignment_params)
     @assignment.course_id = @course.id
     @assignment.blame_id = current_user.id
@@ -43,6 +43,11 @@ class AssignmentsController < CoursesController
   end
 
   def update
+    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+      redirect_to root_path, alert: "Must be an admin or professor."
+      return
+    end
+
     @assignment = Assignment.find(params[:id])
 
     if @assignment.update_attributes(assignment_params)
@@ -54,6 +59,11 @@ class AssignmentsController < CoursesController
   end
 
   def destroy
+    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+      redirect_to root_path, alert: "Must be an admin or professor."
+      return
+    end
+
     @assignment = Assignment.find(params[:id])
 
     @assignment.destroy
@@ -63,6 +73,11 @@ class AssignmentsController < CoursesController
 
   # TODO: There is no route for this currently.
   def tarball
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
     tb = SubTarball.new(params[:id])
     tb.update!
     redirect_to tb.path

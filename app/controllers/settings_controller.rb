@@ -4,6 +4,11 @@ class SettingsController < ApplicationController
   end
 
   def update
+    unless current_user.site_admin?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
     @cfg = Settings.defaults
 
     @cfg.each_key do |kk|

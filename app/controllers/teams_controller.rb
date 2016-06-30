@@ -17,6 +17,11 @@ class TeamsController < CoursesController
 
   # POST /staff/course/:course_id/teams
   def create
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
     @course = Course.find(params[:course_id])
     @team = Team.new(team_params)
 
@@ -44,6 +49,11 @@ class TeamsController < CoursesController
   end
 
   def disolve
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
     @team = Team.find(params[:id])
     @team.update_attribute(:end_date, Date.current)
     redirect_to :back
