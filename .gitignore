@@ -41,3 +41,5 @@ db/dump.sql.gz
 .rbx
 
 .vagrant
+
+*.class

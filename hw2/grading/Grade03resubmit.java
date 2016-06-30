@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.cs3500.TestWeight;
+
 import static org.junit.Assert.*;
 
 import cs3500.hw03.*;
@@ -18,7 +20,7 @@ import cs3500.hw03.*;
 public class Grade03resubmit extends GradingSandbox
 {
 
-    //weight: 1
+    @TestWeight(weight = 1)
     @Test(expected=IllegalArgumentException.class)
     public void testStartGameZeroPlayers()
     {
@@ -32,7 +34,7 @@ public class Grade03resubmit extends GradingSandbox
 
     }
 
-    //weight: 1
+    @TestWeight(weight = 1)
     @Test(expected=IllegalArgumentException.class)
     public void testStartGameOnePlayer()
     {
@@ -45,7 +47,7 @@ public class Grade03resubmit extends GradingSandbox
         controller.startGame(model,1);
     }
 
-    //weight: 1
+    @TestWeight(weight = 1)
     @Test
     public void testModelCurrentPlayer()
     {
@@ -63,7 +65,7 @@ public class Grade03resubmit extends GradingSandbox
 	    }
     }
 
-    //weight: 1
+    @TestWeight(weight = 1)
     @Test(expected=IllegalArgumentException.class)
     public void testModelInvalidPlayer()
     {
@@ -79,7 +81,7 @@ public class Grade03resubmit extends GradingSandbox
         model.play(3,0);
     }
 
-    //weight: 1
+    @TestWeight(weight = 1)
     @Test(expected=IllegalArgumentException.class)
     public void testModelInvalidCard()
     {
@@ -96,7 +98,7 @@ public class Grade03resubmit extends GradingSandbox
         model.play(3,10);
     }
 
-    //weight: 1
+    @TestWeight(weight = 1)
     @Test(expected=IllegalArgumentException.class)
     public void testModelWrongSuit()
     {
@@ -113,7 +115,7 @@ public class Grade03resubmit extends GradingSandbox
         model.play(3,1);
     }
 
-    //weight: 0.5
+    @TestWeight(weight = 0.5)
     @Test
     public void testGameFourPlayers() throws Exception
     {
@@ -177,7 +179,7 @@ public class Grade03resubmit extends GradingSandbox
     }
 
 
-    //weight: 0.5
+    @TestWeight(weight = 0.5)
     @Test
     public void testGameFivePlayers() throws Exception
     {
