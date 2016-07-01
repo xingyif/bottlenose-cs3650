@@ -32,28 +32,29 @@ require 'securerandom'
 output_key = SecureRandom.urlsafe_base64
 
 # Set up test directory.
-test_dir = "/tmp/grade-#{sub.id}-#{sub.grading_uid}"
 
-Dir.mkdir(test_dir)
+Dir.mktmpdir("grade-#{sub.id}-#{sub.grading_uid}") do |test_dir|
 
-if sub.file_full_path.to_s.match(/gz$/)
-  FileUtils.cp(sub.file_full_path, "#{test_dir}/sub.tar.gz")
-else
-  FileUtils.cp(sub.file_full_path, "#{test_dir}/#{sub.file_name}")
-  system(%Q{(cd #{test_dir} && tar czf sub.tar.gz "#{sub.file_name}")})
-end
+  if sub.file_full_path.to_s.match(/gz$/)
+    FileUtils.cp(sub.file_full_path, "#{test_dir}/sub.tar.gz")
+  else
+    FileUtils.cp(sub.file_full_path, "#{test_dir}/#{sub.file_name}")
+    system(%Q{(cd #{test_dir} && tar czf sub.tar.gz "#{sub.file_name}")})
+  end
 
-FileUtils.cp(sub.assignment.grading_full_path, "#{test_dir}/grading.tar.gz")
+  FileUtils.cp(sub.assignment.grading_full_path, "#{test_dir}/grading.tar.gz")
 
-# Run the grading process.
-# pipe = File.popen(["/usr/local/bottlenose/bin/sandbox",
-#                    "#{test_dir}", "#{sub.grading_uid}", "#{output_key}"])
+  # Run the grading process.
+  # pipe = File.popen(["/usr/local/bottlenose/bin/sandbox",
+  #                    "#{test_dir}", "#{sub.grading_uid}", "#{output_key}"])
 
-output_lines = [output_key]
-Dir.chdir(test_dir) do
-  system("tar xf grading.tar.gz")
-  system("tar xf sub.tar.gz -C grading")
-  pipe = File.popen(["sh", "grading/test.sh"])
+  output_lines = [output_key]
+  Dir.chdir(test_dir) do
+    system("tar xf grading.tar.gz")
+    system("tar xf sub.tar.gz -C grading")
+  end
+
+  pipe = File.popen(["sh", File.join(test_dir, "grading/test.sh")])
 
   begin
     while not pipe.eof?
@@ -75,34 +76,36 @@ Dir.chdir(test_dir) do
   end
 
   output_lines << output_key
-end
 
-# TODO: Add sandboxing back.
-# # Make sure everything's cleaned up.
-# system("/usr/local/bottlenose/bin/sandbox", "-reap", "#{sub.grading_uid}")
+  # TODO: Add sandboxing back.
+  # # Make sure everything's cleaned up.
+  # system("/usr/local/bottlenose/bin/sandbox", "-reap", "#{sub.grading_uid}")
 
-# Process results
-if output_lines.any? {|xx| xx.match(output_key)}
-  require 'array_split'
-  results = output_lines.split_on(output_key)[1].join
+  # Process results
+  if output_lines.any? {|xx| xx.match(output_key)}
+    require 'array_split'
+    results = output_lines.split_on(output_key)[1].join
 
-  require 'tap_parser'
-  parser = TapParser.new(results)
-  puts
-  puts "Summary:"
-  puts parser.summary
+    p results
 
-  score = 0
+    require 'tap_parser'
+    parser = TapParser.new(results)
+    puts
+    puts "Summary:"
+    puts parser.summary
 
-  begin
-    score = (parser.points_earned * sub.assignment.points_available) /
-      parser.points_available
-  rescue ZeroDivisionError
-    # Yay, no points available.
+    score = 0
+
+    begin
+      score = (parser.points_earned * sub.assignment.points_available) /
+        parser.points_available
+    rescue ZeroDivisionError
+      # Yay, no points available.
+    end
+
+    sub.auto_score = score
+    sub.save!
   end
-
-  sub.auto_score = score
-  sub.save!
 end
 
 # Clean up afterwards.
@@ -110,8 +113,6 @@ end
 # if File.exists?("#{test_dir}/sandbox/bin/bash")
 #   puts "Loopback mounts still exist. Calling in the reaper man."
 #   system(%Q{cd #{Rails.root} && script/sandbox-reaper &})
-# else
-  system(%Q{rm -rf "#{test_dir}"}) if test_dir.match(/^\/tmp/)
 # end
 
 sub.grading_uid = nil
