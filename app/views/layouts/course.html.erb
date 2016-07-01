@@ -24,7 +24,7 @@
                 <%= link_to "Registrations", course_registrations_path(@course), class: "btn btn-sm btn-default" %>
             <% end %>
             <% if current_user.course_professor?(@course) %>
-                <%= link_to "Settings", '#', class: "btn btn-sm btn-default" %>
+                <%= link_to "Edit Course Settings", edit_course_path(@course), class: "btn btn-sm btn-default" %>
             <% end %>
         </div>
     </div>

@@ -21,6 +21,10 @@ class Registration < ActiveRecord::Base
     self.role == 'professor' || self.role == 'assistant'
   end
 
+  def professor?
+    self.role == 'professor'
+  end
+
   # Return the submissions to the course the user is registered for.
   def submissions
     user.submissions.select { |s| s.course == course }

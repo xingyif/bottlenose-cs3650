@@ -43,6 +43,10 @@ class User < ActiveRecord::Base
     course_professor?(course) || course_assistant?(course)
   end
 
+  def professor_ever?
+    courses.any? {|c| self.course_professor?(c) }
+  end
+
   def course_professor?(course)
     course.registered_by?(self, as: 'professor')
   end
