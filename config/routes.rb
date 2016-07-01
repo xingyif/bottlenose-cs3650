@@ -1,6 +1,6 @@
 Bottlenose::Application.routes.draw do
   # Using devise for user auth.
-  devise_for :users
+  devise_for :users, :skip => [:registrations]
 
   root to: "main#home"
   get "about" => "main#about"
@@ -43,7 +43,7 @@ Bottlenose::Application.routes.draw do
     end
   end
 
-  get 'assignments/:id/tarball' => 'assignments#tarball', as: 'assignment_tarball'
+  get 'courses/:course_id/assignments/:id/tarball' => 'assignments#tarball', as: 'course_assignment_tarball'
 
   # # Staff routes.
   # ###############
