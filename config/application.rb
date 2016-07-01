@@ -22,6 +22,8 @@ module Bottlenose
 
     config.autoload_paths << Rails.root.join('lib')
 
+    config.assets.precompile += ["codemirror*", "codemirror/**/*"]
+
     #config.active_job.queue_adapter = :delayed_job
   end
 end

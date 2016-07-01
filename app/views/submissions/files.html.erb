@@ -1,0 +1,89 @@
+<% @page_title = "View Submission Details" %>
+
+<p>
+  <%= link_to "Back to Assignment: #{@assignment.name}", course_assignment_path(@course, @assignment) %>
+</p>
+
+<h1>Submission</h1>
+
+<table class="table">
+  <tr>
+    <td><strong>Assignment</strong></td>
+    <td><%= @submission.assignment.name %></td>
+  </tr>
+  <% if @submission.team.nil? %>
+    <tr>
+      <td><strong>Student</strong></td>
+      <td><%= @submission.user.name %></td>
+    </tr>
+  <% else %>
+    <tr>
+      <td><strong>Team</strong></td>
+      <td><%= @submission.team %></td>
+    </tr>
+  <% end %>
+  <tr>
+    <td><strong>Submission Time</strong></td>
+    <td><span class="local-time"><%= @submission.created_at %></span></td>
+  </tr>
+  <tr>
+    <td><strong>Submitted File</strong></td>
+    <td>
+      <%= link_to @submission.file_name, @submission.file_path %>
+      <% @file_contents.each_index do |i| %>
+      <%   f = @file_contents[i] %>
+      <%   t = @file_types[i] %>
+        <div>
+          <textarea class="sourceCode" data-lang="<%= t %>" id="submission<%= i %>"><%= render html: f %></textarea>
+        </div>
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Student Notes</strong></td>
+    <td>
+      <div class="prose"><%= @submission.student_notes %></div>
+    </td>
+  </tr>
+</table>
+
+<script>
+$(function (){
+  $("textarea.sourceCode").each(function(_, code) {
+    if ($(code).data("lang")) {
+      var cm = CodeMirror.fromTextArea(code, {
+        readOnly: true, indentUnit: 2,
+        mode: $(code).data("lang"),
+        theme: 'mdn-like', viewportMargin: Infinity,
+        lineNumbers: true, lineWrapping: false,
+        styleActiveLine: true
+      });
+      // cm.setSize(null, cm.heightAtLine(cm.getDoc().lineCount() + 1) - cm.heightAtLine(cm.getDoc().firstLine() - 1) + 30);
+      // CodeMirror.runMode($(code).text(), $(code).data(\"lang\"), code);
+      $(code).addClass("cm-s-mdn-like cm-s-default");
+    }
+    });
+});
+</script>
+
+<% unless @submission.assignment.grading_upload_id.nil? %>
+
+<h1>Autograding Output</h1>
+
+<script>
+  function reload_bottom() {
+    window.location.href = window.location.href + "#bottom";
+    window.location.reload(true);
+  }
+</script>
+
+<p id="bottom2"><%= link_to_function "Refresh Output", "reload_bottom();" %></p>
+
+<pre>
+<% # Lack of indentation important here. %>
+<%= @submission.grading_output %>
+</pre>
+
+<p id="bottom"><%= link_to_function "Refresh Output", "reload_bottom();" %></p>
+
+<% end %>

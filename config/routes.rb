@@ -31,7 +31,11 @@ Bottlenose::Application.routes.draw do
     delete 'reg_requests/:id/accept', to: 'reg_requests#accept', as: 'reg_request_accept'
     delete 'reg_requests/:id/reject', to: 'reg_requests#reject', as: 'reg_request_reject'
     resources :assignments do
-      resources :submissions
+      resources :submissions do
+        member do
+          get :files
+        end
+      end
     end
     resources :teams do
       member do

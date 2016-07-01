@@ -8,6 +8,7 @@ when "development"
     ben = User.create!(
         email: "blerner@ccs.neu.edu",
         name: "Ben Lerner",
+        site_admin: true,
     )
     olin = User.create!(
         email: "shivers@ccs.neu.edu",

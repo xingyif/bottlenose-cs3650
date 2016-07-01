@@ -62,6 +62,8 @@ GEM
       capybara (>= 2.3.0, < 2.6.0)
       json
     chronic (0.10.2)
+    codemirror-rails (5.11)
+      railties (>= 3.0, < 5)
     coderay (1.1.0)
     coffee-rails (4.1.0)
       coffee-script (>= 2.2.0)
@@ -208,6 +210,7 @@ DEPENDENCIES
   bootstrap-sass-extras
   capybara
   capybara-webkit
+  codemirror-rails
   coffee-rails
   coffee-rails-source-maps
   daemons
@@ -234,4 +237,4 @@ DEPENDENCIES
   yaml_db
 
 BUNDLED WITH
-   1.11.2
+   1.12.5

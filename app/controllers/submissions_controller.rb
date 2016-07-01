@@ -11,6 +11,43 @@ class SubmissionsController < CoursesController
     end
   end
 
+  def files
+    @submission = Submission.find(params[:id])
+    @assignment = @submission.assignment
+
+    unless @submission.visible_to?(current_user)
+      show_error "That's not your submission."
+      redirect_to course_assignment_path(@course, @assignment)
+    end
+
+    @file_contents = []
+    @file_types = []
+    if @submission.file_name =~ /.*\.(tar|tgz|tar.gz)/
+      stats = `tar tvf #{@submission.file_full_path}`.split("\n")
+      stats.each do |s|
+        @file_contents.push s
+      end
+    else
+      f = File.open(@submission.file_full_path.to_s)
+      @file_contents.push(f.read)
+      @file_types.push (case File.extname(@submission.file_full_path.to_s)
+      when ".java"
+        "text/x-java"
+      when ".rkt", ".ss"
+        "scheme"
+      when ".jpg", ".jpeg", ".png"
+        "image"
+      when ".jar"
+        "jar"
+      when ".zip"
+        "zip"
+      else
+        "text/unknown"
+      end)
+      f.close
+    end
+  end
+
   def new
     @assignment = Assignment.find(params[:assignment_id])
     @submission = Submission.new
