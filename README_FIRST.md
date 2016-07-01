@@ -11,7 +11,7 @@ To Do
 -----
 
 - [ ] Add uniform edit pages for each resource.
-- [ ] Add permissions for every page.
+- [x] Add permissions for every page.
 
 06/29/2016
 ==========
@@ -33,9 +33,26 @@ grader scripts that Ben provided to mesh.
 Right now the system works by calling `grade!` on a submission, which kicks off
 `script/grade-submission` on the corresponding submission. This in turn, untars
 and runs `test.sh` from within the grading tarball. An example of this can be
-found in `hw1/` from this directory.
+found in `hw1/` from this directory. Keep in mind that the grading file is an
+upload attached to the assignment, which needs to be un-archived.
+
+The way building works now is unlikely to work well with concurrent requests.
 
 To Do
 -----
 
 - [x] Need an edit link for assignments.
+
+06/30/2016
+==========
+
+Overview
+--------
+
+I've added links for more actions based on what permissions you should have,
+and I made the actions check permissions to prevent students from creating
+assignments for example.
+
+I've been playing with the needed changes to the new TAP parser, and test.sh
+runner. The way the temporary directories are made and test.sh is run is
+currently not working as intended.
