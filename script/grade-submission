@@ -95,8 +95,8 @@ if output_lines.any? {|xx| xx.match(output_key)}
   score = 0
 
   begin
-    score = (parser.instance_variable_get('@points_earned') * sub.assignment.points_available) /
-      parser.instance_variable_get('@points_available')
+    score = (parser.points_earned * sub.assignment.points_available) /
+      parser.points_available
   rescue ZeroDivisionError
     # Yay, no points available.
   end
