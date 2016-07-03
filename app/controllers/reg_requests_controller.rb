@@ -42,6 +42,25 @@ class RegRequestsController < CoursesController
     redirect_to :back
   end
 
+  def accept_all
+    RegRequest.where(course_id: params[:course_id]).each do |req|
+      if Registration.create(user: req.user,
+                             course: req.course,
+                             role: req.role,
+                             show_in_lists: req.role == :student)
+        req.destroy
+      end
+    end
+    redirect_to :back
+  end
+
+  def reject_all
+    RegRequest.where(course: params[:course_id]).each do |req|
+      req.destroy 
+    end
+    redirect_to :back
+  end
+
   private
 
   def reg_request_params

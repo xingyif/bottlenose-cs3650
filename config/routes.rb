@@ -30,6 +30,8 @@ Bottlenose::Application.routes.draw do
     resources :reg_requests, only: [:new, :create]
     delete 'reg_requests/:id/accept', to: 'reg_requests#accept', as: 'reg_request_accept'
     delete 'reg_requests/:id/reject', to: 'reg_requests#reject', as: 'reg_request_reject'
+    delete 'reg_requests/:course_id/accept_all', to: 'reg_requests#accept_all', as: 'reg_request_accept_all'
+    delete 'reg_requests/:course_id/reject_all', to: 'reg_requests#reject_all', as: 'reg_request_reject_all'
     resources :assignments do
       resources :submissions do
         member do
