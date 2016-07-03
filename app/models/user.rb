@@ -1,4 +1,5 @@
 require 'securerandom'
+require 'audit'
 
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
@@ -19,12 +20,33 @@ class User < ActiveRecord::Base
   validates :email, uniqueness: true
   validates :name,  length: { in: 2..30 }
 
+  def self.pepper
+    Devise.pepper
+  end
+
+  def self.stretches
+    Devise.stretches
+  end
+
   # Different people with the same name are fine.
   # If someone uses two emails, they get two accounts. So sad.
   #validates :name,  :uniqueness => true
 
   def ldap_before_save
     self.name = Devise::LDAP::Adapter.get_ldap_param(self.email, "displayname").first
+  end
+
+  if ::Rails.env == "development"
+    def valid_ldap_authentication?(pwd)
+      if self.email == "justin.case@fallback.ccs.neu" && 
+          Devise::Encryptor.compare(self.class, self.encrypted_password, pwd)
+        Audit.log("Letting Justin in!\n")
+        print("Letting Justin in!\n")
+        true
+      else
+        super
+      end
+    end
   end
 
   before_validation do
@@ -91,4 +113,5 @@ class User < ActiveRecord::Base
   def teams_for(course)
     @teams ||= teams.where(course: course)
   end
+
 end
