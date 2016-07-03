@@ -18,11 +18,11 @@ test:
   # <<: *AUTHORIZATIONS
 
 production:
-  host: localhost
+  host: ldap.ccs.neu.edu
   port: 636
-  attribute: cn
-  base: ou=people,dc=test,dc=com
-  admin_user: cn=admin,dc=test,dc=com
-  admin_password: admin_password
-  ssl: start_tls
+  attribute: mail
+  base: ou=people,dc=ccs,dc=neu,dc=edu
+  # admin_user: cn=admin,dc=test,dc=com
+  # admin_password: admin_password
+  ssl: true
   # <<: *AUTHORIZATIONS
