@@ -8,6 +8,7 @@
             <tr>
                 <th>Name</th>
                 <th>Email</th>
+                <th>&nbsp;</th>
             </tr>
         </thead>
         <tbody>
@@ -15,6 +16,9 @@
                 <tr>
                     <td><%= user.name %></td>
                     <td><%= user.email %></td>
+                    <td><% if user.course_student?(@course) %>
+                      <%= link_to 'Impersonate', impersonate_user_path(user), method: 'post'%>
+                      <% else %>&nbsp;<% end %></td>
                 </tr>
             <% end %>
         </tbody>
