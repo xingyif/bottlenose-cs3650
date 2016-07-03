@@ -1,5 +1,6 @@
 <% @page_title = "Dashboard" %>
 
+<h2>Your courses</h2>
 <% current_user.courses.each do |course| %>
     <h3><%= link_to course.name, course_path(course) %></h3>
 
