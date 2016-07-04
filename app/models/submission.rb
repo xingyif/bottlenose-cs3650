@@ -7,38 +7,39 @@ class Submission < ActiveRecord::Base
   belongs_to :upload
   belongs_to :comments_upload, class_name: "Upload"
   has_many :best_subs, dependent: :destroy
+  has_many :user_submissions, dependent: :destroy
+  has_many :users, through: :user_submissions
 
   validates :assignment_id, :presence => true
-  validates :user_id,       :presence => true
 
   validates :teacher_score, :numericality => true, :allow_nil => true
   validates :auto_score,    :numericality => true, :allow_nil => true
 
+  validate :has_team_or_user
   validate :user_is_registered_for_course
   validate :submitted_file_or_manual_grade
   validate :file_below_max_size
-  validate :has_team_if_required
 
   delegate :course,    :to => :assignment
   delegate :file_name, :to => :upload, :allow_nil => true
 
   before_destroy :cleanup!
-  before_validation :set_team
+  after_save :add_user_submissions!
   after_save :update_cache!
 
-  def set_team
-    if assignment.team_subs?
-      self.team = user.active_team(course)
+  def update_cache!
+    users.each do |uu|
+      assignment.update_best_sub_for!(uu)
     end
   end
 
-  def update_cache!
-    if team.nil?
-      assignment.update_best_sub_for!(user)
-    else
-      team.users.each do |uu|
-        assignment.update_best_sub_for!(uu)
+  def add_user_submissions!
+    if team
+      team.users.each do |u|
+        UserSubmission.create!(user: u, submission: self)
       end
+    elsif user
+      UserSubmission.create!(user: user, submission: self)
     end
   end
 
@@ -69,7 +70,7 @@ class Submission < ActiveRecord::Base
     end
 
     up = Upload.new
-    up.user_id = user_id
+    up.user_id = user.id
     up.store_meta!({
       type:       "Submission",
       user:       "#{user.name} (#{user.id})",
@@ -184,16 +185,17 @@ class Submission < ActiveRecord::Base
 
   def visible_to?(user)
     user.course_staff?(course) ||
-      user.id == self.user_id ||
-      (assignment.team_subs? &&
-       team.users.map {|u| u.id}.include?(user.id))
+      SubmissionUser.exists?(user: user, submission: self)
   end
 
   private
 
   def user_is_registered_for_course
-    unless user.courses.any? {|cc| cc.id == course.id }
-      errors[:base] << "Not registered for this course."
+    if user && !user.courses.any?{|cc| cc.id == course.id }
+      errors[:base] << "Not registered for this course :" + user.name
+    end
+    if team && !team.users.all?{|u| u.courses.any?{|cc| cc.id == course.id } }
+      errors[:base] << "Not registered for this course :" + team.users.map{|u| u.name}.to_s
     end
   end
 
@@ -210,9 +212,17 @@ class Submission < ActiveRecord::Base
     end
   end
 
-  def has_team_if_required
-    if assignment.team_subs? && team.nil?
-      errors[:base] << "Assignment requires team subs. No team set."
+  def has_team_or_user
+    if assignment.team_subs?
+      if team.nil?
+        errors[:base] << "Assignment requires team subs. No team set."
+      end
+    else
+      if user.nil?      
+        errors[:base] << "Assignment requires individual subs. No user set."
+      elsif team
+        errors[:base] << "Assignment requires individual subs. Team should not be set."
+      end
     end
   end
 end

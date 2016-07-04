@@ -8,6 +8,7 @@ class Course < ActiveRecord::Base
 
   has_many :buckets,     dependent: :destroy
   has_many :assignments, dependent: :restrict_with_error
+  has_many :submissions, through: :assignments
   has_many :teams,       dependent: :destroy
 
   validates :name,    :length      => { :minimum => 2 },

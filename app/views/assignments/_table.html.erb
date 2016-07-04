@@ -23,10 +23,10 @@
         <tbody>
             <% assignments.sort_by(&:due_date).each do |assignment| %>
                 <%
-                    submissions = assignment.submissions.where(user: current_user).order(created_at: :desc)
-                    best = assignment.best_subs.where(user: current_user).first
-                    score = best.nil? ? nil : best.score
-                %>
+                   submissions = current_user.submissions.where(assignment: assignment).order(created_at: :desc)
+                   best = assignment.best_subs.where(user: current_user).first
+                   score = best.nil? ? nil : best.score
+                   %>
                 <tr>
                     <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
                     <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>

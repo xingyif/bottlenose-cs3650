@@ -5,7 +5,7 @@ class AssignmentsController < CoursesController
     if current_user.site_admin? || current_user.registration_for(@course).staff?
       @submissions = @assignment.submissions
     else
-      @submissions = @assignment.submissions.where(user_id: current_user.id)
+      @submissions = current_user.submissions.where(assignment_id: @assignment.id)
     end
   end
 

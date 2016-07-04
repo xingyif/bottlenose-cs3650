@@ -28,21 +28,23 @@
             </tr>
         </thead>
         <tbody>
-            <% @course.assignments.sort_by(&:due_date).each do |assignment| %>
-                <%
-                   submissions = assignment.submissions
-                   min = submissions.minimum(:teacher_score)
-                   avg = submissions.average(:teacher_score)
-                   max = submissions.maximum(:teacher_score)
-                %>
-                <tr>
-                    <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
-                    <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>
-                    <td><%= show_score(min, assignment) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
-                    <td><%= show_score(avg, assignment) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
-                    <td><%= show_score(max, assignment) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
-                </tr>
-            <% end %>
+          <%
+             assignments = @course.assignments.index_by(&:id)
+             stats = @course.submissions
+                            .select("min(assignment_id) as a_id")
+                            .select("min(teacher_score), avg(teacher_score), max(teacher_score)")
+                            .group(:assignment_id)
+          %>
+          <% stats.each do |stat| %>
+          <% assn = assignments[stat.a_id] %>
+          <tr>
+            <td><%= link_to assn.name, course_assignment_path(@course, assn) %></td>
+            <td><%= assn.due_date.strftime("%b %e, %l:%M %p") %></td>
+            <td><%= show_score(stat.min, assn) %>&nbsp;/&nbsp;<%= assn.points_available %></td>
+            <td><%= show_score(stat.avg, assn) %>&nbsp;/&nbsp;<%= assn.points_available %></td>
+            <td><%= show_score(stat.max, assn) %>&nbsp;/&nbsp;<%= assn.points_available %></td>
+          </tr>
+          <% end %>
         </tbody>
       </table>
     </div>

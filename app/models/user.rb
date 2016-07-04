@@ -9,7 +9,8 @@ class User < ActiveRecord::Base
   has_many :registrations
   has_many :courses, through: :registrations, :dependent => :restrict_with_error
 
-  has_many :submissions,  dependent: :restrict_with_error
+  has_many :user_submissions, dependent: :destroy
+  has_many :submissions, through: :user_submissions, :dependent => :restrict_with_error
   has_many :reg_requests, dependent: :destroy
 
   has_many :team_users, dependent: :destroy
