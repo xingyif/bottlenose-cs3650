@@ -1,7 +1,9 @@
 <% @page_title = "#{@course.name} / #{@assignment.name}" %>
 
 <% if current_user.registration_for(@course).professor? %>
+<p class="pull-right">
   <%= link_to "Edit", edit_course_assignment_path(@course, @assignment), class: "btn btn-default" %>
+</p>
 <% end %>
 
 <div class="row">
@@ -52,7 +54,7 @@
 <h3>
   Submissions
   <% if current_user.registration_for(@course).staff? %>
-    <%= link_to "Tarball", course_assignment_tarball_path(@course, @assignment), class: "btn btn-default" %>
+    <%= link_to "Download all", course_assignment_tarball_path(@course, @assignment), class: "btn btn-default" %>
   <% else %>
     <%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment), class: "btn btn-success" %>
   <% end %>
@@ -78,7 +80,7 @@
 
   <% @submissions.each do |sub| %>
     <tr>
-      <td><%= sub.user %></td>
+      <td><%= link_to sub.uname, impersonate_user_path(sub.uid), method: 'post'%></td>
       <td><span class="local-time"><%= sub.created_at %></span></td>
       <td><%= status_image(sub) %></td>
       <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>

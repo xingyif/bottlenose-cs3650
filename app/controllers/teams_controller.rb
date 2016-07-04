@@ -2,12 +2,21 @@ class TeamsController < CoursesController
   # GET /staff/courses/:course_id/teams
   def index
     @course = Course.find(params[:course_id])
-    @active_teams = @course.teams.select(&:active?)
-    @inactive_teams = @course.teams.reject(&:active?)
+    if current_user.site_admin? || current_user.registration_for(@course).staff?
+      @active_teams = @course.teams.select(&:active?)
+      @inactive_teams = @course.teams.reject(&:active?)
+    else
+      @active_teams = current_user.teams.select(&:active?)
+      @inactive_teams = current_user.teams.reject(&:active?)
+    end
   end
 
   # GET /staff/course/:course_id/teams/new
   def new
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to course_teams_path, alert: "Must be an admin or staff."
+      return
+    end
     @course = Course.find(params[:course_id])
     @team = Team.new
     @team.course_id = @course.id
@@ -18,7 +27,7 @@ class TeamsController < CoursesController
   # POST /staff/course/:course_id/teams
   def create
     unless current_user.site_admin? || current_user.registration_for(@course).staff?
-      redirect_to root_path, alert: "Must be an admin or staff."
+      redirect_to course_teams_path, alert: "Must be an admin or staff."
       return
     end
 

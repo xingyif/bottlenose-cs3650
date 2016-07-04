@@ -16,7 +16,7 @@
                 <tr>
                     <td><%= user.name %></td>
                     <td><%= user.email %></td>
-                    <td><% if user.course_student?(@course) %>
+                    <td><% if role == :student %>
                       <%= link_to 'Impersonate', impersonate_user_path(user), method: 'post'%>
                       <% else %>&nbsp;<% end %></td>
                 </tr>

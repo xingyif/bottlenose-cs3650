@@ -3,10 +3,11 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.find(params[:id])
 
     if current_user.site_admin? || current_user.registration_for(@course).staff?
-      @submissions = @assignment.submissions
+      subs = @assignment.submissions
     else
-      @submissions = current_user.submissions.where(assignment_id: @assignment.id)
+      subs = current_user.submissions.where(assignment_id: @assignment.id)
     end
+    @submissions = subs.select("submissions.*").select("users.name as uname, users.id as uid").joins(:users)
   end
 
   def new
