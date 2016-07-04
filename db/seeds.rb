@@ -1,3 +1,5 @@
+require 'devise/encryptor'
+
 [Course, Bucket, Assignment, Registration].each do |model|
     model.reset_column_information
 end
@@ -7,24 +9,37 @@ when "development"
     # Create four users.
     ben = User.create!(
         email: "blerner@ccs.neu.edu",
-        name: "Ben Lerner",
+        name: "Benjamin Lerner",
+        first_name: "Benjamin",
+        last_name: "Lerner",
+        nickname: "Ben",
         site_admin: true,
     )
+    justin = User.create!(
+        email: "justin.case@fallback.ccs.neu",
+        name: "Justin Case",
+        first_name: "Justin",
+        last_name: "Case",
+        nickname: "Safetynet",
+    )
+    justin.encrypted_password = Devise::Encryptor.digest(justin.class, "planet of the O0d")
+    justin.save!
+
     olin = User.create!(
         email: "shivers@ccs.neu.edu",
         name: "Olin Shivers",
+        first_name: "Olin",
+        last_name: "Shivers"
     )
     amal = User.create!(
         email: "amal@ccs.neu.edu",
         name: "Amal Ahmed",
-    )
-    nate = User.create!(
-        email: "lilienthal.n@husky.neu.edu",
-        name: "Nathan Lilienthal",
+        first_name: "Amal",
+        last_name: "Ahmed"
     )
 
     # Create two terms.
-    fall = Term.create!(name: "Fall 2016")
+    fall = Term.create!(name: "Fall 2015")
     spring = Term.create!(name: "Spring 2016")
 
     # The first course.
@@ -39,7 +54,7 @@ when "development"
             course: fundies1,
             bucket: fundies1.buckets.first,
             blame: ben,
-            due_date: Time.now + (i * 1.week),
+            due_date: Time.now + ((i - 3) * 1.week),
         )
     end
     [ben, olin, amal].each do |professor|

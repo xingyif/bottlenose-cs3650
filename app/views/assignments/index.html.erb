@@ -1,0 +1,88 @@
+<% @page_title = "#{@course.name} / Assignments" %>
+
+
+<% if @course && @course.registered_by?(current_user) %>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title" data-toggle="collapse" data-target="#assignments-table">
+            Assignments
+
+            <div class="pull-right">
+                <% if @course && @course.registered_by?(current_user) %>
+                    <%= link_to "New", new_course_assignment_path(@course), class: 'btn btn-xs btn-success' %>
+                <% end %>
+            </div>
+        </h3>
+    </div>
+
+    <div id="assignments-table" class="panel-body collapse">
+      <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Assignment</th>
+                <th>Due Date</th>
+                <th>Min</th>
+                <th>Avg</th>
+                <th>Max</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% @course.assignments.sort_by(&:due_date).each do |assignment| %>
+                <%
+                   submissions = assignment.submissions
+                   min = submissions.minimum(:teacher_score)
+                   avg = submissions.average(:teacher_score)
+                   max = submissions.maximum(:teacher_score)
+                %>
+                <tr>
+                    <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
+                    <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>
+                    <td><%= show_score(min, assignment) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
+                    <td><%= show_score(avg, assignment) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
+                    <td><%= show_score(max, assignment) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
+                </tr>
+            <% end %>
+        </tbody>
+      </table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title" data-toggle="collapse"
+        data-target="#students-table">
+      Students
+    </h3>
+  </div>
+  <div id="students-table" class="panel-body collapse in">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th colspan=2>Student</th>
+          <th>Min</th>
+          <th>Avg</th>
+          <th>Max</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @course.students.sort_by(&:sort_name).each do |s| %>
+          <%
+             bests = BestSub.where(user: s)
+             min = bests.sum(:score)
+           %>
+          <tr>
+            <td width="1em"><%= mail_to "#{s.name} <#{s.email}>", "@" %></td>
+            <td><%= link_to s.display_name, impersonate_user_path(s), method: 'post' %></td>
+            <td><%= show_score(min) %></td>
+            <td>??</td>
+            <td>??</td>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<% else %>
+<%= render "assignments/table", assignments: @course.assignments %>
+<% end %>

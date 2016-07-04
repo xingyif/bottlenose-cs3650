@@ -24,7 +24,7 @@ module ApplicationHelper
       score = "∅"
     end
 
-    return score if assignment.nil?
+    return number_with_precision(score, :precision => 2) if assignment.nil?
 
     if assignment.hide_grading?
       if current_user.course_admin?(@course)
@@ -33,7 +33,7 @@ module ApplicationHelper
         "not ready"
       end
     else
-      score
+      number_with_precision(score, :precision => 2)
     end
   end
 

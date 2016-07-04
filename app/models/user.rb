@@ -33,7 +33,34 @@ class User < ActiveRecord::Base
   #validates :name,  :uniqueness => true
 
   def ldap_before_save
-    self.name = Devise::LDAP::Adapter.get_ldap_param(self.email, "displayname").first
+    res = Devise::LDAP::Adapter.get_ldap_entry(self.email)
+    self.name = res[:displayname]
+    if res[:sn]
+      self.last_name = res[:sn]
+    end
+    if res[:givenname]
+      self.first_name = res[:givenname]
+    end
+  end
+
+  def sort_name
+    if self.first_name && self.last_name
+      "#{self.last_name}, #{self.first_name}"
+    else
+      self.name
+    end
+  end
+
+  def display_name
+    if self.first_name && self.last_name
+      if self.nickname
+        disp = "#{self.first_name} (#{self.nickname}) #{self.last_name}"
+      else
+        disp = "#{self.first_name} #{self.last_name}"
+      end
+    else
+      disp = self.name
+    end
   end
 
   if ::Rails.env == "development"

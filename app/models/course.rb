@@ -37,47 +37,24 @@ class Course < ActiveRecord::Base
     end
   end
 
-  def regs_sorted
-    registrations.includes(:user).to_a.sort_by do |reg|
-      reg.user.invert_name.downcase
-    end
-  end
-
   def buckets_sorted
     buckets.order(:name)
   end
 
-  def staff_registrations
-    regs_sorted.find_all { |reg| reg.role == 'professor' || reg.role == 'assistant' }
-  end
-
-  def professor_registrations
-    regs_sorted.find_all { |reg| reg.role == 'professor' }
-  end
-
-  # TODO: Need to rethink roles. Should be professor, assistant, and student.
-
-  def student_registrations
-    regs_sorted.find_all { |reg| reg.role == 'student' }
-  end
-
   def active_registrations
-    regs_sorted.find_all { |reg| reg.show_in_lists? }
+    registrations.where(:show_in_lists?).order(:last_name, :first_name)
   end
 
-  # TODO: Make these kinds of things return relations, not arrays. This
-  # will allow code like that found in teams#index to perform optimized
-  # joins.
   def students
-    student_registrations.map {|reg| reg.user}
+    users.where("registrations.role": RegRequest::roles["student"])
   end
 
   def professors
-    professor_registrations.map(&:user)
+    users.where("registrations.role": RegRequest::roles["professor"])
   end
 
   def staff
-    staff_registrations.map { |reg| reg.user }
+    users.where("registrations.role <> #{RegRequest::roles["student"]}")
   end
 
   def first_professor

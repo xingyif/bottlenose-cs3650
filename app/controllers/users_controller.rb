@@ -71,7 +71,7 @@ class UsersController < ApplicationController
 
     @user = User.find(params[:id])
     impersonate_user(@user)
-    redirect_to root_path, notice: "You are impersonating #{@user.name}."
+    redirect_to root_path, notice: "You are impersonating #{@user.display_name}."
   end
 
   def stop_impersonating

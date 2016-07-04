@@ -227,7 +227,7 @@ class Assignment < ActiveRecord::Base
   end
 
   def main_submissions
-    regs = course.active_registrations.sort_by {|sr| sr.user.invert_name.downcase  }
+    regs = course.active_registrations
     subs = regs.map do |sreg|
       best_sub_for(sreg.user)
     end
