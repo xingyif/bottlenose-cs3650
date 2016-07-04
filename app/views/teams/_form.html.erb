@@ -15,7 +15,7 @@
     <%= f.hidden_field :course_id %>
 
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <h3>Active Dates</h3>
 
             <div class="form-group">
@@ -29,7 +29,7 @@
             </div>
         </div>
 
-        <div class="col-md-9">
+        <div class="col-md-8">
             <h3>Team Members</h3>
 
             <%= select_tag(:users, names_for_select(@team.users), multiple: true, class: "form-control") %><br />
@@ -70,7 +70,7 @@
 	</div>
 
 	<div class="col-md-6">
-	    <h3>Stuents Without Teams</h3>
+	    <h3>Students Without Teams</h3>
 
             <table id="users" class="table table-striped">
 		<thead>
