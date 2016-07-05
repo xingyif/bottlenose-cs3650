@@ -64,7 +64,7 @@ class TeamsController < CoursesController
     end
 
     @team = Team.find(params[:id])
-    @team.update_attribute(:end_date, Date.current)
+    @team.disolve(Date.current)
     redirect_to :back
   end
 

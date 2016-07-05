@@ -19,7 +19,7 @@
   <% else %>
     <tr>
       <td><strong>Team</strong></td>
-      <td><%= @submission.team %></td>
+      <td><%= @submission.team %> (submitted by <%= @submission.user.name %>)</td>
     </tr>
   <% end %>
   <tr>

@@ -8,13 +8,14 @@ class Team < ActiveRecord::Base
   validates :start_date, presence: true
   validates :users, presence: true
   validate :end_not_before_start
+  validate :all_enrolled
 
   def to_s
     "Team #{self.id} - #{self.member_names}"
   end
 
   def member_names
-    users.sort_by {|uu| uu.invert_name }.map {|uu| uu.name }.join(", ")
+    users.sort_by(&:sort_name).map(&:display_name).join(", ")
   end
 
   # If the end date of a team is not set (nil) then this team does not
@@ -31,12 +32,22 @@ class Team < ActiveRecord::Base
     end
   end
 
-  def add_error(msg)
-    errors[:base] << msg
+  def disolve(as_of)
+    return unless current_user.site_admin? || current_user.registration_for(@course).staff?
+
+    self.update_attribute(:end_date, as_of)
+    team.submissions.joins(:assignment).where('due_date >= ?', as_of)
+      .update_all(stale_team: true)
   end
 
-
   private
+
+  def all_enrolled
+    not_enrolled = users.find {|u| !u.course_student?(course)}
+    if not_enrolled?
+      errors[:base] << "Not all students are enrolled in this course: " + not_enrolled.to_a.to_s
+    end
+  end
 
   def end_not_before_start
     return if end_date.blank?

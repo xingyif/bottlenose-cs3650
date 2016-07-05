@@ -49,6 +49,7 @@ Bottlenose::Application.routes.draw do
     end
   end
 
+  get 'courses/:course_id/assignments/:id/user/:user_id' => 'assignments#show_user', as: 'course_assignment_user'
   get 'courses/:course_id/assignments/:id/tarball' => 'assignments#tarball', as: 'course_assignment_tarball'
 
   # # Staff routes.
