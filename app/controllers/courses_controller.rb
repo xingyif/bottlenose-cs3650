@@ -1,6 +1,7 @@
 class CoursesController < ApplicationController
   layout 'course'
 
+  before_filter :require_current_user
   before_action :load_and_verify_course_registration
 
   def index
@@ -105,8 +106,6 @@ class CoursesController < ApplicationController
     end
 
     @course = Course.find(params[:course_id] || params[:id])
-
-    require_current_user
 
     if current_user.site_admin?
       return
