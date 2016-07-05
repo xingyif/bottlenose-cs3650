@@ -9,6 +9,7 @@
   Basic Profile Information
 <% if current_user.site_admin? || current_user.professor_ever? %>
 <%= link_to "Impersonate", impersonate_user_path(@user), 
+    method: 'post',
     class: "btn btn-primary pull-right" %>
 <% end %>
 </h2>
