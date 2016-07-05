@@ -47,7 +47,7 @@ class ApplicationController < ActionController::Base
   def require_current_user
     if current_user.nil?
       msg = "You need to log in first."
-      redirect_to landing_path, alert: msg
+      redirect_to root_path, alert: msg
       return
     end
   end
@@ -56,7 +56,7 @@ class ApplicationController < ActionController::Base
   def require_site_admin
     unless current_user && current_user.site_admin?
       msg = "You don't have permission to access that page."
-      redirect_to landing_path, alert: msg
+      redirect_to root_path, alert: msg
       return
     end
   end
