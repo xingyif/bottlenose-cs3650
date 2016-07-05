@@ -5,6 +5,13 @@
   <%= link_to 'Edit User', edit_user_path(@user) %>
 </p>
 
+<h2>
+  Basic Profile Information
+<% if current_user.site_admin? || current_user.professor_ever? %>
+<%= link_to "Impersonate", impersonate_user_path(@user), 
+    class: "btn btn-primary pull-right" %>
+<% end %>
+</h2>
 <table class="table">
   <tr>
     <td>Name:</td>
@@ -21,6 +28,7 @@
     <td><%= @user.site_admin? ? "Yes" : "No" %></td>
   </tr>
 </table>
+
 
 <h2>Enrolled Courses</h2>
 
