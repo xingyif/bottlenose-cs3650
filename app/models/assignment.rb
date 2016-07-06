@@ -208,13 +208,21 @@ class Assignment < ActiveRecord::Base
 
   def submissions_for(user)
     if team_subs?
+      # This version of the query is slower, according to SQL explain
+      # user.submissions.where(assignment_id: self.id).order(created_at: :desc)
       Submission.
-        joins("JOIN teams ON submissions.team_id = teams.id JOIN team_users ON team_users.team_id = teams.id").
+        joins(:team).
+        joins("JOIN team_users ON team_users.team_id = teams.id").
         where("team_users.user_id = ? and submissions.assignment_id = ?", user.id, self.id).
-        order(:created_at).reverse
+        order(created_at: :desc)
     else
-      submissions.where(user_id: user.id).order(:created_at).reverse
+      submissions.where(user_id: user.id).order(created_at: :desc)
     end
+  end
+
+  def best_submissions
+    # Only those unique submissions that are marked as a BestSub for this assignment
+    Submission.joins(:best_subs).where(assignment_id: self.id).distinct
   end
 
   def best_sub_for(user)
@@ -231,21 +239,6 @@ class Assignment < ActiveRecord::Base
     subs = regs.map do |sreg|
       best_sub_for(sreg.user)
     end
-  end
-
-  def update_best_subs!
-    course.registrations.each do |reg|
-      update_best_sub_for!(reg.user)
-    end
-  end
-
-  def update_best_sub_for!(user)
-    sub = calc_best_sub_for(user)
-
-    best = BestSub.find_or_initialize_by(user_id: user.id, assignment_id: self.id)
-    best.submission_id = sub.id
-    best.score = sub.score
-    best.save!
   end
 
   def calc_best_sub_for(user)

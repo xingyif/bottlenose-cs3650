@@ -89,6 +89,10 @@ class User < ActiveRecord::Base
     self.email
   end
 
+  def submissions_for(assn)
+    assn.submissions_for(self)
+  end
+
   def course_staff?(course)
     course_professor?(course) || course_assistant?(course)
   end

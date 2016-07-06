@@ -17,17 +17,21 @@ module ApplicationHelper
     hash
   end
 
-  def show_score(score, assignment = nil)
+  def show_score(score, assignment = nil, admin = nil)
     assignment ||= @assignment
 
     if score.nil?
       score = "∅"
     end
 
+    if admin.nil?
+      admin = current_user.course_staff?(@course)
+    end
+
     return number_with_precision(score, :precision => 2) if assignment.nil?
 
     if assignment.hide_grading?
-      if current_user.course_admin?(@course)
+      if admin
         "(hidden #{score})"
       else
         "not ready"

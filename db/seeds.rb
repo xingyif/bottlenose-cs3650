@@ -92,6 +92,7 @@ when "development"
 
   fundies1.assignments.each do |assignment|
     if assignment.team_subs?
+      print "Creating team submission for #{fundies1.students.count} students in #{assignment.name}\n"
       fundies1.students.each do |student|
         upload = Upload.new
         upload.user_id = student.id
@@ -119,8 +120,10 @@ when "development"
                                  user: student,
                                  team: team
                                  )
+        sub.set_best_sub!
       end
     else
+      print "Creating individual submissions for #{fundies1.students.count} students in #{assignment.name}\n"
       fundies1.students.each do |student|
         upload = Upload.new
         upload.user_id = student.id
@@ -138,14 +141,15 @@ when "development"
                                                                     ))
         upload.save!
 
-        Submission.create!(
-                           upload_id: upload.id,
-                           student_notes: "A submission",
-                           assignment_id: assignment.id,
-                           auto_score: 50 + rand(50),
-                           teacher_score: 50 + rand(50),
-                           user: student
-                           )
+        sub = Submission.create!(
+                                 upload_id: upload.id,
+                                 student_notes: "A submission",
+                                 assignment_id: assignment.id,
+                                 auto_score: 50 + rand(50),
+                                 teacher_score: 50 + rand(50),
+                                 user: student
+                                 )
+        sub.set_best_sub!
       end
     end
   end

@@ -25,13 +25,6 @@ class Submission < ActiveRecord::Base
 
   before_destroy :cleanup!
   after_save :add_user_submissions!
-  after_save :update_cache!
-
-  def update_cache!
-    users.each do |uu|
-      assignment.update_best_sub_for!(uu)
-    end
-  end
 
   def add_user_submissions!
     if team
@@ -40,6 +33,22 @@ class Submission < ActiveRecord::Base
       end
     elsif user
       UserSubmission.create!(user: user, submission: self)
+    end
+  end
+
+  def set_best_sub!
+    if team
+      team.users.each do |u|
+        best = BestSub.find_or_initialize_by(user_id: u.id, assignment_id: assignment.id)
+        best.submission_id = self.id
+        best.score = self.score
+        best.save!
+      end
+    else
+      best = BestSub.find_or_initialize_by(user_id: u.id, assignment_id: assignment_id)
+      best.submission_id = self.id
+      best.score = self.score
+      best.save!
     end
   end
 
@@ -58,7 +67,7 @@ class Submission < ActiveRecord::Base
     @upload_data = data
   end
 
-  def save_upload!
+  def save_upload
     if @upload_data.nil?
       return
     end
@@ -79,13 +88,14 @@ class Submission < ActiveRecord::Base
       date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
     })
     up.store_upload!(data)
-    up.save!
-
-    self.upload_id = up.id
-    self.save!
-
-    Audit.log("Sub #{id}: New submission upload by #{user.name} " +
-              "(#{user.id}) with key #{up.secret_key}")
+    if up.save
+      self.upload_id = up.id
+      
+      Audit.log("Sub #{id}: New submission upload by #{user.name} " +
+                "(#{user.id}) with key #{up.secret_key}")
+    else
+      false
+    end
   end
 
   def comments_upload_file=(data)
@@ -185,7 +195,7 @@ class Submission < ActiveRecord::Base
 
   def visible_to?(user)
     user.course_staff?(course) ||
-      SubmissionUser.exists?(user: user, submission: self)
+      UserSubmission.exists?(user: user, submission: self)
   end
 
   private

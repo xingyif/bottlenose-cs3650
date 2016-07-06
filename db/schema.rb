@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160705125623) do
+ActiveRecord::Schema.define(version: 20160705165541) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -35,6 +35,8 @@ ActiveRecord::Schema.define(version: 20160705125623) do
     t.integer  "bucket_id"
     t.integer  "course_id",                            null: false
     t.boolean  "team_subs"
+    t.integer  "max_attempts"
+    t.integer  "rate_per_hour"
   end
 
   create_table "best_subs", force: :cascade do |t|

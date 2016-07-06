@@ -1,0 +1,74 @@
+<% if submissions.empty? %>
+  <div class="well">
+    No submissions yet.
+  </div>
+<% else %>
+  <table class="table table-striped row-vcenter">
+    <tr>
+      <th>Status</th>
+      <th>Submitter</th>
+      <th>Team</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Automatic</th>
+      <th>Teacher</th>
+      <th>Score</th>
+      <th>Action</th>
+    </tr>
+
+  <% submissions.each do |sub| %>
+    <% best = (assignment.best_sub_for(user).id == sub.id) %>
+    <% if sub.stale_team? %>
+    <tr class='muted'>
+    <% elsif best %>
+    <tr class='success'>
+    <% else %>
+    <tr>
+    <% end %>
+      <td>
+        <% if sub.stale_team? %>
+        <span class="well-sm glyphicon glyphicon-alert" 
+              title="Team was disolved before homework was due"></span>
+        <% elsif best %>
+        <span class="well-sm glyphicon glyphicon-chevron-right" 
+              title="This submission is used for grading"></span>
+        <% end %>
+      </td>
+      <td><%= sub.user.name %></td>
+      <td><%= sub.team %></td>
+      <td><span class="local-time"><%= sub.created_at %></span></td>
+      <td><%= status_image(sub) %></td>
+      <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
+      <td><%= show_score(sub.teacher_score) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
+      <td><%= show_score(sub.score) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
+      <% if current_user.course_professor?(course) %>
+      <td>
+        <form method="link"
+              action="<%= course_assignment_submission_path(course, assignment, sub) %>">
+          <div class="btn-group">
+            <button type="submit" class="btn btn-sm">View</button>
+            <button type="button" class="btn btn-sm dropdown-toggle"
+                    data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+              <span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu">
+              <li><%= link_to "View", 
+                      course_assignment_submission_path(course, assignment, sub), 
+                      class: "dropdown-item" %></li>
+              <li><%= link_to "Use for grading", 
+                      "#",
+                      class: "dropdown-item" %></li>
+            </ul>
+          </div>        
+        </form>
+      </td>
+      <% else %>
+      <td><%= link_to "View", course_assignment_submission_path(course, assignment, sub) %></td>
+      <% end %>
+    </tr>
+  <% end %>
+
+  </table>
+<% end %>

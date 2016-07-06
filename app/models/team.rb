@@ -33,10 +33,8 @@ class Team < ActiveRecord::Base
   end
 
   def disolve(as_of)
-    return unless current_user.site_admin? || current_user.registration_for(@course).staff?
-
     self.update_attribute(:end_date, as_of)
-    team.submissions.joins(:assignment).where('due_date >= ?', as_of)
+    self.submissions.joins(:assignment).where('due_date >= ?', as_of)
       .update_all(stale_team: true)
   end
 
@@ -44,7 +42,7 @@ class Team < ActiveRecord::Base
 
   def all_enrolled
     not_enrolled = users.find {|u| !u.course_student?(course)}
-    if not_enrolled?
+    if not_enrolled
       errors[:base] << "Not all students are enrolled in this course: " + not_enrolled.to_a.to_s
     end
   end

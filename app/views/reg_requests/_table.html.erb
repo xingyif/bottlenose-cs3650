@@ -12,11 +12,16 @@
       <th>
         <% if requests.length > 0 %>
           <div class="btn-group pull-right" role="group">
-            <%= link_to course_reg_request_accept_all_path(@course), method: :delete, class: "btn btn-success btn-sm" do %>
+            <%= link_to course_reg_request_accept_all_path(@course), 
+                method: :delete, 
+                class: "btn btn-success btn-sm" do %>
               <span class="glyphicon glyphicon-ok"></span>
               <span style="padding-left: 1em;">Accept All</span>
             <% end %>
-            <%= link_to course_reg_request_reject_all_path(@course), method: :delete, class: "btn btn-danger btn-sm" do %>
+            <%= link_to course_reg_request_reject_all_path(@course), 
+                method: :delete, 
+                data: { confirm: "Are you sure?" },
+                class: "btn btn-danger btn-sm" do %>
               <span class="glyphicon glyphicon-remove"></span>
               <span style="padding-left: 1em;">Reject All</span>
             <% end %>
@@ -35,11 +40,16 @@
         <td><%= request.notes %></td>
         <td>
           <div class="btn-group pull-right" role="group">
-            <%= link_to course_reg_request_accept_path(@course, request), method: :delete, class: "btn btn-success btn-xs" do %>
+            <%= link_to course_reg_request_accept_path(@course, request), 
+                method: :delete, 
+                class: "btn btn-success btn-xs" do %>
               <span class="glyphicon glyphicon-ok"></span>
               <span style="padding-left: 0.5em;">Accept</span>
             <% end %>
-            <%= link_to course_reg_request_reject_path(@course, request), method: :delete, class: "btn btn-danger btn-xs" do %>
+            <%= link_to course_reg_request_reject_path(@course, request), 
+                method: :delete, 
+                data: { confirm: "Are you sure?" },
+                class: "btn btn-danger btn-xs" do %>
               <span class="glyphicon glyphicon-remove"></span>
               <span style="padding-left: 0.5em;">Reject</span>
             <% end %>

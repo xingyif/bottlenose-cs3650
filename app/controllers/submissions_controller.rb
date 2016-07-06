@@ -64,21 +64,23 @@ class SubmissionsController < CoursesController
     @assignment = Assignment.find(params[:assignment_id])
     @submission = Submission.new(submission_params)
     @submission.assignment_id = @assignment.id
+    if @assignment.team_subs?
+      @team = current_user.active_team(@course)
+      @submission.team = @team
+    end
 
     @row_user = User.find_by_id(params[:row_user_id])
 
     if current_user.course_staff?(@course)
       @submission.user ||= current_user
+      @submission.ignore_late_penalty = true
     else
       @submission.user = current_user
       @submission.ignore_late_penalty = false
     end
 
-    @submission.save_upload!
-
-    if @submission.save
-      @team = @submission.team
-
+    if @submission.save_upload and @submission.save
+      @submission.set_best_sub!
       @submission.grade!
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Submission was successfully created.')

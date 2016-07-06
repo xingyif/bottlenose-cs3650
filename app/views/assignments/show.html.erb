@@ -1,8 +1,9 @@
 <% @page_title = "#{@course.name} / #{@assignment.name}" %>
 
-<% if current_user.registration_for(@course).professor? %>
+<% cur_reg = current_user.registration_for(@course) %>
+<% if cur_reg.professor? %>
 <p class="pull-right">
-  <%= link_to "Edit", edit_course_assignment_path(@course, @assignment), class: "btn btn-default" %>
+  <%= link_to "Edit Assignment", edit_course_assignment_path(@course, @assignment), class: "btn btn-default" %>
 </p>
 <% end %>
 
@@ -52,8 +53,8 @@
 </div>
 
 <h3>
-  Submissions
-  <% if current_user.registration_for(@course).staff? %>
+  Submissions (<%= @submissions.count %>)
+  <% if cur_reg.staff? %>
     <%= link_to "Download all", course_assignment_tarball_path(@course, @assignment), class: "btn btn-default" %>
   <% else %>
     <%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment), class: "btn btn-success" %>
@@ -62,59 +63,69 @@
 
 <%# TODO: Show team members if this is a team assignment. %>
 
-<% if @submissions.empty? %>
-  <div class="well">
-    No submissions yet.
-  </div>
-<% else %>
-  <table class="table table-striped">
-    <tr>
-      <th>Submitter</th>
-      <th>Date</th>
-      <th>Status</th>
-      <th>Automatic</th>
-      <th>Teacher</th>
-      <th>Score</th>
-      <th>Link</th>
-    </tr>
+<% if current_user.site_admin? || cur_reg.staff? %>
 
-  <% @submissions.each do |sub| %>
-    <% if sub.stale_team? %>
-    <tr class='text-muted'>
-    <% else %>
-    <tr>
-      <% end %>
-      <td><%= link_to sub.uname, user_path(sub.uid) %></td>
-      <td><span class="local-time"><%= sub.created_at %></span></td>
-      <td><%= status_image(sub) %></td>
-      <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
-      <td><%= show_score(sub.teacher_score) %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
-      <td><%= show_score(sub.score) %>&nbsp;/&nbsp;<%= sub.assignment.points_available %></td>
-      <td>
-        <form method="link"
-              action="<%= course_assignment_submission_path(@course, @assignment, sub) %>">
-          <div class="btn-group">
-            <button type="submit" class="btn">View</button>
-            <button type="button" class="btn dropdown-toggle"
-                    data-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="false">
-              <span class="caret"></span>
-              <span class="sr-only">Toggle Dropdown</span>
-            </button>
-            <ul class="dropdown-menu">
-              <li><%= link_to "View most recent", 
-                      course_assignment_submission_path(@course, @assignment, sub), 
-                      class: "dropdown-item" %></li>
-              <li><%= link_to "View all", 
-                      course_assignment_user_path(@course, @assignment, sub.uid), 
-                      class: "dropdown-item" %></li>
-            <!-- <div class="dropdown-divider"></div> -->
-            </ul>
-          </div>        
-        </form>
-      </td>
-    </tr>
+  <% if @submissions.empty? %>
+    <div class="well">
+      No submissions yet.
+    </div>
+  <% else %>
+    <table class="table table-striped row-vcenter">
+      <tr>
+        <th>Submitter</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Automatic</th>
+        <th>Teacher</th>
+        <th>Score</th>
+        <th>Link</th>
+      </tr>
+
+    <% @submissions.order(created_at: :desc).each do |sub| %>
+      <% if sub.stale_team? %>
+      <tr class='text-muted'>
+      <% else %>
+      <tr>
+        <% end %>
+        <td><%= sub.user.name %></td><!--<%= link_to sub.user.name, user_path(sub.user.id) %></td>-->
+        <td><span class="local-time"><%= sub.created_at %></span></td>
+        <td><%= status_image(sub) %></td>
+        <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= @assignment.points_available %></td>
+        <td><%= show_score(sub.teacher_score, @assignment, cur_reg.staff?) %>&nbsp;/&nbsp;<%= @assignment.points_available %></td>
+        <td>42&nbsp;/&nbsp;<%= @assignment.points_available %></td>
+        <% if cur_reg.professor? %>
+        <td>
+          <form method="link"
+                action="<%= course_assignment_submission_path(@course, @assignment, sub) %>">
+            <div class="btn-group">
+              <button type="submit" class="btn">View</button>
+              <button type="button" class="btn dropdown-toggle"
+                      data-toggle="dropdown"
+                      aria-haspopup="true" aria-expanded="false">
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu">
+                <li><%= link_to "View most recent", 
+                        course_assignment_submission_path(@course, @assignment, sub), 
+                        class: "dropdown-item" %></li>
+                <li><%= link_to "View all", 
+                        course_assignment_user_path(@course, @assignment, sub.user.id), 
+                        class: "dropdown-item" %></li>
+              <!-- <div class="dropdown-divider"></div> -->
+              </ul>
+            </div>        
+          </form>
+        </td>
+        <% else %>
+        <td><%= link_to "View", course_assignment_submission_path(@course, @assignment, sub) %></td>
+        <% end %>
+      </tr>
+    <% end %>
+
+    </table>
   <% end %>
-
-  </table>
+<% else %>
+<%= render 'user_subs', submissions: @submissions, assignment:
+    @assignment, user: current_user, course: @course %>
 <% end %>
