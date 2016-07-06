@@ -75,25 +75,38 @@
         <th>Submitter</th>
         <th>Date</th>
         <th>Status</th>
-        <th>Automatic</th>
-        <th>Teacher</th>
+        <% @configs.each do |c| %>
+        <th><%= c.type %></th>
+        <% end %>
         <th>Score</th>
         <th>Link</th>
       </tr>
-
-    <% @submissions.order(created_at: :desc).each do |sub| %>
+      
+    <% @submissions.each do |sub| %>
       <% if sub.stale_team? %>
       <tr class='text-muted'>
       <% else %>
       <tr>
-        <% end %>
+      <% end %>
         <td><%= sub.user.name %></td><!--<%= link_to sub.user.name, user_path(sub.user.id) %></td>-->
         <td><span class="local-time"><%= sub.created_at %></span></td>
-        <td><%= status_image(sub) %></td>
-        <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= @assignment.points_available %></td>
-        <td><%= show_score(sub.teacher_score, @assignment, cur_reg.staff?) %>&nbsp;/&nbsp;<%= @assignment.points_available %></td>
-        <td>42&nbsp;/&nbsp;<%= @assignment.points_available %></td>
-        <% if cur_reg.professor? %>
+        <td><%= status_image(sub, @assignment.points_available) %></td>
+        <% @configs.each do |c| %>
+        <%   g = @graders[sub.id].find do |g| g.grader_config_id == c.id end %>
+        <td>
+          <% if g %>
+            <% if g.available? %>
+            <%= g.score || '∅' %>&nbsp;/&nbsp;<%= c.avail_score %>
+            <% elsif cur_reg.staff? %>
+            <%= "(hidden #{g.score})" %>
+            <% else %>
+            not ready
+            <% end %>
+          <% end %>
+        </td>
+        <% end %>
+        <td><%= sub.score %>&nbsp;/&nbsp;<%= @assignment.points_available %></td>
+        <% if cur_reg.staff? %>
         <td>
           <form method="link"
                 action="<%= course_assignment_submission_path(@course, @assignment, sub) %>">
@@ -127,5 +140,6 @@
   <% end %>
 <% else %>
 <%= render 'user_subs', submissions: @submissions, assignment:
-    @assignment, user: current_user, course: @course %>
+    @assignment, user: current_user, course: @course, 
+    configs: @configs, graders: @graders %>
 <% end %>

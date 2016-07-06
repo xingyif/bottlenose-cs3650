@@ -1,4 +1,4 @@
-class BestSub < ActiveRecord::Base
+class SubsForGrading < ActiveRecord::Base
   belongs_to :submission
   belongs_to :user
   belongs_to :assignment

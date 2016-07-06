@@ -1,3 +1,5 @@
+<% cur_reg = current_user.registration_for(@course) %>
+
 <% if submissions.empty? %>
   <div class="well">
     No submissions yet.
@@ -10,17 +12,18 @@
       <th>Team</th>
       <th>Date</th>
       <th>Status</th>
-      <th>Automatic</th>
-      <th>Teacher</th>
+      <% @configs.each do |c| %>
+      <th><%= c.type %></th>
+      <% end %>
       <th>Score</th>
       <th>Action</th>
     </tr>
 
   <% submissions.each do |sub| %>
-    <% best = (assignment.best_sub_for(user).id == sub.id) %>
+    <% used = (assignment.used_sub_for(user).id == sub.id) %>
     <% if sub.stale_team? %>
     <tr class='muted'>
-    <% elsif best %>
+    <% elsif used %>
     <tr class='success'>
     <% else %>
     <tr>
@@ -29,7 +32,7 @@
         <% if sub.stale_team? %>
         <span class="well-sm glyphicon glyphicon-alert" 
               title="Team was disolved before homework was due"></span>
-        <% elsif best %>
+        <% elsif used %>
         <span class="well-sm glyphicon glyphicon-chevron-right" 
               title="This submission is used for grading"></span>
         <% end %>
@@ -38,9 +41,21 @@
       <td><%= sub.team %></td>
       <td><span class="local-time"><%= sub.created_at %></span></td>
       <td><%= status_image(sub) %></td>
-      <td><%= sub.auto_score || '∅' %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
-      <td><%= show_score(sub.teacher_score) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
-      <td><%= show_score(sub.score) %>&nbsp;/&nbsp;<%= assignment.points_available %></td>
+      <% @configs.each do |c| %>
+      <%   g = @graders[sub.id].find do |g| g.grader_config_id == c.id end %>
+      <td>
+        <% if g %>
+          <% if g.available? %>
+          <%= g.score || '∅' %>&nbsp;/&nbsp;<%= c.avail_score %>
+          <% elsif cur_reg.staff? %>
+          <%= "(hidden #{g.score})" %>
+          <% else %>
+          not ready
+          <% end %>
+        <% end %>
+      </td>
+      <% end %>
+      <td><%= sub.score %>&nbsp;/&nbsp;<%= @assignment.points_available %></td>
       <% if current_user.course_professor?(course) %>
       <td>
         <form method="link"

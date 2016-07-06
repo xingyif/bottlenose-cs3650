@@ -6,14 +6,12 @@ class Submission < ActiveRecord::Base
   belongs_to :team
   belongs_to :upload
   belongs_to :comments_upload, class_name: "Upload"
-  has_many :best_subs, dependent: :destroy
+  has_many :subs_for_gradings, dependent: :destroy
+  has_many :graders
   has_many :user_submissions, dependent: :destroy
   has_many :users, through: :user_submissions
 
   validates :assignment_id, :presence => true
-
-  validates :teacher_score, :numericality => true, :allow_nil => true
-  validates :auto_score,    :numericality => true, :allow_nil => true
 
   validate :has_team_or_user
   validate :user_is_registered_for_course
@@ -36,19 +34,19 @@ class Submission < ActiveRecord::Base
     end
   end
 
-  def set_best_sub!
+  def set_used_sub!
     if team
       team.users.each do |u|
-        best = BestSub.find_or_initialize_by(user_id: u.id, assignment_id: assignment.id)
-        best.submission_id = self.id
-        best.score = self.score
-        best.save!
+        used = SubsForGrading.find_or_initialize_by(user_id: u.id, assignment_id: assignment.id)
+        used.submission_id = self.id
+        used.score = self.score
+        used.save!
       end
     else
-      best = BestSub.find_or_initialize_by(user_id: u.id, assignment_id: assignment_id)
-      best.submission_id = self.id
-      best.score = self.score
-      best.save!
+      used = SubsForGrading.find_or_initialize_by(user_id: user.id, assignment_id: assignment_id)
+      used.submission_id = self.id
+      used.score = self.score
+      used.save!
     end
   end
 
@@ -167,26 +165,23 @@ class Submission < ActiveRecord::Base
     1.0 - late_penalty
   end
 
-  def score
-    if teacher_score.nil?
-      if auto_score.nil?
-        0.0
-      else
-        auto_score * late_mult
-      end
-    else
-      teacher_score * late_mult
-    end
-  end
-
   def grade!
-    return if upload_id.nil?
-    return if assignment.grading_upload_id.nil?
-    # TODO: This looks strange to me.
-    return if student_notes == "@@@skip tests@@@"
+    score = 0
+    assignment.grader_configs.each do |c|
+      begin
+        res = c.grade(assignment, self)
+        unless res.nil?
+          score += res
+        end
+      rescue NotImplementedError
+      end
+    end
+    self.score = score
+    # TODO: Lateness
+    self.save!
 
-    root = Rails.root.to_s
-    system(%Q{(cd "#{root}" && script/grade-submission #{self.id})&})
+    # root = Rails.root.to_s
+    # system(%Q{(cd "#{root}" && script/grade-submission #{self.id})&})
   end
 
   def cleanup!

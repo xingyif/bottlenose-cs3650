@@ -11,10 +11,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160705165541) do
+ActiveRecord::Schema.define(version: 20160706031509) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "assignment_graders", force: :cascade do |t|
+    t.integer "assignment_id",    null: false
+    t.integer "grader_config_id", null: false
+    t.integer "order"
+  end
+
+  add_index "assignment_graders", ["assignment_id"], name: "index_assignment_graders_on_assignment_id", using: :btree
 
   create_table "assignments", force: :cascade do |t|
     t.string   "name",                                 null: false
@@ -37,13 +45,6 @@ ActiveRecord::Schema.define(version: 20160705165541) do
     t.boolean  "team_subs"
     t.integer  "max_attempts"
     t.integer  "rate_per_hour"
-  end
-
-  create_table "best_subs", force: :cascade do |t|
-    t.integer "user_id",       null: false
-    t.integer "assignment_id", null: false
-    t.integer "submission_id", null: false
-    t.float   "score",         null: false
   end
 
   create_table "buckets", force: :cascade do |t|
@@ -84,6 +85,25 @@ ActiveRecord::Schema.define(version: 20160705165541) do
 
   add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
 
+  create_table "grader_configs", force: :cascade do |t|
+    t.string "type"
+    t.float  "avail_score"
+    t.string "params"
+  end
+
+  create_table "graders", force: :cascade do |t|
+    t.integer  "grader_config_id",                 null: false
+    t.integer  "submission_id",                    null: false
+    t.string   "grading_output"
+    t.text     "notes"
+    t.float    "score"
+    t.float    "out_of"
+    t.datetime "updated_at"
+    t.boolean  "available",        default: false
+  end
+
+  add_index "graders", ["submission_id"], name: "index_graders_on_submission_id", using: :btree
+
   create_table "reg_requests", force: :cascade do |t|
     t.integer  "course_id"
     t.text     "notes"
@@ -111,12 +131,7 @@ ActiveRecord::Schema.define(version: 20160705165541) do
     t.integer  "user_id",                             null: false
     t.string   "secret_dir"
     t.string   "file_name"
-    t.float    "auto_score"
     t.text     "student_notes"
-    t.float    "teacher_score"
-    t.text     "teacher_notes"
-    t.integer  "grading_uid"
-    t.text     "grading_output"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "ignore_late_penalty", default: false
@@ -125,12 +140,19 @@ ActiveRecord::Schema.define(version: 20160705165541) do
     t.integer  "team_id"
     t.integer  "comments_upload_id"
     t.boolean  "stale_team"
+    t.float    "score"
   end
 
   add_index "submissions", ["assignment_id"], name: "index_submissions_on_assignment_id", using: :btree
-  add_index "submissions", ["grading_uid"], name: "index_submissions_on_grading_uid", unique: true, using: :btree
   add_index "submissions", ["user_id", "assignment_id"], name: "index_submissions_on_user_id_and_assignment_id", using: :btree
   add_index "submissions", ["user_id"], name: "index_submissions_on_user_id", using: :btree
+
+  create_table "subs_for_gradings", force: :cascade do |t|
+    t.integer "user_id",       null: false
+    t.integer "assignment_id", null: false
+    t.integer "submission_id", null: false
+    t.float   "score",         null: false
+  end
 
   create_table "team_users", force: :cascade do |t|
     t.integer  "team_id"

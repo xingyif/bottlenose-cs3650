@@ -8,7 +8,10 @@ class Assignment < ActiveRecord::Base
   belongs_to :course
 
   has_many :submissions, :dependent => :restrict_with_error
-  has_many :best_subs, :dependent => :destroy
+  has_many :subs_for_gradings, :dependent => :destroy
+
+  has_many :assignment_graders, :dependent => :destroy
+  has_many :grader_configs, through: :assignment_graders
 
   validates :name,      :uniqueness => { :scope => :course_id }
   validates :name,      :presence => true
@@ -220,42 +223,24 @@ class Assignment < ActiveRecord::Base
     end
   end
 
-  def best_submissions
-    # Only those unique submissions that are marked as a BestSub for this assignment
-    Submission.joins(:best_subs).where(assignment_id: self.id).distinct
+  def used_submissions
+    # Only those unique submissions that are marked as used-for-grading for this assignment
+    Submission.joins(:subs_for_gradings).where(assignment_id: self.id).distinct
   end
 
-  def best_sub_for(user)
-    bs = BestSub.where(user_id: user.id, assignment_id: self.id).first
-    if bs.nil?
-      Submission.new(user_id: user.id, assignment_id: self.id)
+  def used_sub_for(user)
+    used = SubsForGrading.where(user_id: user.id, assignment_id: self.id).first
+    if used.nil?
+      SubsForGrading.new(user_id: user.id, assignment_id: self.id)
     else
-      bs.submission
+      used.submission
     end
   end
 
   def main_submissions
     regs = course.active_registrations
     subs = regs.map do |sreg|
-      best_sub_for(sreg.user)
-    end
-  end
-
-  def calc_best_sub_for(user)
-    subs = submissions_for(user)
-    if subs.empty?
-      logger.info("Trying to calculate best subs for {user = #{user.id}, assign = #{self.id}}")
-      raise Exception.new("Couldn't find any submissions")
-    end
-
-    teacher_scores = subs.find_all {|ss| not ss.teacher_score.nil? }
-
-    if teacher_scores.empty?
-      subs.sort_by do |ss|
-        sprintf("%06d%014d", ss.score || 0, ss.created_at.to_i)
-      end.last
-    else
-      teacher_scores.sort_by {|ss| ss.score }.last
+      used_sub_for(sreg.user)
     end
   end
 end

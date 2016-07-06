@@ -47,6 +47,9 @@ when "development"
                             name: "Fundamentals of Computer Science 1",
                             term: fall,
                             )
+  manual = ManualGrader.create!(avail_score: 42)
+  junit = JunitGrader.create!(avail_score: 58, params: "Whee")
+
   0.upto(5).each do |i|
     assignment = Assignment.create!(
                                     name: "Homework #{i}",
@@ -57,6 +60,8 @@ when "development"
                                     blame: ben,
                                     due_date: Time.now + ((i - 3) * 1.week),
                                     )
+    AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: junit.id, order: 1)
+    AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: manual.id, order: 2)
   end
   [ben, olin, amal].each do |professor|
     Registration.create!(
@@ -92,7 +97,7 @@ when "development"
 
   fundies1.assignments.each do |assignment|
     if assignment.team_subs?
-      print "Creating team submission for #{fundies1.students.count} students in #{assignment.name}\n"
+      print "Creating team submissions for #{fundies1.students.count} students in #{assignment.name}\n"
       fundies1.students.each do |student|
         upload = Upload.new
         upload.user_id = student.id
@@ -115,12 +120,11 @@ when "development"
                                  upload_id: upload.id,
                                  student_notes: "A team effort",
                                  assignment_id: assignment.id,
-                                 auto_score: 50 + rand(50),
-                                 teacher_score: 50 + rand(50),
                                  user: student,
                                  team: team
                                  )
-        sub.set_best_sub!
+        sub.grade!
+        sub.set_used_sub!
       end
     else
       print "Creating individual submissions for #{fundies1.students.count} students in #{assignment.name}\n"
@@ -145,11 +149,10 @@ when "development"
                                  upload_id: upload.id,
                                  student_notes: "A submission",
                                  assignment_id: assignment.id,
-                                 auto_score: 50 + rand(50),
-                                 teacher_score: 50 + rand(50),
                                  user: student
                                  )
-        sub.set_best_sub!
+        sub.grade!
+        sub.set_used_sub!
       end
     end
   end

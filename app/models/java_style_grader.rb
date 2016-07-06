@@ -1,0 +1,2 @@
+class JavaStyleGrader < GraderConfig
+end

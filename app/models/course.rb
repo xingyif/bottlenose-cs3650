@@ -86,7 +86,7 @@ class Course < ActiveRecord::Base
   end
 
   def score_summary
-    as = self.assignments.includes(:best_subs)
+    as = self.assignments.includes(:subs_for_gradings)
 
     # Partition scores by user.
     avails = {}
@@ -95,10 +95,10 @@ class Course < ActiveRecord::Base
       avails[aa.bucket_id] ||= 0
       avails[aa.bucket_id] += aa.points_available
 
-      aa.best_subs.each do |bs|
-        scores[bs.user_id] ||= {}
-        scores[bs.user_id][aa.bucket_id] ||= 0
-        scores[bs.user_id][aa.bucket_id] += bs.score
+      aa.subs_for_gradings.each do |used|
+        scores[used.user_id] ||= {}
+        scores[used.user_id][aa.bucket_id] ||= 0
+        scores[used.user_id][aa.bucket_id] += used.score
       end
     end
 

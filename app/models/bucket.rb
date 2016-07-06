@@ -7,7 +7,7 @@ class Bucket < ActiveRecord::Base
 
   def points_earned(user)
     assignments.reduce(0) do |sum, aa|
-      sub = aa.best_sub_for(user)
+      sub = aa.used_sub_for(user)
       sum + (sub.nil? ? 0 : sub.score)
     end
   end

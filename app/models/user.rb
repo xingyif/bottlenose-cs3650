@@ -94,7 +94,7 @@ class User < ActiveRecord::Base
   end
 
   def course_staff?(course)
-    course_professor?(course) || course_assistant?(course)
+    course && (course_professor?(course) || course_assistant?(course))
   end
 
   def professor_ever?

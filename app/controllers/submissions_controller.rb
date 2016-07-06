@@ -9,6 +9,9 @@ class SubmissionsController < CoursesController
       show_error "That's not your submission."
       redirect_to course_assignment_path(@course, @assignment)
     end
+
+    @configs = @assignment.assignment_graders.order(:order).includes(:grader_config).map{ |c| c.grader_config }
+    @graders = Grader.where(submission_id: @submission.id)
   end
 
   def files
@@ -80,7 +83,7 @@ class SubmissionsController < CoursesController
     end
 
     if @submission.save_upload and @submission.save
-      @submission.set_best_sub!
+      @submission.set_used_sub!
       @submission.grade!
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Submission was successfully created.')

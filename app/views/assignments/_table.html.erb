@@ -24,8 +24,8 @@
             <% assignments.sort_by(&:due_date).each do |assignment| %>
                 <%
                    submissions = current_user.submissions_for(assignment)
-                   best = assignment.best_subs.where(user: current_user).first
-                   score = best.nil? ? nil : best.score
+                   used = assignment.subs_for_gradings.where(user: current_user).first
+                   score = used.nil? ? nil : used.score
                    %>
                 <tr>
                     <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>

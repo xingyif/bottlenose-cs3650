@@ -70,8 +70,8 @@
       <tbody>
         <% @course.students.sort_by(&:sort_name).each do |s| %>
           <%
-             bests = BestSub.where(user: s)
-             min = bests.sum(:score)
+             used = SubsForGrading.where(user: s)
+             min = used.sum(:score)
            %>
           <tr>
             <td width="1em"><%= mail_to "#{s.name} <#{s.email}>", "@" %></td>

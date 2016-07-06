@@ -30,15 +30,6 @@ class Registration < ActiveRecord::Base
     user.submissions.select { |s| s.course == course }
   end
 
-  # TODO <refactor>: Is this used?
-  def best_subs
-    Assignment.where(course_id: course_id).map do |aa|
-      aa.main_submission_for(user)
-    end.find_all do |ss|
-      !ss.nil?
-    end
-  end
-
   # Return the total score for the student in the course. This value is
   # meaningless for staff and professors. The value is a percent.
   def total_score

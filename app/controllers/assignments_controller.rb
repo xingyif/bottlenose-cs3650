@@ -3,10 +3,12 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.find(params[:id])
 
     if current_user.site_admin? || current_user.registration_for(@course).staff?
-      @submissions = @assignment.best_submissions.includes(:user)
+      @submissions = @assignment.used_submissions.includes(:user).order(created_at: :desc).to_a
     else
-      @submissions = current_user.submissions_for(@assignment).includes(:user)
+      @submissions = current_user.submissions_for(@assignment).includes(:user).order(created_at: :desc).to_a
     end
+    @configs = @assignment.assignment_graders.order(:order).includes(:grader_config).map{ |c| c.grader_config }
+    @graders = Grader.where(submission_id: @submissions.map(&:id)).group_by(&:submission_id)
   end
 
   def new
@@ -85,7 +87,9 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.find(params[:id])
     @user = User.find(params[:user_id])
     subs = @user.submissions_for(@assignment)
-    @submissions = subs.select("submissions.*").includes(:users)
+    @submissions = subs.select("submissions.*").includes(:users).order(created_at: :desc).to_a
+    @configs = @assignment.assignment_graders.order(:order).includes(:grader_config).map{ |c| c.grader_config }
+    @graders = Grader.where(submission_id: @submissions.map(&:id)).group_by(&:submission_id)
   end
 
   # TODO: There is no route for this currently.
