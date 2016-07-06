@@ -1,4 +1,5 @@
 require 'securerandom'
+require 'audit'
 
 class Submission < ActiveRecord::Base
   belongs_to :assignment
@@ -23,6 +24,7 @@ class Submission < ActiveRecord::Base
 
   before_destroy :cleanup!
   after_save :add_user_submissions!
+  after_save :update_used_subs!
 
   def add_user_submissions!
     if team
@@ -47,6 +49,13 @@ class Submission < ActiveRecord::Base
       used.submission_id = self.id
       used.score = self.score
       used.save!
+    end
+  end
+
+  def update_used_subs!
+    SubsForGrading.where(submission_id: self.id).each do |s| 
+      s.score = self.score
+      s.save!
     end
   end
 
@@ -166,18 +175,25 @@ class Submission < ActiveRecord::Base
   end
 
   def grade!
-    score = 0
+    ### A Submission's score is recorded as a percentage
+    score = 0.0
+    max_score = 0.0
+    log = ""
     assignment.grader_configs.each do |c|
       begin
         res = c.grade(assignment, self)
+        max_score += c.avail_score
+        log += "#{c.type} => #{res}, "
         unless res.nil?
           score += res
         end
       rescue NotImplementedError
       end
     end
-    self.score = score
+    self.score = (100.0 * score) / max_score
+    log += "Final score: #{self.score}%"
     # TODO: Lateness
+    Audit.log("Grading submission at #{DateTime.current}, grades are #{log}\n")
     self.save!
 
     # root = Rails.root.to_s

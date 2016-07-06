@@ -1,32 +1,32 @@
-<% @page_title = "#{@course.name} / #{@assignment.name} / Submissions for #{@user.display_name}" %>
+<% @page_title = "#{@course.name} / #{@gradesheet.assignment.name} / Submissions for #{@user.display_name}" %>
 
 <div class="row">
   <div class="col-md-6">
     <p>
       <b>Name:</b>
-      <%= @assignment.name %>
+      <%= @gradesheet.assignment.name %>
     </p>
 
     <p>
       <b>Bucket:</b>
-      <%= @assignment.bucket.name %>
+      <%= @gradesheet.assignment.bucket.name %>
     </p>
     <p>
       <b>Due Date:</b>
-      <%= @assignment.due_date %>
+      <%= @gradesheet.assignment.due_date %>
     </p>
     <p>
       <b>Grading Hidden:</b>
-      <%= @assignment.hide_grading? ? "Yes" : "No" %>
+      <%= @gradesheet.assignment.hide_grading? ? "Yes" : "No" %>
     </p>
     <p>
       <b>Teams:</b>
-      <%= @assignment.team_subs? ? "Yes" : "No" %>
+      <%= @gradesheet.assignment.team_subs? ? "Yes" : "No" %>
     </p>
-    <% unless @assignment.assignment_file_name.blank? %>
+    <% unless @gradesheet.assignment.assignment_file_name.blank? %>
       <p>
         <b>Assignment Download:</b>
-        <%= link_to @assignment.assignment_file_name, @assignment.assignment_file_path %>
+        <%= link_to @gradesheet.assignment.assignment_file_name, @gradesheet.assignment.assignment_file_path %>
       </p>
     <% end %>
   </div>
@@ -38,7 +38,7 @@
       </div>
       <div class="panel-body">
         <div class="prose">
-          <%= raw @assignment.assignment %>
+          <%= raw @gradesheet.assignment.assignment %>
         </div>
       </div>
     </div>
@@ -48,5 +48,4 @@
 <h3>
   Submissions for <%= @user.name %>
 </h3>
-<%= render 'user_subs', submissions: @submissions, assignment:
-    @assignment, user: @user, course: @course %>
+<%= render 'user_subs', user: @user, course: @course, gradesheet: @gradesheet %>

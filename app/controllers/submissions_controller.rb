@@ -10,8 +10,7 @@ class SubmissionsController < CoursesController
       redirect_to course_assignment_path(@course, @assignment)
     end
 
-    @configs = @assignment.assignment_graders.order(:order).includes(:grader_config).map{ |c| c.grader_config }
-    @graders = Grader.where(submission_id: @submission.id)
+    @gradesheet = Gradesheet.new(@assignment, [@submission])
   end
 
   def files
@@ -36,6 +35,8 @@ class SubmissionsController < CoursesController
       @file_types.push (case File.extname(@submission.file_full_path.to_s)
       when ".java"
         "text/x-java"
+      when ".arr"
+        "pyret"
       when ".rkt", ".ss"
         "scheme"
       when ".jpg", ".jpeg", ".png"
@@ -83,8 +84,8 @@ class SubmissionsController < CoursesController
     end
 
     if @submission.save_upload and @submission.save
-      @submission.set_used_sub!
       @submission.grade!
+      @submission.set_used_sub!
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Submission was successfully created.')
     else

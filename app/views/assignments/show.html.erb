@@ -1,9 +1,10 @@
-<% @page_title = "#{@course.name} / #{@assignment.name}" %>
+<% @page_title = "#{@course.name} / #{@gradesheet.assignment.name}" %>
 
 <% cur_reg = current_user.registration_for(@course) %>
 <% if cur_reg.professor? %>
 <p class="pull-right">
-  <%= link_to "Edit Assignment", edit_course_assignment_path(@course, @assignment), class: "btn btn-default" %>
+  <%= link_to "Edit Assignment", 
+      edit_course_assignment_path(@course, @gradesheet.assignment), class: "btn btn-default" %>
 </p>
 <% end %>
 
@@ -11,29 +12,29 @@
   <div class="col-md-6">
     <p>
       <b>Name:</b>
-      <%= @assignment.name %>
+      <%= @gradesheet.assignment.name %>
     </p>
 
     <p>
       <b>Bucket:</b>
-      <%= @assignment.bucket.name %>
+      <%= @gradesheet.assignment.bucket.name %>
     </p>
     <p>
       <b>Due Date:</b>
-      <%= @assignment.due_date %>
+      <%= @gradesheet.assignment.due_date %>
     </p>
     <p>
       <b>Grading Hidden:</b>
-      <%= @assignment.hide_grading? ? "Yes" : "No" %>
+      <%= @gradesheet.assignment.hide_grading? ? "Yes" : "No" %>
     </p>
     <p>
       <b>Teams:</b>
-      <%= @assignment.team_subs? ? "Yes" : "No" %>
+      <%= @gradesheet.assignment.team_subs? ? "Yes" : "No" %>
     </p>
-    <% unless @assignment.assignment_file_name.blank? %>
+    <% unless @gradesheet.assignment.assignment_file_name.blank? %>
       <p>
         <b>Assignment Download:</b>
-        <%= link_to @assignment.assignment_file_name, @assignment.assignment_file_path %>
+        <%= link_to @gradesheet.assignment.assignment_file_name, @gradesheet.assignment.assignment_file_path %>
       </p>
     <% end %>
   </div>
@@ -45,7 +46,7 @@
       </div>
       <div class="panel-body">
         <div class="prose">
-          <%= raw @assignment.assignment %>
+          <%= raw @gradesheet.assignment.assignment %>
         </div>
       </div>
     </div>
@@ -53,11 +54,13 @@
 </div>
 
 <h3>
-  Submissions (<%= @submissions.count %>)
+  Submissions (<%= @gradesheet.submissions.count %>)
   <% if cur_reg.staff? %>
-    <%= link_to "Download all", course_assignment_tarball_path(@course, @assignment), class: "btn btn-default" %>
+    <%= link_to "Download all", 
+        course_assignment_tarball_path(@course, @gradesheet.assignment), class: "btn btn-default" %>
   <% else %>
-    <%= link_to "New Submission", new_course_assignment_submission_path(@course, @assignment), class: "btn btn-success" %>
+    <%= link_to "New Submission", 
+        new_course_assignment_submission_path(@course, @gradesheet.assignment), class: "btn btn-success" %>
   <% end %>
 </h3>
 
@@ -65,7 +68,7 @@
 
 <% if current_user.site_admin? || cur_reg.staff? %>
 
-  <% if @submissions.empty? %>
+  <% if @gradesheet.submissions.empty? %>
     <div class="well">
       No submissions yet.
     </div>
@@ -75,14 +78,16 @@
         <th>Submitter</th>
         <th>Date</th>
         <th>Status</th>
-        <% @configs.each do |c| %>
-        <th><%= c.type %></th>
+        <% @gradesheet.grades[:names].each do |c| %>
+        <th class="text-right"><%= c %></th>
         <% end %>
-        <th>Score</th>
-        <th>Link</th>
+        <th class="text-right">Total</th>
+        <th>Grade</th>
+        <th class="text-right">Link</th>
       </tr>
       
-    <% @submissions.each do |sub| %>
+    <% @gradesheet.grades[:grades].each do |grade| %>
+      <% sub = grade[:sub] %>
       <% if sub.stale_team? %>
       <tr class='text-muted'>
       <% else %>
@@ -90,29 +95,32 @@
       <% end %>
         <td><%= sub.user.name %></td><!--<%= link_to sub.user.name, user_path(sub.user.id) %></td>-->
         <td><span class="local-time"><%= sub.created_at %></span></td>
-        <td><%= status_image(sub, @assignment.points_available) %></td>
-        <% @configs.each do |c| %>
-        <%   g = @graders[sub.id].find do |g| g.grader_config_id == c.id end %>
-        <td>
-          <% if g %>
-            <% if g.available? %>
-            <%= g.score || '∅' %>&nbsp;/&nbsp;<%= c.avail_score %>
-            <% elsif cur_reg.staff? %>
-            <%= "(hidden #{g.score})" %>
-            <% else %>
-            not ready
-            <% end %>
+        <% scores = if cur_reg.staff? then grade[:staff_scores] else grade[:blind_scores] end %>
+        <td><%= status_image(sub, scores[:raw_score]) %></td>
+        <% scores[:scores].each do |s| %>
+        <td class="text-right">
+          <% if s.kind_of?(Array) %>
+          <%= s[0] %>&nbsp;/&nbsp;<%= s[1] %>
+          <% else %>
+          <%= s %>
           <% end %>
         </td>
         <% end %>
-        <td><%= sub.score %>&nbsp;/&nbsp;<%= @assignment.points_available %></td>
+        <% if scores[:raw_score] && sub.score %>
+        <td class="text-right"><%= scores[:raw_score] %>&nbsp;/&nbsp;<%= @gradesheet.max_score %></td>
+        <td>(<%= number_with_precision(sub.score, :precision => 2) %>%)</td>
+        <% else %>
+        <td><%= image_tag("question-mark.png", height: 32) %></td><td></td>
+        <% end %>
         <% if cur_reg.staff? %>
-        <td>
+        <td class="text-right">
           <form method="link"
-                action="<%= course_assignment_submission_path(@course, @assignment, sub) %>">
+                action="<%= course_assignment_submission_path(@course, @gradesheet.assignment, sub) %>">
             <div class="btn-group">
-              <button type="submit" class="btn">View</button>
-              <button type="button" class="btn dropdown-toggle"
+              <%= link_to "View",
+                  course_assignment_submission_path(@course, @gradesheet.assignment, sub),
+                  class: "btn btn-sm btn-default" %>
+              <button type="button" class="btn btn-sm btn-default dropdown-toggle"
                       data-toggle="dropdown"
                       aria-haspopup="true" aria-expanded="false">
                 <span class="caret"></span>
@@ -120,10 +128,10 @@
               </button>
               <ul class="dropdown-menu">
                 <li><%= link_to "View most recent", 
-                        course_assignment_submission_path(@course, @assignment, sub), 
+                        course_assignment_submission_path(@course, @gradesheet.assignment, sub), 
                         class: "dropdown-item" %></li>
                 <li><%= link_to "View all", 
-                        course_assignment_user_path(@course, @assignment, sub.user.id), 
+                        course_assignment_user_path(@course, @gradesheet.assignment, sub.user.id), 
                         class: "dropdown-item" %></li>
               <!-- <div class="dropdown-divider"></div> -->
               </ul>
@@ -131,7 +139,7 @@
           </form>
         </td>
         <% else %>
-        <td><%= link_to "View", course_assignment_submission_path(@course, @assignment, sub) %></td>
+        <td><%= link_to "View", course_assignment_submission_path(@course, @gradesheet.assignment, sub) %></td>
         <% end %>
       </tr>
     <% end %>
@@ -139,7 +147,5 @@
     </table>
   <% end %>
 <% else %>
-<%= render 'user_subs', submissions: @submissions, assignment:
-    @assignment, user: current_user, course: @course, 
-    configs: @configs, graders: @graders %>
+<%= render 'user_subs', user: current_user, course: @course, gradesheet: @gradesheet %>
 <% end %>

@@ -41,16 +41,12 @@ module ApplicationHelper
     end
   end
 
-  def status_image(sub, max_score = nil)
-    if max_score.nil?
-      max_score = sub.assignment.points_available
-    end
-
+  def status_image(sub, grade_pct)
     if (sub.nil? || sub.new_record?)
       return image_tag("null-mark.png", height: 32)
     end
 
-    if sub.score.nil?
+    if grade_pct.nil?
       # if sub.assignment.has_grading?
       if sub.created_at > (Time.now - 10.minutes)
         return image_tag("question-mark.png", height: 32)
@@ -59,15 +55,15 @@ module ApplicationHelper
       end
     end
 
-    if sub.score == 0
+    if grade_pct < 0.1
       return image_tag("cross-mark.png", height: 32)
     end
 
-    if sub.score >= max_score
+    if grade_pct >= 100.0
       return image_tag("check-mark.png", height: 32)
     end
 
-    if sub.score < (max_score / 2)
+    if grade_pct < 50.0
       return image_tag("sad-mark.png", height: 32)
     end
 

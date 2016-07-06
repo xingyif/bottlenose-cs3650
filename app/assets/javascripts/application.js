@@ -16,13 +16,13 @@
 //= require nicEdit
 //= require bootstrap-datepicker
 //= require jquery.keyDecoder
-//= require_tree .
 //= require codemirror
 //= require codemirror/addons/runmode/runmode
 //= require codemirror/addons/selection/active-line
 //= require codemirror/modes/clike
 //= require codemirror/modes/javascript
 //= require codemirror/modes/scheme
+//= require_tree .
 
 $.fn.datepicker.defaults.format = "yyyy-mm-dd";
 

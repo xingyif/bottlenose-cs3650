@@ -32,7 +32,7 @@
              assignments = @course.assignments.index_by(&:id)
              stats = @course.submissions
                             .select("min(assignment_id) as a_id")
-                            .select("min(teacher_score), avg(teacher_score), max(teacher_score)")
+                            .select("min(score), avg(score), max(score)")
                             .group(:assignment_id)
           %>
           <% stats.each do |stat| %>

@@ -51,8 +51,8 @@
 <h1>Score</h1>
 
 <table class="table table-striped">
-<% @configs.each do |c| %>
-<% g = @graders.find_by(submission_id: @submission.id, grader_config_id: c.id) %>
+<% @gradesheet.configs.each do |c| %>
+<% g = @gradesheet.graders[@submission.id].find do |g| g.grader_config_id == c.id end %>
 <tr>
   <td><%= c.type %></td>
   <td>
@@ -82,7 +82,7 @@
 <% end %>
 <tr>
   <td>Current Score:</td>
-  <td><%= @submission.score %>&nbsp;/&nbsp;<%= @assignment.points_available %></td>
+  <td><%= number_with_precision(@submission.score, :precision => 2) %>&nbsp;/&nbsp;<%= @gradesheet.max_score %></td>
 </tr>
 </table>
 
