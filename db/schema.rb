@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160706031509) do
+ActiveRecord::Schema.define(version: 20160707163955) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,7 +32,6 @@ ActiveRecord::Schema.define(version: 20160706031509) do
     t.text     "assignment"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "points_available",     default: 100
     t.string   "secret_dir"
     t.boolean  "hide_grading",         default: false
     t.integer  "assignment_upload_id"
@@ -40,20 +39,11 @@ ActiveRecord::Schema.define(version: 20160706031509) do
     t.integer  "blame_id"
     t.integer  "solution_upload_id"
     t.string   "tar_key"
-    t.integer  "bucket_id"
     t.integer  "course_id",                            null: false
     t.boolean  "team_subs"
     t.integer  "max_attempts"
     t.integer  "rate_per_hour"
-  end
-
-  create_table "buckets", force: :cascade do |t|
-    t.integer  "course_id"
-    t.string   "name"
-    t.float    "weight"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean  "team_subs"
+    t.float    "points_available"
   end
 
   create_table "courses", force: :cascade do |t|
@@ -151,7 +141,6 @@ ActiveRecord::Schema.define(version: 20160706031509) do
     t.integer "user_id",       null: false
     t.integer "assignment_id", null: false
     t.integer "submission_id", null: false
-    t.float   "score",         null: false
   end
 
   create_table "team_users", force: :cascade do |t|

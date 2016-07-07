@@ -8,41 +8,46 @@
         <h3 class="panel-title" data-toggle="collapse" data-target="#assignments-table">
             Assignments
 
+            <% if @course && @course.registered_by?(current_user) %>
             <div class="pull-right">
-                <% if @course && @course.registered_by?(current_user) %>
-                    <%= link_to "New", new_course_assignment_path(@course), class: 'btn btn-xs btn-success' %>
-                <% end %>
+              <%= link_to "New", new_course_assignment_path(@course), class: 'btn btn-xs btn-success' %>
             </div>
+            <div class="pull-right">
+              <%= link_to "Edit Assignment Weights", weights_course_assignments_path, class: 'btn btn-xs btn-default' %>
+            </div>
+            <% end %>
         </h3>
     </div>
 
-    <div id="assignments-table" class="panel-body collapse">
+    <div id="assignments-table" class="panel-body collapse in">
       <table class="table table-hover">
         <thead>
             <tr>
                 <th>Assignment</th>
                 <th>Due Date</th>
-                <th>Min</th>
-                <th>Avg</th>
-                <th>Max</th>
+                <th>Weight</th>
+                <th>Min (%)</th>
+                <th>Avg (%)</th>
+                <th>Max (%)</th>
             </tr>
         </thead>
         <tbody>
           <%
-             assignments = @course.assignments.index_by(&:id)
+             assignments = @course.assignments.order(due_date: :desc)
              stats = @course.submissions
                             .select("min(assignment_id) as a_id")
                             .select("min(score), avg(score), max(score)")
-                            .group(:assignment_id)
+                            .group(:assignment_id).to_a
           %>
-          <% stats.each do |stat| %>
-          <% assn = assignments[stat.a_id] %>
+          <% assignments.each do |assn| %>
+          <% stat = stats.find{|r| r.a_id == assn.id} %>
           <tr>
             <td><%= link_to assn.name, course_assignment_path(@course, assn) %></td>
             <td><%= assn.due_date.strftime("%b %e, %l:%M %p") %></td>
-            <td><%= show_score(stat.min, assn) %>&nbsp;/&nbsp;<%= assn.points_available %></td>
-            <td><%= show_score(stat.avg, assn) %>&nbsp;/&nbsp;<%= assn.points_available %></td>
-            <td><%= show_score(stat.max, assn) %>&nbsp;/&nbsp;<%= assn.points_available %></td>
+            <td><%= show_score(assn.points_available, assn, true) %>
+            <td><%= show_score(stat.min, assn, true) %>%</td>
+            <td><%= show_score(stat.avg, assn, true) %>%</td>
+            <td><%= show_score(stat.max, assn, true) %>%</td>
           </tr>
           <% end %>
         </tbody>
@@ -63,22 +68,21 @@
         <tr>
           <th colspan=2>Student</th>
           <th>Min</th>
-          <th>Avg</th>
+          <th>Cur</th>
           <th>Max</th>
         </tr>
       </thead>
       <tbody>
-        <% @course.students.sort_by(&:sort_name).each do |s| %>
-          <%
-             used = SubsForGrading.where(user: s)
-             min = used.sum(:score)
-           %>
+        <% 
+        @course.score_summary.each do |info|
+        %>
           <tr>
-            <td width="1em"><%= mail_to "#{s.name} <#{s.email}>", "@" %></td>
-            <td><%= link_to s.display_name, impersonate_user_path(s), method: 'post' %></td>
-            <td><%= show_score(min) %></td>
-            <td>??</td>
-            <td>??</td>
+            <td width="1em"><%= mail_to "#{info[:s].name} <#{info[:s].email}>", "@" %></td>
+            <td><%= link_to info[:s].display_name, impersonate_user_path(info[:s]), method: 'post' %></td>
+            <td><%= show_score(info[:min], nil, true) %></td>
+            <td><%= show_score(info[:cur], nil, true) %></td>
+            <td><%= show_score(info[:max], nil, true) %></td>
+          </tr>
         <% end %>
       </tbody>
     </table>
@@ -86,5 +90,5 @@
 </div>
 
 <% else %>
-<%= render "assignments/table", assignments: @course.assignments %>
+<%= render "assignments/table", assignments: @course.assignments, for_user: current_user %>
 <% end %>

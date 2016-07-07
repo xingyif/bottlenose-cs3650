@@ -22,7 +22,8 @@
 
   <% gradesheet.grades[:grades].each do |grade| %>
     <% sub = grade[:sub] %>
-    <% used = (gradesheet.assignment.used_sub_for(user).id == sub.id) %>
+    <% used_sub = gradesheet.assignment.used_sub_for(user) %>
+    <% used = (!used_sub.nil? && used_sub.id == sub.id) %>
     <% if sub.stale_team? %>
     <tr class='muted'>
     <% elsif used %>

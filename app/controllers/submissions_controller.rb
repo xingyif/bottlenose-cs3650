@@ -84,8 +84,8 @@ class SubmissionsController < CoursesController
     end
 
     if @submission.save_upload and @submission.save
-      @submission.grade!
       @submission.set_used_sub!
+      @submission.grade!
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Submission was successfully created.')
     else

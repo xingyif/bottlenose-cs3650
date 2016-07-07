@@ -12,13 +12,13 @@ class Bucket < ActiveRecord::Base
     end
   end
 
-  def points_available(user)
-    assignments.reduce(0) { |sum, aa| sum + aa.points_available }
+  def weight_available
+    assignments.reduce(0) { |sum, aa| sum + aa.weight }
   end
 
   def points_ratio(user)
-    return 0 if points_available(user).zero?
-    points_earned(user) / points_available(user)
+    return 0 if weight_available.zero?
+    points_earned(user) / weight_available
   end
 
   def points_percent(user)

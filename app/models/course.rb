@@ -6,7 +6,6 @@ class Course < ActiveRecord::Base
 
   has_many :reg_requests, dependent: :destroy
 
-  has_many :buckets,     dependent: :destroy
   has_many :assignments, dependent: :restrict_with_error
   has_many :submissions, through: :assignments
   has_many :teams,       dependent: :destroy
@@ -16,10 +15,6 @@ class Course < ActiveRecord::Base
   validates :late_options, :format => { :with => /\A\d+,\d+,\d+\z/ }
 
   validates :term_id, presence: true
-
-  after_create do
-    Bucket.create!(name: "Assignments", weight: 1.0, course: self)
-  end
 
   def late_opts
     # pen, del, max
@@ -36,10 +31,6 @@ class Course < ActiveRecord::Base
     else
       registration.role == 'assistant' || registration.role == 'professor'
     end
-  end
-
-  def buckets_sorted
-    buckets.order(:name)
   end
 
   def active_registrations
@@ -62,10 +53,6 @@ class Course < ActiveRecord::Base
     professors.first
   end
 
-  def total_bucket_weight
-    buckets.reduce(0) {|sum, bb| sum + bb.weight }
-  end
-
   def add_registration(email, role = :student)
     email.downcase!
 
@@ -86,48 +73,70 @@ class Course < ActiveRecord::Base
   end
 
   def score_summary
-    as = self.assignments.includes(:subs_for_gradings)
-
-    # Partition scores by user.
-    avails = {}
-    scores = {}
-    as.each do |aa|
-      avails[aa.bucket_id] ||= 0
-      avails[aa.bucket_id] += aa.points_available
-
-      aa.subs_for_gradings.each do |used|
-        scores[used.user_id] ||= {}
-        scores[used.user_id][aa.bucket_id] ||= 0
-        scores[used.user_id][aa.bucket_id] += used.score
-      end
-    end
-
-    # Calculate percentages.
-    percents = {}
-    scores.each do |u_id, bs|
-      percents[u_id] ||= {}
-
-      bs.each do |b_id, score|
-        if avails[b_id].zero?
-          percents[u_id][b_id] = 0
+    subs = SubsForGrading.where(user: self.students)
+      .joins(:submission).select(:user_id, :assignment_id, :score).to_a
+    assn_weights = self.assignments.pluck(:id, :points_available).to_h 
+    avail = assn_weights.reduce(0) do |tot, kv| tot + kv[1] end
+    remaining = 100.0 - avail
+    ans = []
+    self.students.sort_by(&:sort_name).each do |s|
+      used = subs.select{|r| r.user_id == s.id}
+      min = used.reduce(0.0) do |tot, sub| 
+        if (assn_weights[sub.assignment_id] != 0)
+          tot + (sub.score * assn_weights[sub.assignment_id] / 100.0) 
         else
-          percents[u_id][b_id] = (100 * score) / avails[b_id]
+          tot
         end
       end
+      cur = (100.0 * min) / avail
+      max = min + remaining
+      ans.push ({s: s, min: min, cur: cur, max: max})
     end
-
-    # Fill in for slackers, calc totals.
-    totals = {}
-    users.each do |uu|
-      percents[uu.id] ||= {}
-      totals[uu.id] = 0
-
-      buckets.each do |bb|
-        percents[uu.id][bb.id] ||= 0
-        totals[uu.id] += bb.weight * percents[uu.id][bb.id]
-      end
-    end
-
-    [percents, totals]
+    ans
   end
+
+  #   as = self.assignments.includes(:subs_for_gradings)
+
+  #   # Partition scores by user.
+  #   avails = {}
+  #   scores = {}
+  #   as.each do |aa|
+  #     avails[aa.bucket_id] ||= 0
+  #     avails[aa.bucket_id] += aa.points_available
+
+  #     aa.subs_for_gradings.each do |used|
+  #       scores[used.user_id] ||= {}
+  #       scores[used.user_id][aa.bucket_id] ||= 0
+  #       scores[used.user_id][aa.bucket_id] += used.score
+  #     end
+  #   end
+
+  #   # Calculate percentages.
+  #   percents = {}
+  #   scores.each do |u_id, bs|
+  #     percents[u_id] ||= {}
+
+  #     bs.each do |b_id, score|
+  #       if avails[b_id].zero?
+  #         percents[u_id][b_id] = 0
+  #       else
+  #         percents[u_id][b_id] = (100 * score) / avails[b_id]
+  #       end
+  #     end
+  #   end
+
+  #   # Fill in for slackers, calc totals.
+  #   totals = {}
+  #   users.each do |uu|
+  #     percents[uu.id] ||= {}
+  #     totals[uu.id] = 0
+
+  #     buckets.each do |bb|
+  #       percents[uu.id][bb.id] ||= 0
+  #       totals[uu.id] += bb.weight * percents[uu.id][bb.id]
+  #     end
+  #   end
+
+  #   [percents, totals]
+  # end
 end

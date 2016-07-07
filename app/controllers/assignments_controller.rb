@@ -15,11 +15,9 @@ class AssignmentsController < CoursesController
 
   def new
     @course = Course.find(params[:course_id])
-    bucket = @course.buckets.find_by_id(params[:bucket])
 
     @assignment = Assignment.new
     @assignment.course_id = @course.id
-    @assignment.bucket = bucket
     @assignment.due_date = (Time.now + 1.month).to_date
     @assignment.points_available = 100
   end
@@ -28,6 +26,24 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.find(params[:id])
   end
 
+  def edit_weights
+    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+      redirect_to :back, alert: "Must be an admin or professor."
+      return
+    end
+  end
+
+  def update_weights
+    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+      redirect_to :back, alert: "Must be an admin or professor."
+      return
+    end
+    params[:weight].each do |kv|
+      Assignment.find(kv[0]).update_attribute(:points_available, kv[1])
+    end
+    redirect_to course_assignments_path
+  end
+  
   def create
     unless current_user.site_admin? || current_user.registration_for(@course).professor?
       redirect_to root_path, alert: "Must be an admin or professor."
@@ -111,6 +127,6 @@ class AssignmentsController < CoursesController
     params[:assignment].permit(:name, :assignment, :due_date,
                                :points_available, :hide_grading, :blame_id,
                                :assignment_file, :grading_file, :solution_file,
-                               :bucket_id, :course_id, :team_subs)
+                               :course_id, :team_subs)
   end
 end

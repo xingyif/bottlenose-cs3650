@@ -22,10 +22,6 @@
     <%= f.text_area :assignment, class: "form-control rich-text" %>
   </div>
   <div class="form-group">
-    <%= f.label :bucket %>
-    <%= f.select :bucket_id, @course.buckets.map {|bb| [bb.name, bb.id]}, {}, class: 'form-control' %>
-  </div>
-  <div class="form-group">
     <%= f.label :assignment_file %>
     <%= f.file_field :assignment_file %>
   </div>

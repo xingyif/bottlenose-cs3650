@@ -24,7 +24,6 @@ class Submission < ActiveRecord::Base
 
   before_destroy :cleanup!
   after_save :add_user_submissions!
-  after_save :update_used_subs!
 
   def add_user_submissions!
     if team
@@ -41,21 +40,12 @@ class Submission < ActiveRecord::Base
       team.users.each do |u|
         used = SubsForGrading.find_or_initialize_by(user_id: u.id, assignment_id: assignment.id)
         used.submission_id = self.id
-        used.score = self.score
         used.save!
       end
     else
       used = SubsForGrading.find_or_initialize_by(user_id: user.id, assignment_id: assignment_id)
       used.submission_id = self.id
-      used.score = self.score
       used.save!
-    end
-  end
-
-  def update_used_subs!
-    SubsForGrading.where(submission_id: self.id).each do |s| 
-      s.score = self.score
-      s.save!
     end
   end
 

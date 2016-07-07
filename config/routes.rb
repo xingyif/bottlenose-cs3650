@@ -33,6 +33,10 @@ Bottlenose::Application.routes.draw do
     delete 'reg_requests/:course_id/accept_all', to: 'reg_requests#accept_all', as: 'reg_request_accept_all'
     delete 'reg_requests/:course_id/reject_all', to: 'reg_requests#reject_all', as: 'reg_request_reject_all'
     resources :assignments do
+      collection do
+        get 'weights' => 'assignments#edit_weights'
+        post 'weights' => 'assignments#update_weights'
+      end
       resources :submissions do
         member do
           get :files

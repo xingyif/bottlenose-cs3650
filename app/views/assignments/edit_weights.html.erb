@@ -1,0 +1,47 @@
+<% @page_title = "#{@course.name} / Assignment Weights" %>
+
+<%= form_tag do %>
+<table class="table table-hover">
+  <thead>
+    <th>Assignment Name</th>
+    <td>Weight</td>
+  </thead>
+  <tbody>
+<% @course.assignments.order(:due_date).each do |a| %>
+    <tr>
+      <td><%= label_tag(:weight, a.name) %></td>
+      <td><%= text_field_tag "weight[#{a.id}]", a.points_available, class: "weight" %></td>
+    </tr>
+<% end %>
+   <tr id="total-row" class="alert alert-success">
+     <td>Total points</td>
+     <td id="total"></td>
+  </tbody>
+</table>
+  <div class="form-group">
+    <%= submit_tag "Update weights", class: 'btn btn-primary' %>
+  </div>
+<script type="text/javascript">
+$(function() {
+  var weights = $("input.weight");
+  
+  function refresh() {
+    var sum = 0;
+    weights.each(function() {
+      var val = Number($(this).val());
+      if (!isNaN(val)) sum += val;
+    });
+    $("#total").text(sum);
+    if (sum > 100) {
+     $("#total-row").removeClass("alert-success").addClass("alert-danger");
+    } else {
+     $("#total-row").addClass("alert-success").removeClass("alert-danger");
+    }
+  }
+  weights.blur(refresh);
+  refresh();
+});
+</script>
+
+
+<% end %>

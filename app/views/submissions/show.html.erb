@@ -1,4 +1,5 @@
 <% @page_title = "View Submission" %>
+<% cur_reg = current_user.registration_for(@course) %>
 
 <p>
   <%= link_to "Back to Assignment: #{@assignment.name}", course_assignment_path(@course, @assignment) %>
@@ -48,28 +49,33 @@
   </tr>
 </table>
 
-<h1>Score</h1>
+<h1>Scoring Details</h1>
 
 <table class="table table-striped">
-<% @gradesheet.configs.each do |c| %>
-<% g = @gradesheet.graders[@submission.id].find do |g| g.grader_config_id == c.id end %>
+<% g = @gradesheet.grades[:grades].find(sub: @submission).first
+   all_scores = if cur_reg.staff? then g[:staff_scores] else g[:blind_scores] end 
+   @gradesheet.configs.each_with_index do |c, i|
+     scores = all_scores[:scores][i] %>
 <tr>
   <td><%= c.type %></td>
   <td>
-    <% if g %>
-      <% if g.available? %>
-      <%= g.score || '∅' %>&nbsp;/&nbsp;<%= c.avail_score %>
-      <% elsif cur_reg.staff? %>
-      <%= "(hidden #{g.score})" %>
-      <% else %>
-      not ready
-      <% end %>
+    <% if scores.kind_of?(Array) %>
+    <%= scores[0] %>&nbsp;/&nbsp;<%= scores[1] %>
     <% else %>
-    ∅
+    <%= scores %>
     <% end %>
   </td>
-<tr>
+</tr>
 <% end %>
+<tr>
+  <td>Raw Score:</td>
+  <td><%= number_with_precision(all_scores[:raw_score], :precision => 2) %>
+    &nbsp;/&nbsp;<%= @gradesheet.max_score %></td>
+</tr>
+<tr>
+  <td>Raw Percentage</td>
+  <td><%= number_with_precision(100.0 * (all_scores[:raw_score] / @gradesheet.max_score), :precision => 2) %>%</td>
+</tr>
 <% if @submission.late? %>
 <tr>
   <td>Days Late:</td>
@@ -81,8 +87,8 @@
 </tr>
 <% end %>
 <tr>
-  <td>Current Score:</td>
-  <td><%= number_with_precision(@submission.score, :precision => 2) %>&nbsp;/&nbsp;<%= @gradesheet.max_score %></td>
+  <td>Total Score:</td>
+  <td><%= number_with_precision(@submission.score, :precision => 2) %>%</td>
 </tr>
 </table>
 

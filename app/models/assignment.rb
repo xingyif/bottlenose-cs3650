@@ -4,7 +4,6 @@ require 'audit'
 class Assignment < ActiveRecord::Base
   belongs_to :blame, :class_name => "User", :foreign_key => "blame_id"
 
-  belongs_to :bucket
   belongs_to :course
 
   has_many :submissions, :dependent => :restrict_with_error
@@ -18,7 +17,6 @@ class Assignment < ActiveRecord::Base
   validates :course_id, :presence => true
   validates :due_date,  :presence => true
   validates :blame_id,  :presence => true
-  validates :bucket_id, :presence => true
   validates :points_available, :numericality => true
 
   def assignment_upload
@@ -229,11 +227,11 @@ class Assignment < ActiveRecord::Base
   end
 
   def used_sub_for(user)
-    used = SubsForGrading.where(user_id: user.id, assignment_id: self.id).first
-    if used.nil?
-      SubsForGrading.new(user_id: user.id, assignment_id: self.id)
+    ans = SubsForGrading.find_by(user_id: user.id, assignment_id: self.id)
+    if ans.nil?
+      ans
     else
-      used.submission
+      ans.submission
     end
   end
 
