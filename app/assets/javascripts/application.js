@@ -14,7 +14,8 @@
 //= require bootstrap-sprockets
 //= require jquery_ujs
 //= require nicEdit
-//= require bootstrap-datepicker
+//= require moment
+//= require bootstrap-datetimepicker
 //= require jquery.keyDecoder
 //= require codemirror
 //= require codemirror/addons/runmode/runmode
@@ -23,8 +24,6 @@
 //= require codemirror/modes/javascript
 //= require codemirror/modes/scheme
 //= require_tree .
-
-$.fn.datepicker.defaults.format = "yyyy-mm-dd";
 
 $(function() {
     $('[data-toggle="tooltip"]').tooltip()

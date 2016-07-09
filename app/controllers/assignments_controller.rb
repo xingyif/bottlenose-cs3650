@@ -18,7 +18,7 @@ class AssignmentsController < CoursesController
 
     @assignment = Assignment.new
     @assignment.course_id = @course.id
-    @assignment.due_date = (Time.now + 1.month).to_date
+    @assignment.due_date = (Time.now + 1.week).end_of_day.strftime("%Y/%m/%d %H:%M")
     @assignment.points_available = 100
   end
 
