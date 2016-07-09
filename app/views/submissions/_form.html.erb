@@ -14,19 +14,36 @@
     </div>
   <% end %>
 
+  <% allowed = @assignment.sub_allow_submission?(@submission)
+     staff_override = true_user.course_staff?(@course)
+     %>
   <% if @team.nil? && @assignment.team_sub? %>
     <div class="alert alert-danger">
       <p>This assignment requires team submissions,
         and you are not currently in a team.</p>
+      <% if staff_override %>
+      <p>You need to 
+        <%= link_to "enroll the student in a team",
+        new_course_team_path(@course) %>
+        before submitting.</p>
+      <% else %>
       <p>Contact a professor to join a team.</p>
+      <% end %>
     </div>
-  <% elsif !true_user.course_staff?(@course) && !@assignment.sub_allow_submission?(@submission) %>
+  <% elsif !allowed && !staff_override %>
     <div class="alert alert-danger">
       <p>It's too late to submit to this assignment: you either have
         too few late days remaining, or it's too long after the
         assignment is due.</p>
     </div> 
   <% else %>
+    <% if !allowed && staff_override %>
+    <div class="alert alert-info">
+      <p>You are submitting on behalf of a student; this assignment
+        will be exempt from lateness penalties.</p>
+    </div>
+    <% end %>
+
     <p>This will be a team submission for <strong><%= @team %></strong>.</p>
 
     <div class="form-group">

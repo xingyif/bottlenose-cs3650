@@ -139,11 +139,6 @@ class User < ActiveRecord::Base
     name =~ /\s/ && name.downcase != name
   end
 
-  def active_team(course)
-    warn "[DEPRECATED] `active_team` use `active_team_for` instead."
-    active_team_for(course)
-  end
-
   def active_team_for(course)
     @active_team ||= teams_for(course).select(&:active?).first
   end

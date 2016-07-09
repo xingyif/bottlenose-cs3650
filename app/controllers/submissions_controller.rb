@@ -59,7 +59,7 @@ class SubmissionsController < CoursesController
     @submission.user_id = current_user.id
 
     if @assignment.team_subs?
-      @team = current_user.active_team(@course)
+      @team = current_user.active_team_for(@course)
       @submission.team = @team
     end
   end
@@ -69,7 +69,7 @@ class SubmissionsController < CoursesController
     @submission = Submission.new(submission_params)
     @submission.assignment_id = @assignment.id
     if @assignment.team_subs?
-      @team = current_user.active_team(@course)
+      @team = current_user.active_team_for(@course)
       @submission.team = @team
     end
 
