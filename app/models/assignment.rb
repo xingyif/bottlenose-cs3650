@@ -6,6 +6,8 @@ class Assignment < ActiveRecord::Base
 
   belongs_to :course
 
+  belongs_to :lateness_config
+
   has_many :submissions, :dependent => :restrict_with_error
   has_many :subs_for_gradings, :dependent => :destroy
 
@@ -18,6 +20,23 @@ class Assignment < ActiveRecord::Base
   validates :due_date,  :presence => true
   validates :blame_id,  :presence => true
   validates :points_available, :numericality => true
+  validates :lateness_config, :presence => true
+
+  def sub_late?(sub)
+    self.lateness_config.late?(self, sub)
+  end
+
+  def sub_days_late(sub)
+    self.lateness_config.days_late(self, sub)
+  end
+  
+  def sub_late_penalty(sub)
+    self.lateness_config.late_penalty(self, sub)
+  end
+
+  def sub_allow_submission?(sub)
+    self.lateness_config.allow_submission?(self, sub)
+  end
 
   def assignment_upload
     Upload.find_by_id(assignment_upload_id)

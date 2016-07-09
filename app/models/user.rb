@@ -89,6 +89,12 @@ class User < ActiveRecord::Base
     self.email
   end
 
+  def late_days_used
+    SubsForGrading.where(user: self).reduce(0) do |acc, s|
+      acc + s.submission.days_late
+    end
+  end
+
   def submissions_for(assn)
     assn.submissions_for(self)
   end

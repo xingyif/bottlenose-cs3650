@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160707163955) do
+ActiveRecord::Schema.define(version: 20160708231858) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,7 +26,7 @@ ActiveRecord::Schema.define(version: 20160707163955) do
 
   create_table "assignments", force: :cascade do |t|
     t.string   "name",                                 null: false
-    t.date     "due_date",                             null: false
+    t.datetime "due_date",                             null: false
     t.string   "assignment_file_name"
     t.string   "grading_file_name"
     t.text     "assignment"
@@ -44,19 +44,21 @@ ActiveRecord::Schema.define(version: 20160707163955) do
     t.integer  "max_attempts"
     t.integer  "rate_per_hour"
     t.float    "points_available"
+    t.integer  "lateness_config_id", null: false
   end
 
   create_table "courses", force: :cascade do |t|
-    t.string   "name",                            null: false
+    t.string   "name",                               null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "late_options", default: "10,1,0"
     t.text     "footer"
     t.integer  "term_id"
-    t.integer  "sub_max_size", default: 5,        null: false
-    t.boolean  "public",       default: false,    null: false
+    t.integer  "sub_max_size",       default: 5,     null: false
+    t.boolean  "public",             default: false, null: false
     t.integer  "team_min"
     t.integer  "team_max"
+    t.integer  "total_late_days"
+    t.integer  "lateness_config_id", null: false
   end
 
   create_table "delayed_jobs", force: :cascade do |t|
@@ -93,6 +95,14 @@ ActiveRecord::Schema.define(version: 20160707163955) do
   end
 
   add_index "graders", ["submission_id"], name: "index_graders_on_submission_id", using: :btree
+
+  create_table "lateness_configs", force: :cascade do |t|
+    t.string  "type"
+    t.integer "days_per_assignment"
+    t.integer "percent_off"
+    t.integer "frequency"
+    t.integer "max_penalty"
+  end
 
   create_table "reg_requests", force: :cascade do |t|
     t.integer  "course_id"

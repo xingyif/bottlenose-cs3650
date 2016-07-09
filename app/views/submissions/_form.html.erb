@@ -14,14 +14,18 @@
     </div>
   <% end %>
 
-  <% if @team.nil? %>
-    <% if @assignment.team_subs? %>
+  <% if @team.nil? && @assignment.team_sub? %>
     <div class="alert alert-danger">
       <p>This assignment requires team submissions,
         and you are not currently in a team.</p>
       <p>Contact a professor to join a team.</p>
     </div>
-    <% end %>
+  <% elsif !true_user.course_staff?(@course) && !@assignment.sub_allow_submission?(@submission) %>
+    <div class="alert alert-danger">
+      <p>It's too late to submit to this assignment: you either have
+        too few late days remaining, or it's too long after the
+        assignment is due.</p>
+    </div> 
   <% else %>
     <p>This will be a team submission for <strong><%= @team %></strong>.</p>
 

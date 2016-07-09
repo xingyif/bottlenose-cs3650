@@ -38,6 +38,9 @@ when "development"
                       last_name: "Ahmed"
                       )
 
+  fixed_lateness = FixedDaysConfig.create!(days_per_assignment: 2)
+  pct_lateness = LatePerDayConfig.create!(percent_off: 25, frequency: 1, days_per_assignment: 4)
+  
   # Create two terms.
   fall = Term.create!(name: "Fall 2015")
   spring = Term.create!(name: "Spring 2016")
@@ -46,6 +49,8 @@ when "development"
   fundies1 = Course.create!(
                             name: "Fundamentals of Computer Science 1",
                             term: fall,
+                            lateness_config: fixed_lateness,
+                            total_late_days: nil
                             )
   manual = ManualGrader.create!(avail_score: 42)
   junit = JunitGrader.create!(avail_score: 58, params: "Whee")
@@ -57,6 +62,7 @@ when "development"
                                     course: fundies1,
                                     bucket: fundies1.buckets.first,
                                     team_subs: i < 3,
+                                    lateness_config: (i % 2 == 1) ? pct_lateness : nil,
                                     blame: ben,
                                     due_date: Time.now + ((i - 3) * 1.week),
                                     )

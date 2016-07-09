@@ -53,6 +53,18 @@ class Submission < ActiveRecord::Base
     "#{user.name} @ #{created_at}"
   end
 
+  def late?
+    self.assignment.sub_late?(self)
+  end
+
+  def days_late
+    self.assignment.sub_days_late(self)
+  end
+
+  def late_penalty
+    self.assignment.sub_late_penalty(self)
+  end
+
   def upload_file=(data)
     return if data.nil?
 
@@ -134,36 +146,6 @@ class Submission < ActiveRecord::Base
     end
   end
 
-  def late?
-    return false if new_record?
-    created_at.to_date > assignment.due_date
-  end
-
-  def days_late
-    return 0 unless late?
-    due_on = assignment.due_date.to_time
-    sub_on = created_at
-    late_days = (sub_on - due_on) / 1.day
-    late_days.floor
-  end
-
-  def late_penalty
-    # Returns multiplier for post-penalty score.
-    return 0.0 unless late?
-    return 0.0 if ignore_late_penalty?
-
-    (pen, del, max) = course.late_opts
-
-    percent_off = (days_late / del) * pen
-    percent_off = max if percent_off > max
-
-    percent_off / 100.0
-  end
-
-  def late_mult
-    1.0 - late_penalty
-  end
-
   def grade!
     ### A Submission's score is recorded as a percentage
     score = 0.0
@@ -181,8 +163,13 @@ class Submission < ActiveRecord::Base
       end
     end
     self.score = (100.0 * score) / max_score
+    if self.ignore_late_penalty
+      log += "Ignoring late penalty, "
+    else
+      self.score = assignment.lateness_config.penalize(self.score, assignment, self)
+    end
     log += "Final score: #{self.score}%"
-    # TODO: Lateness
+
     Audit.log("Grading submission at #{DateTime.current}, grades are #{log}\n")
     self.save!
 

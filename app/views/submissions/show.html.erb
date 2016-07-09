@@ -83,7 +83,7 @@
 </tr>
 <tr>
   <td>Late Penalty:</td>
-  <td><%= 100.0 * @submission.late_penalty %>%</td>
+  <td><%= number_with_precision(@submission.late_penalty, :precision => 2) %>%</td>
 </tr>
 <% end %>
 <tr>

@@ -10,17 +10,13 @@ class Course < ActiveRecord::Base
   has_many :submissions, through: :assignments
   has_many :teams,       dependent: :destroy
 
+  belongs_to :lateness_config
+  validates :lateness_config, presence: true
+
   validates :name,    :length      => { :minimum => 2 },
                       :uniqueness  => true
-  validates :late_options, :format => { :with => /\A\d+,\d+,\d+\z/ }
 
   validates :term_id, presence: true
-
-  def late_opts
-    # pen, del, max
-    os = late_options.split(",")
-    os.map {|oo| oo.to_i}
-  end
 
   def registered_by?(user, as: nil)
     return false if user.nil?
