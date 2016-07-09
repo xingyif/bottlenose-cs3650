@@ -4,63 +4,65 @@
 <% if @course && @course.registered_by?(current_user) %>
 
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title" data-toggle="collapse" data-target="#assignments-table">
-            Assignments
+  <div class="panel-heading">
+    <div class="panel-title" id="assignments" data-toggle="collapse" data-target="#assignments-table">
+      Assignments
 
-            <% if @course && @course.registered_by?(current_user) %>
-            <div class="pull-right">
-              <%= link_to "New", new_course_assignment_path(@course), class: 'btn btn-xs btn-success' %>
-            </div>
-            <div class="pull-right">
-              <%= link_to "Edit Assignment Weights", weights_course_assignments_path, class: 'btn btn-xs btn-default' %>
-            </div>
-            <% end %>
-        </h3>
+      <% if @course && @course.registered_by?(current_user) %>
+      <div class="pull-right">
+        <%= link_to "New", new_course_assignment_path(@course), class: 'btn btn-xs btn-success' %>
+      </div>
+      <div class="pull-right">
+        <%= link_to "Edit Assignment Weights", weights_course_assignments_path, class: 'btn btn-xs btn-default' %>
+      </div>
+      <% end %>
     </div>
+    <script>
+      $("#assignments a.btn").on("click", function(e) { e.stopPropagation(); });
+    </script>
+  </div>
 
-    <div id="assignments-table" class="panel-body collapse in">
-      <table class="table table-hover">
-        <thead>
-            <tr>
-                <th>Assignment</th>
-                <th>Due Date</th>
-                <th>Weight</th>
-                <th>Min (%)</th>
-                <th>Avg (%)</th>
-                <th>Max (%)</th>
-            </tr>
-        </thead>
-        <tbody>
-          <%
-             assignments = @course.assignments.order(due_date: :desc)
-             stats = @course.submissions
-                            .select("min(assignment_id) as a_id")
-                            .select("min(score), avg(score), max(score)")
-                            .group(:assignment_id).to_a
-          %>
-          <% assignments.each do |assn| %>
-          <% stat = stats.find{|r| r.a_id == assn.id} %>
-          <tr>
-            <td><%= link_to assn.name, course_assignment_path(@course, assn) %></td>
-            <td><%= assn.due_date.strftime("%b %e, %l:%M %p") %></td>
-            <td><%= show_score(assn.points_available, assn, true) %>
-            <td><%= show_score(stat.min, assn, true) %>%</td>
-            <td><%= show_score(stat.avg, assn, true) %>%</td>
-            <td><%= show_score(stat.max, assn, true) %>%</td>
-          </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
+  <div id="assignments-table" class="panel-body collapse in">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Assignment</th>
+          <th>Due Date</th>
+          <th>Weight</th>
+          <th>Min (%)</th>
+          <th>Avg (%)</th>
+          <th>Max (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%
+           assignments = @course.assignments.order(due_date: :desc)
+           stats = @course.submissions
+                          .select("min(assignment_id) as a_id")
+                          .select("min(score), avg(score), max(score)")
+                          .group(:assignment_id).to_a
+        %>
+        <% assignments.each do |assn| %>
+        <% stat = stats.find{|r| r.a_id == assn.id} %>
+        <tr>
+          <td><%= link_to assn.name, course_assignment_path(@course, assn) %></td>
+          <td><%= assn.due_date.strftime("%b %e, %l:%M %p") %></td>
+          <td><%= show_score(assn.points_available, assn, true) %>
+          <td><%= show_score(stat.min, assn, true) %>%</td>
+          <td><%= show_score(stat.avg, assn, true) %>%</td>
+          <td><%= show_score(stat.max, assn, true) %>%</td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title" data-toggle="collapse"
-        data-target="#students-table">
+    <div class="panel-title" data-toggle="collapse" data-target="#students-table">
       Students
-    </h3>
+    </div>
   </div>
   <div id="students-table" class="panel-body collapse in">
     <table class="table table-hover">

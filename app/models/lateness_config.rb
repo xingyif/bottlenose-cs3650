@@ -1,6 +1,10 @@
 class LatenessConfig < ActiveRecord::Base
   belongs_to :lateness_config
 
+  def self.unique
+    select(column_names - ["id"]).distinct
+  end
+
   def late?(assignment, submission)
     (submission.created_at || DateTime.current) > assignment.due_date
   end

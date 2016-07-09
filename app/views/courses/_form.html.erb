@@ -11,7 +11,7 @@
     </div>
   <% end %>
 
-  <%= f.hidden_field :late_options %>
+  <%= hidden_field_tag :late_options %>
 
   <div>
     <div class="form-group">
@@ -28,14 +28,7 @@
     </div>
     <div class="form-group">
       <p><strong>Late Penalty</strong></p>
-      <p>Deduct
-      <%= text_field_tag :late_penalty, @course.late_opts[0], :size => 10 %>
-      percent every
-      <%= text_field_tag :late_repeat,  @course.late_opts[1], :size => 10 %>
-      days late to a maximum of
-      <%= text_field_tag :late_maximum, @course.late_opts[2], :size => 10 %>
-      percent off.
-      </p>
+      <%= render 'lateness' %>
     </div>
     <div>
       <%= f.label :footer, "Course-Wide Footer" %> (HTML Allowed)

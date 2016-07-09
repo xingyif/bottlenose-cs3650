@@ -26,8 +26,10 @@
     <%= f.file_field :assignment_file %>
   </div>
   <div class="form-group">
+    <% if !@assignment.grading_file_name.nil? && @assignment.grading_file_name != "" %>
     <span>Existing file</span>
     <%= link_to @assignment.grading_file_name, @assignment.grading_file_path %>
+    <% end %>
     <%= f.label :grading_file %>
     <%= f.file_field :grading_file %>
   </div>
@@ -38,8 +40,8 @@
   <div class="form-group">
     <%= f.label :points_available %>
     <br>(This is the percentage of the final grade that this
-    assignment is worth.)
-    <%= f.text_field :points_available, {size: 10, default: 100, class: 'form-control' } %>
+    assignment is worth.  Default: same as previous assignment)
+    <%= f.text_field :points_available, size: 10, class: 'form-control' %>
   </div>
   <div class="form-group">
     <%= f.label :hide_grading, "Hide Grading?" %>
@@ -53,6 +55,8 @@
   </div>
   <div class="form-group">
     <%= f.label :due_date %>
+    <div class="row"><p class="col-sm-12">(Assignment should not be
+    submitted after this time. Default: one week from today.)</p></div>
     <div class="row">
       <div class="col-sm-6">
         <%= f.text_field :due_date, class: 'form-control' %>
@@ -68,7 +72,6 @@
         });
       </script>
     </div>
-    <div class="row"><p>(Assignment should not be submitted after this time.)</p></div>
   </div>
   <div class="form-group">
   <%= f.submit nil, class: 'btn btn-primary' %>
