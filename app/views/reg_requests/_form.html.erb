@@ -1,6 +1,6 @@
 <%= form_for [@course, @reg_request] do |f| %>
   <% if @reg_request.errors.any? %>
-    <div id="error_explanation">
+    <div id="error_explanation" class="alert alert-danger">
       <h2><%= pluralize(@reg_request.errors.count, "error") %> prohibited this reg_request from being saved:</h2>
 
       <ul>

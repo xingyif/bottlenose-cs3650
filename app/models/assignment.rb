@@ -21,6 +21,15 @@ class Assignment < ActiveRecord::Base
   validates :blame_id,  :presence => true
   validates :points_available, :numericality => true
   validates :lateness_config, :presence => true
+  validate :valid_lateness_config
+
+  def valid_lateness_config
+    if !self.lateness_config.nil? && !self.lateness_config.valid?
+      self.lateness_config.errors.full_messages.each do |m|
+        @errors[:base] << m
+      end
+    end
+  end
 
   def sub_late?(sub)
     self.lateness_config.late?(self, sub)

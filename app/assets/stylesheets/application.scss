@@ -37,6 +37,9 @@ table.row-vcenter > tbody > tr > td {
     margin-bottom: 0;
 }
 
+#error_explanation > h2:first-child {
+   margin-top: 0;
+}
 
 .spinner {
   width: 100px;

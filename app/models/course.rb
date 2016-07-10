@@ -12,11 +12,20 @@ class Course < ActiveRecord::Base
 
   belongs_to :lateness_config
   validates :lateness_config, presence: true
+  validate :valid_lateness_config
 
   validates :name,    :length      => { :minimum => 2 },
                       :uniqueness  => true
 
   validates :term_id, presence: true
+
+  def valid_lateness_config
+    if !self.lateness_config.nil? && !self.lateness_config.valid?
+      self.lateness_config.errors.full_messages.each do |m|
+        @errors[:base] << m
+      end
+    end
+  end
 
   def registered_by?(user, as: nil)
     return false if user.nil?

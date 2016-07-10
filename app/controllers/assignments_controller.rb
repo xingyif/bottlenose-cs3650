@@ -53,6 +53,7 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.new(assignment_params)
     @assignment.course_id = @course.id
     @assignment.blame_id = current_user.id
+    set_lateness_config
 
     if @assignment.save
       @assignment.save_uploads!
@@ -69,12 +70,27 @@ class AssignmentsController < CoursesController
     end
 
     @assignment = Assignment.find(params[:id])
+    set_lateness_config
 
     if @assignment.update_attributes(assignment_params)
       @assignment.save_uploads!
       redirect_to course_assignment_path(@course, @assignment), notice: 'Assignment was successfully updated.'
     else
       render action: "edit"
+    end
+  end
+
+  def set_lateness_config
+    lateness = params[:lateness]
+    type = lateness[:type]
+    lateness = lateness[type] unless lateness.nil? || type.nil?
+    lateness[:type] = type
+    if type == "UseCourseDefaultConfig"
+      @assignment.lateness_config = @course.lateness_config
+    elsif type != "reuse"
+      late_config = LatenessConfig.new(lateness.permit(LatenessConfig.attribute_names - ["id"]))
+      @assignment.lateness_config = late_config
+      late_config.save
     end
   end
 

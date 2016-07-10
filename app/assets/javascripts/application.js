@@ -55,33 +55,39 @@ $(function() {
       upArrow.addClass("disabled");
     if (min !== undefined && val <= min)
       downArrow.addClass("disabled");
+    function validate() {
+      var val = parseInt(input.val(), 10);
+      if (max !== undefined && val >= max) {
+        upArrow.addClass("disabled");
+        clearInterval(upInterval);
+        upInterval = undefined;
+      }
+      if (min === undefined || val > min)
+        downArrow.removeClass("disabled");
+      if (min !== undefined && val <= min) {
+        downArrow.addClass("disabled");
+        clearInterval(downInterval);
+        downInterval = undefined;
+      }
+      if (max === undefined || val < max)
+        upArrow.removeClass("disabled");
+    }
+    input.on("change", validate);
     function increment() {
       var newVal = parseInt(input.val(), 10) + delta;
       if (max !== undefined) {
         newVal = Math.min(max, newVal);
-        if (newVal === max) {
-          upArrow.addClass("disabled");
-          clearInterval(upInterval);
-          upInterval = undefined;
-        }
-        if (min === undefined || newVal > min)
-          downArrow.removeClass("disabled");
       }
       input.val(newVal);
+      validate();
     }
     function decrement() {
       var newVal = parseInt(input.val(), 10) - delta;
       if (min !== undefined) {
         newVal = Math.max(min, newVal);
-        if (newVal === min) {
-          downArrow.addClass("disabled");
-          clearInterval(downInterval);
-          downInterval = undefined;
-        }
-        if (max === undefined || newVal < max)
-          upArrow.removeClass("disabled");
       }
       input.val(newVal);
+      validate();
     }
     $(upArrow).on('mousedown', function() {
       upInterval = setInterval(increment, 200);

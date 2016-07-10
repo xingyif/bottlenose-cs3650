@@ -7,7 +7,7 @@
     <div class="well">
       <%= form_for [@course, @registration] do |f| %>
         <% if @registration.errors.any? %>
-          <div id="error_explanation">
+          <div id="error_explanation" class="alert alert-danger">
             <p>
               <%= pluralize(@registration.errors.count, "error") %>
               prohibited this registration from being saved:

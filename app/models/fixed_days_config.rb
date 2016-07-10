@@ -1,4 +1,6 @@
 class FixedDaysConfig < LatenessConfig
+  validates :days_per_assignment, :numericality => true
+
   def allow_submission?(assignment, submission)
     late_days = days_late(assignment, submission)
     return false if late_days > self.days_per_assignment

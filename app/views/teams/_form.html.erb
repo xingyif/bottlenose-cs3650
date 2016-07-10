@@ -1,7 +1,7 @@
 <%= form_for([@course, @team]) do |f| %>
     <div class="row">
         <% if @team.errors.any? %>
-            <div id="error_explanation">
+            <div id="error_explanation" class="alert alert-danger">
                 <h3><%= pluralize(@team.errors.count, "error") %> prohibited this team from being saved:</h3>
                 <ul>
 		    <% @team.errors.full_messages.each do |message| %>

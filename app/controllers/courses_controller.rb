@@ -32,14 +32,8 @@ class CoursesController < ApplicationController
 
     @course = Course.new(course_params)
 
-    unless params[:late_penalty].nil?
-      @course.late_options = [
-        params[:late_penalty],
-        params[:late_repeat],
-        params[:late_maximum]
-      ].join(',')
-    end
-
+    set_default_lateness_config
+    
     if @course.save
       redirect_to course_path(@course), notice: 'Course was successfully created.'
     else
@@ -55,18 +49,24 @@ class CoursesController < ApplicationController
 
     @course.assign_attributes(course_params)
 
-    unless params[:late_penalty].nil?
-      @course.late_options = [
-        params[:late_penalty],
-        params[:late_repeat],
-        params[:late_maximum]
-      ].join(',')
-    end
+    set_default_lateness_config
 
     if @course.save
       redirect_to course_path(@course), notice: 'Course was successfully updated.'
     else
       render :edit, layout: 'application'
+    end
+  end
+
+  def set_default_lateness_config
+    lateness = params[:lateness]
+    type = lateness[:type]
+    lateness = lateness[type] unless lateness.nil? || type.nil?
+    lateness[:type] = type
+    if type != "reuse"
+      late_config = LatenessConfig.new(lateness.permit(LatenessConfig.attribute_names - ["id"]))
+      @course.lateness_config = late_config
+      late_config.save
     end
   end
 

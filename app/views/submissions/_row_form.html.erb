@@ -2,7 +2,7 @@
 
 <% if sub.errors.any? %>
   <td colspan="4">
-    <div id="error_explanation">
+    <div id="error_explanation" class="alert alert-danger">
       <h2><%= pluralize(@submission.errors.count, "error") %> prohibited this
 	submission from being saved:</h2>
 

@@ -1,6 +1,6 @@
 <%= form_for(@term) do |f| %>
   <% if @term.errors.any? %>
-    <div id="error_explanation">
+    <div id="error_explanation" class="alert alert-danger">
       <h2><%= pluralize(@term.errors.count, "error") %> prohibited this term from being saved:</h2>
 
       <ul>

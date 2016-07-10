@@ -1,15 +1,15 @@
 class LatePerDayConfig < LatenessConfig
+  validates :days_per_assignment, :numericality => true
+  validates :frequency, :numericality => true
+  validates :max_penalty, :numericality => true
+  validates :percent_off, :numericality => true
+
   def allow_submission?(assn, sub)
-    days_allowed = self.days_per_assignment
-    if days_allowed.nil? && !assn.lateness_config.nil?
-      days_allowed = assn.lateness_config.days_per_assignment
-    end
-    return true if days_allowed.nil?
-    days_late(assn, sub) <= days_allowed
+    days_late(assn, sub) <= self.days_per_assignment
   end
 
   def late_penalty(assn, sub)
-    [100, [self.max_penalty || 0, (self.percent_off || 0).to_f * (days_late(assn, sub).to_f / self.frequency)].max].min
+    [100, [self.max_penalty, (self.percent_off || 0).to_f * (days_late(assn, sub).to_f / self.frequency)].max].min
   end
 
   def to_s
@@ -19,7 +19,7 @@ class LatePerDayConfig < LatenessConfig
       days_allowed = plural(self.days_per_assignment, "late day")
     end
       
-    "Allow #{days_allowed}, penalizing #{self.percent_off}% each #{plural(self.frequency, 'day')} up to #{self.max_penalty || 100}%"
+    "Allow #{days_allowed}, penalizing #{self.percent_off}% each #{plural(self.frequency, 'day')} up to #{self.max_penalty}%"
   end
 
   private
