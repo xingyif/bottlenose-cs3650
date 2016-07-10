@@ -1,6 +1,6 @@
 Bottlenose::Application.routes.draw do
   # Using devise for user auth.
-  devise_for :users, :skip => [:registrations]
+  devise_for :users, :skip => [:registrations, :passwords]
 
   root to: "main#home"
   get "about" => "main#about"
