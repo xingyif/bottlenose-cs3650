@@ -40,6 +40,7 @@ Bottlenose::Application.routes.draw do
       resources :submissions do
         member do
           get :files
+          get :use, to: 'submissions#use_for_grading', as: 'use'
         end
       end
     end

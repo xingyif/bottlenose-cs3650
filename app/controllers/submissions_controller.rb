@@ -94,6 +94,12 @@ class SubmissionsController < CoursesController
     end
   end
 
+  def use_for_grading
+    @submission = Submission.find(params[:id])
+    @submission.set_used_sub!
+    redirect_to :back
+  end
+
   private
 
   def submission_params
