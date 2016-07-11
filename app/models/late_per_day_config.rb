@@ -22,6 +22,17 @@ class LatePerDayConfig < LatenessConfig
     "Allow #{days_allowed}, penalizing #{self.percent_off}% each #{plural(self.frequency, 'day')} up to #{self.max_penalty}%"
   end
 
+  def ==(other)
+    if other.instance_of?(LatePerDayConfig)
+      self.days_per_assignment == other.days_per_assignment &&
+        self.frequency == other.frequency &&
+        self.max_penalty == other.max_penalty &&
+        self.percent_off == other.percent_off
+    else
+      false
+    end
+  end
+
   private
   def plural(n, sing, pl = nil)
     if n == 1

@@ -20,7 +20,7 @@
     <div id="LatePerDayConfig" class="tab-pane equal-height-group form-group">
       <div class="form-inline">
         Deduct
-        <%= spinner_tag "lateness[LatePerDayConfig][percent_off]", 42, :min => 0, :max => 100, :delta => 5 %>
+        <%= spinner_tag "lateness[LatePerDayConfig][percent_off]", 20, :min => 0, :max => 100, :delta => 5 %>
         percent every
         <%= spinner_tag "lateness[LatePerDayConfig][frequency]", 1, :min => 0, :max => 100 %>
         days late to a maximum of
@@ -30,7 +30,7 @@
       <br>
       <div class="form-inline">
         Stop accepting assignments after
-        <%= spinner_tag "lateness[LatePerDayConfig][days_per_assignment]", 4, :min => 0, :max => 5 %>
+        <%= spinner_tag "lateness[LatePerDayConfig][days_per_assignment]", 5, :min => 0, :max => 5 %>
         days.
       </div>
     </div>
@@ -39,7 +39,7 @@
         Allow users or teams at most
         <%= spinner_tag "lateness[FixedDaysConfig][days_per_assignment]", 2, :min => 0, :max => 5 %>
         late days per assignment with no penalty, up to
-        <%= spinner_tag "lateness[FixedDaysConfig][max_late_days]", 4, :min => 0 %>
+        <%= spinner_tag "course[total_late_days]", 4, :min => 0 %>
         late days for the entire course.
       </div>
     </div>
@@ -68,6 +68,23 @@
     $("[href='#UseCourseDefaultConfig']").tab('show');
     <% else %>
     $("[href='#LatePerDayConfig']").tab('show');
+    <% end %>
+
+    <% if within_course && @assignment.lateness_config != @course.lateness_config
+         lateness = @assignment.lateness_config
+       elsif !within_course && @course.lateness_config
+         lateness = @course.lateness_config
+       end %>
+    <% if lateness %>
+      $("div.spinner > input[type='text']").val("");
+      $("input#course_total_late_days").val(<%= @course.total_late_days %>);
+      $("[href='#<%= @course.lateness_config.type %>']").tab('show');
+      <% lateness.attributes.each do |k, v|
+           unless k == "type" 
+             id = "#lateness_" + lateness.type + "_" + k %>
+             $("<%= id %>").val(<%= v %>);
+      <%   end %>
+      <% end %>
     <% end %>
 
     var sel = $("#config-options");

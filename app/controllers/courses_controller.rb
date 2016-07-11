@@ -67,6 +67,7 @@ class CoursesController < ApplicationController
       late_config = LatenessConfig.new(lateness.permit(LatenessConfig.attribute_names - ["id"]))
       @course.lateness_config = late_config
       late_config.save
+      @course.total_late_days = course_params[:total_late_days]
     end
   end
 
@@ -120,7 +121,7 @@ class CoursesController < ApplicationController
   end
 
   def course_params
-    params[:course].permit(:name, :footer, :late_options, :private, :public,
+    params[:course].permit(:name, :footer, :total_late_days, :private, :public,
                            :term_id, :sub_max_size)
   end
 end

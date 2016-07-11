@@ -18,4 +18,12 @@ class FixedDaysConfig < LatenessConfig
   def to_s
     "Allow #{self.days_per_assignment} days per assignment; limit to course's maximum total late days; everyone on team must have sufficient late days remaining"
   end
+
+  def ==(other)
+    if other.instance_of?(FixedDaysConfig)
+      self.days_per_assignment == other.days_per_assignment
+    else
+      false
+    end
+  end
 end
