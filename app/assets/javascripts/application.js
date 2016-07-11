@@ -14,6 +14,7 @@
 //= require bootstrap-sprockets
 //= require jquery_ujs
 //= require jquery.matchHeight
+//= require jquery-tablesorter
 //= require nicEdit
 //= require moment
 //= require bootstrap-datetimepicker

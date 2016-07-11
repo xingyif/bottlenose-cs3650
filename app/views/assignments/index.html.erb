@@ -27,7 +27,8 @@
       <thead>
         <tr>
           <th>Assignment</th>
-          <th>Due Date</th>
+          <th>Assigned</th>
+          <th>Due</th>
           <th>Weight</th>
           <th>Min (%)</th>
           <th>Avg (%)</th>
@@ -44,13 +45,25 @@
         %>
         <% assignments.each do |assn| %>
         <% stat = stats.find{|r| r.a_id == assn.id} %>
+        <% if assn.available > DateTime.current %>
+        <tr class="text-muted">
+          <td><%= link_to assn.name, course_assignment_path(@course, assn) %></td>
+          <td><%= assn.available.strftime("%b %e, %l:%M %p") %></td>
+          <td><%= assn.due_date.strftime("%b %e, %l:%M %p") %></td>
+          <td><%= show_score(assn.points_available, assn, true) %>
+          <td>N/A</td>
+          <td>N/A</td>
+          <td>N/A</td>
+        <% else %>
         <tr>
           <td><%= link_to assn.name, course_assignment_path(@course, assn) %></td>
+          <td><%= assn.available.strftime("%b %e, %l:%M %p") %></td>
           <td><%= assn.due_date.strftime("%b %e, %l:%M %p") %></td>
           <td><%= show_score(assn.points_available, assn, true) %>
           <td><%= show_score(stat.min, assn, true) %>%</td>
           <td><%= show_score(stat.avg, assn, true) %>%</td>
           <td><%= show_score(stat.max, assn, true) %>%</td>
+        <% end %>
         </tr>
         <% end %>
       </tbody>
@@ -89,8 +102,35 @@
       </tbody>
     </table>
   </div>
+  <script>
+    $(function() {
+      $.tablesorter.themes.bootstrap = {
+        caption      : 'caption',
+        sortNone     : '',
+        sortAsc      : '',
+        sortDesc     : '',
+        active       : '', // applied when column is sorted
+        hover        : '', // custom css required - a defined bootstrap style may not override other classes
+        // icon class names
+        icons        : '', // add "icon-white" to make them white; this icon class is added to the <i> in the header
+        iconSortAsc  : 'glyphicon glyphicon-chevron-up', // class name added to icon when column has ascending sort
+        iconSortDesc : 'glyphicon glyphicon-chevron-down', // class name added to icon when column has descending sort
+        filterRow    : '', // filter row class; use widgetOptions.filter_cssFilter for the input/select element
+        footerRow    : '',
+        footerCells  : '',
+        even         : '', // even row zebra striping
+        odd          : ''  // odd row zebra striping
+      };
+      $("#students-table > table").tablesorter({
+        headerTemplate: "{content} {icon}",
+        theme: "bootstrap",
+        widgets: ['uitheme']
+      });
+    });
+  </script>    
 </div>
 
 <% else %>
-<%= render "assignments/table", assignments: @course.assignments, for_user: current_user %>
+<%= render "assignments/table", assignments: @course.assignments, 
+    for_user: current_user, show_all: false %>
 <% end %>

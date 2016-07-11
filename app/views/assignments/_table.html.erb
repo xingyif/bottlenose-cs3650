@@ -1,49 +1,54 @@
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">
-            Assignments
-        </h3>
-    </div>
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      Assignments
+    </h3>
+  </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Due Date</th>
-                <th>Score (%)</th>
-                <th>Submissions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% assignments.sort_by(&:due_date).each do |assignment| %>
-                <%
-                   submissions = for_user.submissions_for(assignment)
-                   used = assignment.used_sub_for(for_user)
-                   score = used.nil? ? nil : used.score
-                   %>
-                <tr>
-                    <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
-                    <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>
-                    <td><%= show_score(score, assignment) %></td>
-                    <td>
-                        <% submissions.limit(5).each do |submission| %>
-                          <%= link_to course_assignment_submission_path(assignment.course, assignment, submission) do %>
-                            <% if submission.id == used.id %>
-                              <span class="label label-success" 
-                                    data-toggle="tooltip" data-placement="top"
-                                    title="This submission is used for grading">
-                                <%= number_with_precision(submission.score, :precision => 2)%>
-                              </span>
-                            <% else %>
-                              <span class="label label-default">
-                                <%= number_with_precision(submission.score, :precision => 2)%>
-                              </span>
-                            <% end %>
-                          <% end %>
-                        <% end %>
-                    </td>
-                </tr>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Due Date</th>
+        <th>Score (%)</th>
+        <th>Submissions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if show_all then
+           assns = assignments
+         else
+           assns = assignments.where("available <= ?", DateTime.current) 
+         end %>
+      <% assns.sort_by(&:due_date).each do |assignment| %>
+        <%
+          submissions = for_user.submissions_for(assignment)
+          used = assignment.used_sub_for(for_user)
+          score = used.nil? ? nil : used.score
+          %>
+        <tr>
+          <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
+          <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>
+          <td><%= show_score(score, assignment) %></td>
+          <td>
+            <% submissions.limit(5).each do |submission| %>
+             <%= link_to course_assignment_submission_path(assignment.course, assignment, submission) do %>
+              <% if submission.id == used.id %>
+               <span class="label label-success" 
+                  data-toggle="tooltip" data-placement="top"
+                  title="This submission is used for grading">
+                <%= number_with_precision(submission.score, :precision => 2)%>
+               </span>
+              <% else %>
+               <span class="label label-default">
+                <%= number_with_precision(submission.score, :precision => 2)%>
+               </span>
+              <% end %>
+             <% end %>
             <% end %>
-        </tbody>
-    </table>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
 </div>

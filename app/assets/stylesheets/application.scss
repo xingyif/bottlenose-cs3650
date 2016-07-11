@@ -1,5 +1,6 @@
 //= require codemirror
 //= require codemirror/themes/mdn-like
+//= require jquery-tablesorter/theme.bootstrap_2
 
 // Import the bootstrap overrides *before* bootstrap.
 @import "bootstrap-overrides";
@@ -75,4 +76,9 @@ table.row-vcenter > tbody > tr > td {
   position: absolute;
   top: 0;
   left: 4px;
+}
+
+.tablesorter-bootstrap .tablesorter-header {
+   background-image: initial;
+   background-color: initial;
 }

@@ -3,19 +3,24 @@
 <%= form_tag do %>
 <table class="table table-hover">
   <thead>
-    <th>Assignment Name</th>
-    <td>Weight</td>
+    <th class="col-sm-4">Assignment Name</th>
+    <th>Weight</th>
   </thead>
   <tbody>
 <% @course.assignments.order(:due_date).each do |a| %>
     <tr>
-      <td><%= label_tag(:weight, a.name) %></td>
+      <td><%= label_tag("weight[#{a.id}]", a.name) %></td>
       <td><%= text_field_tag "weight[#{a.id}]", a.points_available, class: "weight" %></td>
     </tr>
 <% end %>
    <tr id="total-row" class="alert alert-success">
-     <td>Total points</td>
+     <td>Points currently assigned</td>
      <td id="total"></td>
+   </tr>
+   <tr id="remaining-row" class="alert alert-info">
+     <td>Remaining points</td>
+     <td id="remaining"></td>
+   </tr>
   </tbody>
 </table>
   <div class="form-group">
@@ -31,10 +36,13 @@ $(function() {
       var val = Number($(this).val());
       if (!isNaN(val)) sum += val;
     });
+    $("#remaining").text(100 - sum);
     $("#total").text(sum);
     if (sum > 100) {
+     $("#remaining-row").removeClass("alert-info").addClass("alert-danger");
      $("#total-row").removeClass("alert-success").addClass("alert-danger");
     } else {
+     $("#remaining-row").addClass("alert-info").removeClass("alert-danger");
      $("#total-row").addClass("alert-success").removeClass("alert-danger");
     }
   }

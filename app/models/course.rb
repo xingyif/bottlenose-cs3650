@@ -78,9 +78,12 @@ class Course < ActiveRecord::Base
   end
 
   def score_summary
-    subs = SubsForGrading.where(user: self.students)
-      .joins(:submission).select(:user_id, :assignment_id, :score).to_a
-    assn_weights = self.assignments.pluck(:id, :points_available).to_h 
+    assns = self.assignments.where("available < ?", DateTime.current)
+    subs = SubsForGrading.where(user: self.students, assignment: assns)
+      .joins(:submission)
+      .select(:user_id, :assignment_id, :score)
+      .to_a
+    assn_weights = assns.pluck(:id, :points_available).to_h 
     avail = assn_weights.reduce(0) do |tot, kv| tot + kv[1] end
     remaining = 100.0 - avail
     ans = []
