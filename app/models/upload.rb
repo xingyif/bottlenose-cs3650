@@ -118,11 +118,17 @@ class Upload < ActiveRecord::Base
     Audit.log("Uploaded file #{file_name} for #{user.name} (#{user_id}) at #{secret_key}")
   end
 
-
   def extracted_files
-    Dir.glob("#{upload_dir}/extracted/**/*").select{|fn| File.file?(fn) }.sort.map do |p|
-      {path: p, public_link: upload_path_for(p)}
+    def rec_path(path)
+      path.children.sort.collect do |child|
+        if child.file?
+          {path: child.basename.to_s, full_path: child, public_link: upload_path_for(child)}
+        elsif child.directory?
+          {path: child.basename.to_s, children: rec_path(child)}
+        end
+      end
     end
+    rec_path(Pathname.new("#{upload_dir}/extracted/"))
   end
 
 

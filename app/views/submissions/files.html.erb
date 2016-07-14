@@ -38,12 +38,9 @@
 </table>
 
 <div class="row">
-  <div class="col-sm-3" style="margin-left: -25%;">
-    <ul id="files" class="nav nav-stacked condensed" data-spy="affix" data-offset-top="250">
-      <% @submission_files.each_with_index do |f, i| %>
-      <li><a data-toggle="tab" href="#file_<%= i %>" <%= if i == 0; "class: \"active\"" end %> ><%= f[:name] %></a></li>
-      <% end %>
-    </ul>
+  <div class="col-sm-3"style="margin-left: -25%;">
+    <div id="files" class="nav treeview condensed" data-spy="affix" data-offset-top="250">
+    </div>
   </div>
   <div class="col-sm-12 tab-content">
     <% @submission_files.each_with_index do |f, i| %>
@@ -84,7 +81,22 @@ $(function (){
   $(".tab-pane.hideAfterRender").each(function() {
     $(this).removeClass("active").removeClass("hideAfterRender");
   });
+  $("#files").treeview({
+    expandIcon: 'glyphicon glyphicon-chevron-right',
+    collapseIcon: 'glyphicon glyphicon-chevron-down',
+    enableLinks: true,
+    data: <%= raw(@submission_dirs) %>
+  });
+  $("#files").treeview('expandAll', { silent: true });
+  $("#files a").data("toggle", "tab").on("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (this.href !== "#")
+        $(this).tab('show');
+  });
   $("#files").data("offset-top", $("#files").offset().top).css("width", $("#files").width());
+  if (document.location.hash !== "")
+    $("#files a[href='" + document.location.hash + "']").tab('show');
 });
 </script>
 

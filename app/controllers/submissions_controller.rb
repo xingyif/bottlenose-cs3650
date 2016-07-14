@@ -23,35 +23,38 @@ class SubmissionsController < CoursesController
     end
 
     @submission_files = []
-    @submission.upload.extracted_files.each do |item|
-      f = File.open(item[:path].to_s)
-      contents = f.read
-      f.close
-
-      ftype = case File.extname(item[:path].to_s)
-              when ".java"
-                "text/x-java"
-              when ".arr"
-                "pyret"
-              when ".rkt", ".ss"
-                "scheme"
-              when ".jpg", ".jpeg", ".png"
-                "image"
-              when ".jar"
-                "jar"
-              when ".zip"
-                "zip"
-              else
-                "text/unknown"
-              end
-      
-      @submission_files.push({
-        link: item[:public_link],
-        contents: contents,
-        type: ftype,
-        name: item[:public_link].sub(/^.*extracted\//, "")
-      })
+    def with_extracted(item)
+      if item[:public_link]
+        @submission_files.push({
+          link: item[:public_link],
+          name: item[:public_link].sub(/^.*extracted\//, ""),
+          contents: File.read(item[:full_path].to_s),
+          type: case File.extname(item[:full_path].to_s)
+                when ".java"
+                  "text/x-java"
+                when ".arr"
+                  "pyret"
+                when ".rkt", ".ss"
+                  "scheme"
+                when ".jpg", ".jpeg", ".png"
+                  "image"
+                when ".jar"
+                  "jar"
+                when ".zip"
+                  "zip"
+                else
+                  "text/unknown"
+                end
+          })
+        { text: item[:path], href: "#file_#{@submission_files.count}" }
+      else
+        {
+          text: item[:path] + "/",
+          nodes: item[:children].map{|i| with_extracted(i)}
+        }
+      end
     end
+    @submission_dirs = @submission.upload.extracted_files.map{|i| with_extracted(i)}.to_json
   end
 
   def new

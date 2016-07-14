@@ -11,14 +11,15 @@
 // GO AFTER THE REQUIRES BELOW.
 //
 //= require jquery
-//= require bootstrap-sprockets
 //= require jquery_ujs
 //= require jquery.matchHeight
 //= require jquery-tablesorter
+//= require jquery.keyDecoder
 //= require nicEdit
 //= require moment
+//= require bootstrap-sprockets
 //= require bootstrap-datetimepicker
-//= require jquery.keyDecoder
+//= require bootstrap.treeview
 //= require codemirror
 //= require codemirror/addons/runmode/runmode
 //= require codemirror/addons/selection/active-line
@@ -31,10 +32,14 @@ $(function() {
     $('[data-toggle="tooltip"]').tooltip()
 
     $('.local-time').each(function(_) {
-        var dd = new Date($(this).text());
+        var dd = moment(Date.parse($(this).text()));
 
-        if (!isNaN(dd.getTime())) {
-          $(this).text(dd);
+        if (dd.isValid()) {
+          var today = moment().startOf('day');
+          if (today.isBefore(dd))
+            $(this).text("Today, " + dd.format("h:mm:ssa"));
+          else
+            $(this).text(dd.format("MMM D YYYY, h:mm:ssa"));
         }
     });
 })

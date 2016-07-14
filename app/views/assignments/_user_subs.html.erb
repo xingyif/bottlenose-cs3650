@@ -44,7 +44,7 @@
       <td><%= sub.team %></td>
       <td><span class="local-time"><%= sub.created_at %></span></td>
       <% scores = if cur_reg.staff? then grade[:staff_scores] else grade[:blind_scores] end %>
-      <td><%= status_image(sub, scores[:raw_score]) %></td>
+      <td><%= status_image(sub, sub.score) %></td>
       <% scores[:scores].each do |s| %>
       <td class="text-right">
         <% if s.kind_of?(Array) %>

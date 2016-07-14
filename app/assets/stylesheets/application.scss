@@ -10,6 +10,7 @@
 @import "bootstrap";
 @import "font-awesome";
 @import "bootstrap-datetimepicker";
+@import "bootstrap-treeview";
 
 // Internal stylesheets.
 @import "old";  // TODO: Delete me.
@@ -41,11 +42,15 @@ table.row-vcenter > tbody > tr > td {
    outline: none;
 }
 
-.nav.condensed {
+.treeview.condensed {
    overflow: scroll;
+   border: 1px solid #ddd;
+   border-radius: 5px;
 }
-.nav.condensed > li > a {
-   padding: 0.1em;
+.treeview.condensed .list-group-item { 
+   padding: 0.1em; 
+   white-space: nowrap;
+   border: 0px solid white;
 }
 
 .vert-tabs > .tab-pane { display: none; }
