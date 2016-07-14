@@ -27,12 +27,16 @@ table.row-vcenter > tbody > tr > td {
    margin-right: initial;
 }
 .tab-pane {
-
-    border-left: 1px solid #ddd;
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-left: 1px solid $table-border-color;
+    border-right: 1px solid $table-border-color;
+    border-bottom: 1px solid $table-border-color;
     border-radius: 0px 0px 5px 5px;
     padding: 10px;
+}
+
+.panel-tab-pane {
+    border: 1px solid $table-border-color;
+    border-radius: 5px;
 }
 
 .nav-tabs {
@@ -42,9 +46,30 @@ table.row-vcenter > tbody > tr > td {
    outline: none;
 }
 
+.list-group-item.active:hover {
+   color: black;
+}
+
+@media (min-width: 1200px) {
+.hang-left.col-sm-3 {
+   margin-left: -26%;
+   width: (($container-desktop) / 3.25);
+}
+.affix {
+   top: 0;
+   width: (($container-desktop) / 3.25) - 30px;
+}
+}
+@media (max-width: 1200px) {
+.hang-left.col-sm-3 {
+   width: 100%;
+}
+.affix { position: initial; }
+}
+
 .treeview.condensed {
    overflow: scroll;
-   border: 1px solid #ddd;
+   border: 1px solid $table-border-color;
    border-radius: 5px;
 }
 .treeview.condensed .list-group-item { 

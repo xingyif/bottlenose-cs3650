@@ -50,6 +50,7 @@ class SubmissionsController < CoursesController
       else
         {
           text: item[:path] + "/",
+          state: {selectable: false},
           nodes: item[:children].map{|i| with_extracted(i)}
         }
       end

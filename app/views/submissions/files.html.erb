@@ -1,7 +1,4 @@
 <% @page_title = "View Submission Details" %>
-<style>
-  .affix { top: 0 }
-</style>
 
 <p>
   <%= link_to "< Back to submission", course_assignment_submission_path(@course, @assignment, @submission) %>
@@ -38,14 +35,13 @@
 </table>
 
 <div class="row">
-  <div class="col-sm-3"style="margin-left: -25%;">
-    <div id="files" class="nav treeview condensed" data-spy="affix" data-offset-top="250">
+  <div class="col-sm-3 hang-left">
+    <div id="files" class="nav treeview condensed" data-spy="affix">
     </div>
   </div>
   <div class="col-sm-12 tab-content">
     <% @submission_files.each_with_index do |f, i| %>
-    <div class="tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="file_<%= i %>"
-         style="border-top: 1px solid #ddd; border-radius: 5px;">
+    <div class="tab-pane panel-tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="file_<%= i + 1 %>">
       <% if f[:ftype] == "image" %>
       <%= image_tag f[:link], alt: f[:name] %>
       <% elsif f[:ftype] == "zip" || f[:ftype] == "jar" %>
@@ -82,19 +78,22 @@ $(function (){
     $(this).removeClass("active").removeClass("hideAfterRender");
   });
   $("#files").treeview({
-    expandIcon: 'glyphicon glyphicon-chevron-right',
-    collapseIcon: 'glyphicon glyphicon-chevron-down',
+    expandIcon: 'glyphicon glyphicon-chevron-down', // deliberately the same
+    collapseIcon: 'glyphicon glyphicon-chevron-down', // always expanded
     enableLinks: true,
+    onNodeSelected: function(e, data) {
+      console.log(data);
+      e.preventDefault();
+      e.stopPropagation();
+      if (data.href !== undefined && data.href !== "#") {
+        $(".tab-pane").removeClass("active");
+        $(data.href).addClass("active");
+      }
+    },
     data: <%= raw(@submission_dirs) %>
   });
   $("#files").treeview('expandAll', { silent: true });
-  $("#files a").data("toggle", "tab").on("click", function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (this.href !== "#")
-        $(this).tab('show');
-  });
-  $("#files").data("offset-top", $("#files").offset().top).css("width", $("#files").width());
+  $("#files").data("offset-top", $("#files").offset().top);
   if (document.location.hash !== "")
     $("#files a[href='" + document.location.hash + "']").tab('show');
 });
