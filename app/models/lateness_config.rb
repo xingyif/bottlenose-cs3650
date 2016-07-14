@@ -26,7 +26,11 @@ class LatenessConfig < ActiveRecord::Base
   end
 
   def penalize(score, assignment, submission)
-    [100, [self.max_penalty || 0, score * (1.0 - late_penalty(assignment, submission))].max].min
+    penalty = late_penalty(assignment, submission) # compute penalty in [0, 1.0]
+    if self.max_penalty # cap it
+      penalty = [self.max_penalty, penalty].min
+    end
+    [100, [0, score - penalty].max].min
   end
 
 end

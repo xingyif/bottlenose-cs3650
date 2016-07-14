@@ -9,7 +9,8 @@ class LatePerDayConfig < LatenessConfig
   end
 
   def late_penalty(assn, sub)
-    [100, [self.max_penalty, (self.percent_off || 0).to_f * (days_late(assn, sub).to_f / self.frequency)].max].min
+    penalty = (self.percent_off || 0).to_f * days_late(assn, sub).to_f
+    [self.max_penalty, penalty].min
   end
 
   def to_s
