@@ -89,14 +89,13 @@ class Submission < ActiveRecord::Base
 
     up = Upload.new
     up.user_id = user.id
-    up.store_meta!({
+    up.store_upload!(data, {
       type:       "Submission",
       user:       "#{user.name} (#{user.id})",
       course:     "#{course.name} (#{course.id})",
       assignment: "#{assignment.name} (#{assignment.id})",
       date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
     })
-    up.store_upload!(data)
     if up.save
       self.upload_id = up.id
       
@@ -116,14 +115,13 @@ class Submission < ActiveRecord::Base
 
     up = Upload.new
     up.user_id = user.id
-    up.store_meta!({
+    up.store_upload!(data, {
       type:       "Submission Comments",
       user:       "Some teacher for #{user.name} (#{user.id})",
       course:     "#{course.name} (#{course.id})",
       assignment: "#{assignment.name} (#{assignment.id})",
       date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
     })
-    up.store_upload!(data)
     up.save!
 
     self.comments_upload_id = up.id
@@ -139,10 +137,11 @@ class Submission < ActiveRecord::Base
   end
 
   def file_full_path
+    raise Exception.new("Don't do this!")
     if upload_id.nil?
       ""
     else
-      upload.full_path
+      upload.submission_path
     end
   end
 

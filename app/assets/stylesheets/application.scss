@@ -37,6 +37,19 @@ table.row-vcenter > tbody > tr > td {
 .nav-tabs {
     margin-bottom: 0;
 }
+.nav-tabs > li > a:focus {
+   outline: none;
+}
+
+.nav.condensed {
+   overflow: scroll;
+}
+.nav.condensed > li > a {
+   padding: 0.1em;
+}
+
+.vert-tabs > .tab-pane { display: none; }
+.vert-tabs > .tab-pane.active { display: initial; }
 
 #error_explanation > h2:first-child {
    margin-top: 0;

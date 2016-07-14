@@ -28,16 +28,12 @@
     <td><span class="local-time"><%= @submission.created_at %></span></td>
   </tr>
   <tr>
-    <td><strong>Submitted File</strong></td>
-    <td>
-      <%= link_to @submission.file_name, @submission.file_path %>
-      <% if @submission.file_name =~ /.*\.(tar|tgz|tar.gz)/ %>
-        <ul>
-          <% stats = `tar tvf #{@submission.file_full_path}`.split("\n") %>
-          <% stats.each do |s| %>
-            <li><%= s %></li>
-          <% end %>
-        </ul>
+    <td><strong>Submission Details</strong></td>
+    <td><%= link_to "See individual files",
+            files_course_assignment_submission_path(@course, @assignment, @submission),
+            class: "btn btn-success" %>
+      <%= link_to @submission.file_path, class: "btn btn-default" do %>
+      <i class="glyphicon glyphicon-download-alt"></i> Download  <%= @submission.file_name %> 
       <% end %>
     </td>
   </tr>

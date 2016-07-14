@@ -96,11 +96,11 @@ class Assignment < ActiveRecord::Base
   end
 
   def assignment_full_path
-    assignment_upload.full_path
+    assignment_upload.submission_path
   end
 
   def grading_full_path
-    grading_upload.full_path
+    grading_upload.submission_path
   end
 
   def assignment_file_path
@@ -154,13 +154,12 @@ class Assignment < ActiveRecord::Base
 
       up = Upload.new
       up.user_id = user.id
-      up.store_meta!({
+      up.store_upload!(@assignment_file_data, {
         type:       "Assignment File",
         user:       "#{user.name} (#{user.id})",
         course:     "#{course.name} (#{course.id})",
         date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
       })
-      up.store_upload!(@assignment_file_data)
       up.save!
 
       self.assignment_upload_id = up.id
@@ -178,13 +177,12 @@ class Assignment < ActiveRecord::Base
 
       up = Upload.new
       up.user_id = user.id
-      up.store_meta!({
+      up.store_upload!(@grading_file_data, {
         type:       "Assignment Grading File",
         user:       "#{user.name} (#{user.id})",
         course:     "#{course.name} (#{course.id})",
         date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
       })
-      up.store_upload!(@grading_file_data)
       up.save!
 
       self.grading_upload_id = up.id
@@ -202,13 +200,12 @@ class Assignment < ActiveRecord::Base
 
       up = Upload.new
       up.user_id = user.id
-      up.store_meta!({
+      up.store_upload!(@solution_file_data, {
         type:       "Assignment Solution File",
         user:       "#{user.name} (#{user.id})",
         course:     "#{course.name} (#{course.id})",
         date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
       })
-      up.store_upload!(@solution_file_data)
       up.save!
 
       self.solution_upload_id = up.id

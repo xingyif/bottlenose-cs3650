@@ -1,7 +1,10 @@
 <% @page_title = "View Submission Details" %>
+<style>
+  .affix { top: 0 }
+</style>
 
 <p>
-  <%= link_to "Back to Assignment: #{@assignment.name}", course_assignment_path(@course, @assignment) %>
+  <%= link_to "< Back to submission", course_assignment_submission_path(@course, @assignment, @submission) %>
 </p>
 
 <h1>Submission</h1>
@@ -27,25 +30,38 @@
     <td><span class="local-time"><%= @submission.created_at %></span></td>
   </tr>
   <tr>
-    <td><strong>Submitted File</strong></td>
-    <td>
-      <%= link_to @submission.file_name, @submission.file_path %>
-      <% @file_contents.each_index do |i| %>
-      <%   f = @file_contents[i] %>
-      <%   t = @file_types[i] %>
-        <div>
-          <textarea class="sourceCode" data-lang="<%= t %>" id="submission<%= i %>"><%= render html: f %></textarea>
-        </div>
-      <% end %>
-    </td>
-  </tr>
-  <tr>
     <td><strong>Student Notes</strong></td>
     <td>
       <div class="prose"><%= @submission.student_notes %></div>
     </td>
   </tr>
 </table>
+
+<div class="row">
+  <div class="col-sm-3" style="margin-left: -25%;">
+    <ul id="files" class="nav nav-stacked condensed" data-spy="affix" data-offset-top="250">
+      <% @submission_files.each_with_index do |f, i| %>
+      <li><a data-toggle="tab" href="#file_<%= i %>" <%= if i == 0; "class: \"active\"" end %> ><%= f[:name] %></a></li>
+      <% end %>
+    </ul>
+  </div>
+  <div class="col-sm-12 tab-content">
+    <% @submission_files.each_with_index do |f, i| %>
+    <div class="tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="file_<%= i %>"
+         style="border-top: 1px solid #ddd; border-radius: 5px;">
+      <% if f[:ftype] == "image" %>
+      <%= image_tag f[:link], alt: f[:name] %>
+      <% elsif f[:ftype] == "zip" || f[:ftype] == "jar" %>
+      <%= link_to f[:link], "Download #{f[:name]}" %>
+      <% else %>
+      <div>
+      <textarea class="sourceCode" data-lang="<%= f[:type] %>" id="contents_<%= i %>"><%= render html: f[:contents] %></textarea>
+      </div>
+      <% end %>
+    </div>
+    <% end %>
+  </div>
+</div>
 
 <script>
 $(function (){
@@ -58,11 +74,17 @@ $(function (){
         lineNumbers: true, lineWrapping: false,
         styleActiveLine: true
       });
+      var height = cm.heightAtLine(Math.min(75, cm.getDoc().lineCount())) - cm.heightAtLine(0);
+      cm.setSize(null, height + 30);
       // cm.setSize(null, cm.heightAtLine(cm.getDoc().lineCount() + 1) - cm.heightAtLine(cm.getDoc().firstLine() - 1) + 30);
       // CodeMirror.runMode($(code).text(), $(code).data(\"lang\"), code);
       $(code).addClass("cm-s-mdn-like cm-s-default");
     }
     });
+  $(".tab-pane.hideAfterRender").each(function() {
+    $(this).removeClass("active").removeClass("hideAfterRender");
+  });
+  $("#files").data("offset-top", $("#files").offset().top).css("width", $("#files").width());
 });
 </script>
 

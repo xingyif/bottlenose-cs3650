@@ -17,7 +17,7 @@
   <% allowed = @assignment.sub_allow_submission?(@submission)
      staff_override = true_user.course_staff?(@course)
      %>
-  <% if @team.nil? && @assignment.team_sub? %>
+  <% if @team.nil? && @assignment.team_subs? %>
     <div class="alert alert-danger">
       <p>This assignment requires team submissions,
         and you are not currently in a team.</p>
@@ -44,7 +44,11 @@
     </div>
     <% end %>
 
+    <% if @team.nil? %>
+    <p>This will be an individual submission.</p>
+    <% else %>
     <p>This will be a team submission for <strong><%= @team %></strong>.</p>
+    <% end %>
 
     <div class="form-group">
       <%= f.label :student_notes %>

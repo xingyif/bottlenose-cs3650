@@ -1,0 +1,26 @@
+[ ] time-taken
+[X] unzip archives
+[ ] per-file markup
+   [X] edit the .../files endpoint
+[ ] automated graders
+   [ ] junit
+   [ ] style
+   [ ] checker
+[ ] NUID
+   [ ] make sure it's only visible to faculty -- not just any staff!
+[ ] defered running of grading scripts
+[ ] meta-grading
+[ ] revise solution files for assignments
+[ ] user profiles
+   [ ] NUID
+   [ ] profile picture
+   [ ] nickname
+   [ ] initial login experience
+[ ] clone course
+   [ ] deep-clone assignments
+[ ] backup database
+[ ] export all files
+[ ] self-evals
+   [ ] new assignment type
+   [ ] questionaire
+   [ ] grading

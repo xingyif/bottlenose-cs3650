@@ -211,6 +211,7 @@ GEM
     yaml_db (0.3.0)
       rails (>= 3.0, < 4.3)
       rake (>= 0.8.7)
+    zipruby (0.3.6)
 
 PLATFORMS
   ruby
@@ -251,6 +252,7 @@ DEPENDENCIES
   uglifier
   whenever
   yaml_db
+  zipruby
 
 BUNDLED WITH
    1.12.5
