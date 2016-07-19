@@ -6,7 +6,7 @@ require 'zlib'
 class Upload < ActiveRecord::Base
   validates :file_name,  :presence => true
   validates :user_id,    :presence => true
-  validates :secret_key, :presence => true, :uniqueness => true
+  validates :secret_key, :presence => true
 
   validate :data_and_metadata_stored
 

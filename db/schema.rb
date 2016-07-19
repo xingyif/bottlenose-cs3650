@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160710233936) do
+ActiveRecord::Schema.define(version: 20160719122956) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -154,12 +154,16 @@ ActiveRecord::Schema.define(version: 20160710233936) do
     t.integer "submission_id", null: false
   end
 
+  add_index "subs_for_gradings", ["user_id", "assignment_id"], name: "unique_sub_per_user_assignment", unique: true, using: :btree
+
   create_table "team_users", force: :cascade do |t|
     t.integer  "team_id"
     t.integer  "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  add_index "team_users", ["team_id", "user_id"], name: "unique_team_memebers", unique: true, using: :btree
 
   create_table "teams", force: :cascade do |t|
     t.integer  "course_id"
