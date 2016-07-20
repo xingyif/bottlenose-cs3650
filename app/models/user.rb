@@ -18,7 +18,6 @@ class User < ActiveRecord::Base
 
   validates :email, :format => { :with => /\@.*\./ }
 
-  validates :email, uniqueness: true
   validates :name,  length: { in: 2..30 }
 
   def self.pepper
@@ -31,7 +30,6 @@ class User < ActiveRecord::Base
 
   # Different people with the same name are fine.
   # If someone uses two emails, they get two accounts. So sad.
-  #validates :name,  :uniqueness => true
 
   def ldap_before_save
     res = Devise::LDAP::Adapter.get_ldap_entry(self.email)

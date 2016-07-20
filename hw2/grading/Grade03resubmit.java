@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-import org.cs3500.TestWeight;
+import edu.neu.cs3500.TestWeight;
 
 import static org.junit.Assert.*;
 
@@ -146,7 +146,7 @@ public class Grade03resubmit extends GradingSandbox
 	}
     }
 
-    //weight=0.5
+    @TestWeight(weight=0.5)
     @Test
     public void testGameFourPlayersInvalidPlay() throws Exception
     {

@@ -6,13 +6,15 @@ class TapParser
     @test_count = 0
     @tests = []
     @commentary = []
-    lines = text.split("\n")
-    parse_version(lines)
-    parse_count(lines)
-    parse_commentary(lines)
-    parse_test(lines) while lines.count > 0
-    @tests.length.upto(@test_count - 1) do |i|
-      @tests[i] = missing_test(i + 1)
+    if text != ""
+      lines = text.split("\n")
+      parse_version(lines)
+      parse_count(lines)
+      parse_commentary(lines)
+      parse_test(lines) while lines.count > 0
+      @tests.length.upto(@test_count - 1) do |i|
+        @tests[i] = missing_test(i + 1)
+      end
     end
   end
 
@@ -68,7 +70,7 @@ class TapParser
       if lines.length > 0
         mm = lines[0].match(/^(\s+)---\s*$/)
         if mm
-          test["info"] = parse_info(lines, mm[1])
+          test[:info] = parse_info(lines, mm[1])
         end
       end
       @tests.push test
@@ -83,43 +85,31 @@ class TapParser
       break if line == (indent + "...")
       info.push(mm[1])
     end
-    YAML.load(info.join("\n"))
-  end
-
-  def tests_ok
-    tests = {}
-    @text.split("\n").each do |line|
-      # Passing test?
-      mm = line.match(/^ok (\d+) -/)
-      if mm
-        nn = mm[1].to_i
-        tests[nn] = 1 if tests[nn].nil?
-      end
-
-      # Failing test wins.
-      mm = line.match(/^not ok (\d+) -/)
-      if mm
-        nn = mm[1].to_i
-        tests[nn] = false
-      end
+    begin
+      YAML.load(info.join("\n"))
+    rescue Exception => ee
+      print "Couldn't parse YAML for:\n```\n"
+      print info.join("\n")
+      print "```\n"
+      print "Error was #{ee}\n"
     end
-
-    # Count passing tests.
-    points = 0
-    1.upto(@test_count) do |ii|
-      points += 1 if tests[ii]
-    end
-
-    points
   end
 
   def points_available
-    total_points = @test_count
+    total_points = false
 
-    @text.split("\n").each do |line|
-      mm = line.match(/# TOTAL POINTS: (\d+)/)
+    # Find the total points
+    @commentary.each do |comm|
+      mm = comm.match(/TOTAL POINTS: (\d+)/)
       if mm
-        total_points = mm[1].to_i
+        total_points = mm[1].to_f
+      end
+    end
+
+    if total_points == false
+      total_points = 0
+      @tests.each do |t|
+        total_points += t[:info]["weight"]
       end
     end
 
@@ -127,26 +117,34 @@ class TapParser
   end
 
   def points_earned
-    points = @tests_ok
-
-    @text.split("\n").each do |line|
-      mm = line.match(/# POINTS: (\d+)/)
+    total_points = false
+    # Find the total points
+    @commentary.each do |comm|
+      mm = comm.match(/TOTAL POINTS: (\d+)/)
       if mm
-        points = points + mm[1].to_i - 1
+        total_points = mm[1].to_f
       end
     end
 
-    points
+    if total_points == false
+      total_points = 0
+      @tests.each do |t|
+        next if t[:passed] == false # skip the failed tests; they don't add anything
+        next if t[:info]["suppressed"] # skip the suppressed tests
+        total_points += t[:info]["weight"]
+      end
+    else
+      @tests.each do |t|
+        next if t[:passed] # skip the passed tests; they don't deduct anything
+        next if t[:info]["suppressed"] # skip the suppressed tests
+        total_points -= t[:info]["weight"]
+      end
+    end
+    # Return the resulting points
+    total_points
   end
 
   def summary
-    # <<-"SUMMARY"
-    # Test count:        #{test_count}
-    # Tests OK:          #{tests_ok}
-    # Points available:  #{points_available}
-    # Points earned:     #{points_earned}
-    # SUMMARY
-
     nums = @tests.map {|t| t[:num] }
 
     <<-"SUMMARY"
@@ -156,6 +154,7 @@ class TapParser
     Test data: #{nums}
     Commentary: #{@commentary}
     Num tests: #{@tests.length}
+    Points earned: #{points_earned}
     SUMMARY
   end
 end

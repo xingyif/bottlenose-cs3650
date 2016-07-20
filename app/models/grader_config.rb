@@ -11,7 +11,7 @@ class GraderConfig < ActiveRecord::Base
   def grader_for(sub)
     g = Grader.find_or_create_by(grader_config_id: self.id, submission_id: sub.id)
     if g.new_record?
-      g.out_of = self.avail_points
+      g.out_of = self.avail_score
     end
     g
   end

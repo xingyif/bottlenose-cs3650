@@ -96,17 +96,20 @@
         <% scores[:scores].each do |s| %>
         <td class="text-right">
           <% if s.kind_of?(Array) %>
-          <%= s[0] %>&nbsp;/&nbsp;<%= s[1] %>
+          <%= number_with_precision(s[0], :precision => 2) %>&nbsp;/&nbsp;<%= number_with_precision(s[1], :precision => 2)%>
           <% else %>
           <%= s %>
           <% end %>
         </td>
         <% end %>
         <% if scores[:raw_score] && sub.score %>
-        <td class="text-right"><%= scores[:raw_score] %>&nbsp;/&nbsp;<%= @gradesheet.max_score %></td>
+        <td class="text-right">
+          <%= number_with_precision(scores[:raw_score], :precision => 2)%>&nbsp;/&nbsp;<%= number_with_precision(@gradesheet.max_score, :precision => 2)%>
+        </td>
         <td>(<%= number_with_precision(sub.score, :precision => 2) %>%)</td>
         <% else %>
-        <td><%= image_tag("question-mark.png", height: 32) %></td><td></td>
+        <td class="text-right"><%= image_tag("question-mark.png", height: 32) %></td>
+        <td>NONE</td>
         <% end %>
         <% if cur_reg.staff? %>
         <td class="text-right">

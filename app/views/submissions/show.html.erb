@@ -56,7 +56,8 @@
   <td><%= c.type %></td>
   <td>
     <% if scores.kind_of?(Array) %>
-    <%= scores[0] %>&nbsp;/&nbsp;<%= scores[1] %>
+    <%= number_with_precision(scores[0], :precision => 2)
+    %>&nbsp;/&nbsp;<%= number_with_precision(scores[1], :precision => 2) %>
     <% else %>
     <%= scores %>
     <% end %>

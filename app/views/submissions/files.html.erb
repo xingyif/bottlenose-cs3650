@@ -67,7 +67,7 @@ $(function (){
         lineNumbers: true, lineWrapping: false,
         styleActiveLine: true
       });
-      var height = cm.heightAtLine(Math.min(75, cm.getDoc().lineCount())) - cm.heightAtLine(0);
+      var height = cm.heightAtLine(75) - cm.heightAtLine(0);
       cm.setSize(null, height + 30);
       // cm.setSize(null, cm.heightAtLine(cm.getDoc().lineCount() + 1) - cm.heightAtLine(cm.getDoc().firstLine() - 1) + 30);
       // CodeMirror.runMode($(code).text(), $(code).data(\"lang\"), code);

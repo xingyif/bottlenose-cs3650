@@ -21,11 +21,12 @@ class Gradesheet
       @configs.each do |c|
         g = @graders[s.id].find do |g| g.grader_config_id == c.id end
         if g
-          if g.available?
-            s_scores[:raw_score] += g.score
-            s_scores[:scores].push [g.score, c.avail_score]
+          scaled = g.score.to_f * (c.avail_score.to_f / g.out_of.to_f)
+          if g.available?  
+            s_scores[:raw_score] += scaled
+            s_scores[:scores].push [scaled, c.avail_score]
 
-            b_scores[:scores].push [g.score, c.avail_score]
+            b_scores[:scores].push [scaled, c.avail_score]
             if b_scores[:raw_score] 
               b_scores[:raw_score] += g.score
             end
@@ -35,7 +36,10 @@ class Gradesheet
             b_scores[:raw_score] = nil
             b_scores[:scores].push "not ready"
           end
-        end        
+        else
+          s_scores[:scores].push "Missing"
+          b_scores[:scores].push "Missing"
+        end
       end
       @grades[:grades].push res
     end

@@ -128,10 +128,14 @@ class Upload < ActiveRecord::Base
         end
       end
     end
-    rec_path(Pathname.new("#{upload_dir}/extracted/"))
+    rec_path(extracted_path)
   end
 
 
+  def extracted_path
+    upload_dir.join("extracted")
+  end
+  
   def submission_path
     upload_dir.join("submission", file_name)
   end
@@ -140,6 +144,10 @@ class Upload < ActiveRecord::Base
     upload_dir.join("metadata.yaml")
   end
 
+  def grader_path(grader)
+    upload_dir.join("graders", grader.id.to_s)
+  end
+  
   private
   def upload_path_for(p)
     p.to_s.sub(Rails.root.join("public").to_s, "")
