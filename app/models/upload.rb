@@ -28,6 +28,25 @@ class Upload < ActiveRecord::Base
     true
   end
 
+  def fix_submission
+    base = upload_dir
+    base.mkpath
+    begin
+      if File.exists?(base.join("_metadata"))
+        base.join("submission").mkpath
+        base.join("extracted").mkpath
+        base.join("graders").mkpath
+        FileUtils.mv(base.join("_metadata"), base.join("metadata.yaml"))
+        FileUtils.mv(base.join("strings.rkt"), base.join("submission/strings.rkt"))
+        FileUtils.cp_r(base.join("submission/."), base.join("extracted"))
+      end
+      true
+    rescue Exception => ee
+      print "Problem with #{self.id}: #{ee}\n"
+      false
+    end
+  end
+  
   def create_submission_structure(upload, metadata)
     # upload_dir/
     # +-- metadata.yaml
@@ -99,7 +118,7 @@ class Upload < ActiveRecord::Base
 
   def path
     # Yields a string that's a public uploads path to the submitted file
-    upload_path_for(submission_path)
+    Upload.upload_path_for(submission_path)
   end
 
   def store_upload!(upload, metadata)
@@ -122,7 +141,7 @@ class Upload < ActiveRecord::Base
     def rec_path(path)
       path.children.sort.collect do |child|
         if child.file?
-          {path: child.basename.to_s, full_path: child, public_link: upload_path_for(child)}
+          {path: child.basename.to_s, full_path: child, public_link: Upload.upload_path_for(child)}
         elsif child.directory?
           {path: child.basename.to_s, children: rec_path(child)}
         end
@@ -147,9 +166,8 @@ class Upload < ActiveRecord::Base
   def grader_path(grader)
     upload_dir.join("graders", grader.id.to_s)
   end
-  
-  private
-  def upload_path_for(p)
+
+  def self.upload_path_for(p)
     p.to_s.sub(Rails.root.join("public").to_s, "")
   end
 

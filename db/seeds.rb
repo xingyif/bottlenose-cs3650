@@ -54,6 +54,7 @@ when "development"
                             )
   manual = ManualGrader.create!(avail_score: 42)
   junit = JunitGrader.create!(avail_score: 58, params: "Whee")
+  style = JavaStyleGrader.create!(avail_score: 55)
 
   0.upto(5).each do |i|
     assignment = Assignment.create!(
@@ -66,8 +67,11 @@ when "development"
                                     blame: ben,
                                     due_date: Time.now + ((i - 3) * 1.week),
                                     )
-    AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: junit.id, order: 1)
-    AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: manual.id, order: 2)
+    if assignment.id > 3
+      AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: junit.id, order: 1)
+    end
+    AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: style.id, order: 2)
+    AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: manual.id, order: 3)
   end
   [ben, olin, amal].each do |professor|
     Registration.create!(
@@ -106,12 +110,13 @@ when "development"
       print "Creating team submissions for #{fundies1.students.count} students in #{assignment.name}\n"
       fundies1.students.each do |student|
         upload = Upload.new
+        submit_time = assignment.due_date + 48.hours - rand(96).hours
         upload.user_id = student.id
         upload.store_meta!({
                              type:       "Team Submission File",
                              user:       "#{student.name} (#{student.id})",
                              course:     "#{assignment.course.name} (#{assignment.course.id})",
-                             date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
+                             date:       submit_time.strftime("%Y/%b/%d %H:%M:%S %Z")
                            })
         submission_path = "#{Rails.root}/hw1/strings.rkt"
         submission_file = File.new(submission_path)
@@ -128,6 +133,7 @@ when "development"
                                  assignment_id: assignment.id,
                                  user: student,
                                  team: team
+                                 created_at: submit_time,
                                  )
         sub.grade!
         sub.set_used_sub!
@@ -136,12 +142,13 @@ when "development"
       print "Creating individual submissions for #{fundies1.students.count} students in #{assignment.name}\n"
       fundies1.students.each do |student|
         upload = Upload.new
+        submit_time = assignment.due_date + 48.hours - rand(96).hours
         upload.user_id = student.id
         upload.store_meta!({
                              type:       "Submission File",
                              user:       "#{student.name} (#{student.id})",
                              course:     "#{assignment.course.name} (#{assignment.course.id})",
-                             date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
+                             date:       submit_time.strftime("%Y/%b/%d %H:%M:%S %Z")
                            })
         submission_path = "#{Rails.root}/hw1/strings.rkt"
         submission_file = File.new(submission_path)
@@ -155,7 +162,8 @@ when "development"
                                  upload_id: upload.id,
                                  student_notes: "A submission",
                                  assignment_id: assignment.id,
-                                 user: student
+                                 user: student,
+                                 created_at: submit_time
                                  )
         sub.grade!
         sub.set_used_sub!

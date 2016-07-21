@@ -37,11 +37,11 @@
                <span class="label label-success" 
                   data-toggle="tooltip" data-placement="top"
                   title="This submission is used for grading">
-                <%= number_with_precision(submission.score, :precision => 2)%>
+                <%= to_fixed(submission.score)%>
                </span>
               <% else %>
                <span class="label label-default">
-                <%= number_with_precision(submission.score, :precision => 2)%>
+                <%= to_fixed(submission.score)%>
                </span>
               <% end %>
              <% end %>

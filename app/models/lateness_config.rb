@@ -1,3 +1,4 @@
+require 'clamp'
 class LatenessConfig < ActiveRecord::Base
   belongs_to :lateness_config
 
@@ -26,11 +27,17 @@ class LatenessConfig < ActiveRecord::Base
   end
 
   def penalize(score, assignment, submission)
-    penalty = late_penalty(assignment, submission) # compute penalty in [0, 1.0]
+    # score is [0, 100]
+    penalty = late_penalty(assignment, submission) # compute penalty in [0, 100]
+    print "Penalty is #{penalty}\n"
     if self.max_penalty # cap it
-      penalty = [self.max_penalty, penalty].min
+      penalty = penalty.clamp(0, self.max_penalty)
     end
-    [100, [0, score - penalty].max].min
+    print "Penalty is now #{penalty}\n"
+    print "Score is #{score}\n"
+    ans = (score - penalty).clamp(0, 100)
+    print "Penalized score is #{ans}\n"
+    ans
   end
 
 end

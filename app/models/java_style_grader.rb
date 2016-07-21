@@ -25,6 +25,6 @@ class JavaStyleGrader < GraderConfig
     g.updated_at = DateTime.now
     g.available = true
     g.save!
-    return self.avail_score * (tap.points_earned.to_f / tap.points_available.to_f)
+    return self.avail_score.to_f * (tap.points_earned.to_f / tap.points_available.to_f)
   end
 end

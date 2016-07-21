@@ -3,8 +3,8 @@
 [ ] per-file markup
    [X] edit the .../files endpoint
 [ ] automated graders
-   [ ] junit
-   [ ] style
+   [X] junit
+   [X] style
    [ ] checker
 [ ] NUID
    [ ] make sure it's only visible to faculty -- not just any staff!
@@ -24,3 +24,4 @@
    [ ] new assignment type
    [ ] questionaire
    [ ] grading
+[ ] exams

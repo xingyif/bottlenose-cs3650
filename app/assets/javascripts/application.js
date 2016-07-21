@@ -29,19 +29,20 @@
 //= require_tree .
 
 $(function() {
-    $('[data-toggle="tooltip"]').tooltip()
-
-    $('.local-time').each(function(_) {
-        var dd = moment(Date.parse($(this).text()));
-
-        if (dd.isValid()) {
-          var today = moment().startOf('day');
-          if (today.isBefore(dd))
-            $(this).text("Today, " + dd.format("h:mm:ssa"));
-          else
-            $(this).text(dd.format("MMM D YYYY, h:mm:ssa"));
-        }
-    });
+  $('[data-toggle="tooltip"]').tooltip()
+  
+  $('.local-time').each(function(_) {
+    var dd = moment(Date.parse($(this).text()));
+    if (!dd.isValid()) { dd = moment($(this).text()); }
+    
+    if (dd.isValid()) {
+      var today = moment().startOf('day');
+      if (today.isBefore(dd))
+        $(this).text("Today, " + dd.format("h:mm:ssa"));
+      else
+        $(this).text(dd.format("MMM D YYYY, h:mm:ssa"));
+    }
+  });
 })
 
 $(function() {

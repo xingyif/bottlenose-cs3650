@@ -154,14 +154,14 @@ class Submission < ActiveRecord::Base
       begin
         res = c.grade(assignment, self)
         max_score += c.avail_score
-        log += "#{c.type} => #{res}, "
+        log += "#{c.type} => #{res} / #{c.avail_score}, "
         unless res.nil?
           score += res
         end
       rescue NotImplementedError
       end
     end
-    self.score = (100.0 * score) / max_score
+    self.score = (100.0 * score.to_f) / max_score.to_f
     if self.ignore_late_penalty
       log += "Ignoring late penalty, "
     else
@@ -169,7 +169,7 @@ class Submission < ActiveRecord::Base
     end
     log += "Final score: #{self.score}%"
 
-    Audit.log("Grading submission at #{DateTime.current}, grades are #{log}\n")
+    Audit.log("Grading submission at #{DateTime.current}, grades are #{log}")
     self.save!
 
     # root = Rails.root.to_s

@@ -66,7 +66,7 @@ class User < ActiveRecord::Base
     def valid_ldap_authentication?(pwd)
       if self.email == "justin.case@fallback.ccs.neu" && 
           Devise::Encryptor.compare(self.class, self.encrypted_password, pwd)
-        Audit.log("Letting Justin in!\n")
+        Audit.log("Letting Justin in!")
         print("Letting Justin in!\n")
         true
       else

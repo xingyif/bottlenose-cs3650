@@ -28,7 +28,7 @@ module ApplicationHelper
       admin = current_user.course_staff?(@course)
     end
 
-    return number_with_precision(score, :precision => 2) if assignment.nil?
+    return to_fixed(score, 2) if assignment.nil?
 
     if assignment.hide_grading?
       if admin
@@ -37,10 +37,14 @@ module ApplicationHelper
         "not ready"
       end
     else
-      number_with_precision(score, :precision => 2)
+      to_fixed(score, 2)
     end
   end
 
+  def to_fixed(n, prec = 2)
+    number_with_precision(n, :precision => prec)
+  end
+  
   def status_image(sub, grade_pct)
     if (sub.nil? || sub.new_record?)
       return image_tag("null-mark.png", height: 32)

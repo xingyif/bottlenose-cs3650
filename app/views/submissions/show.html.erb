@@ -48,45 +48,52 @@
 <h1>Scoring Details</h1>
 
 <table class="table table-striped">
-<% g = @gradesheet.grades[:grades].find(sub: @submission).first
-   all_scores = if cur_reg.staff? then g[:staff_scores] else g[:blind_scores] end 
-   @gradesheet.configs.each_with_index do |c, i|
-     scores = all_scores[:scores][i] %>
-<tr>
-  <td><%= c.type %></td>
-  <td>
-    <% if scores.kind_of?(Array) %>
-    <%= number_with_precision(scores[0], :precision => 2)
-    %>&nbsp;/&nbsp;<%= number_with_precision(scores[1], :precision => 2) %>
-    <% else %>
-    <%= scores %>
-    <% end %>
-  </td>
-</tr>
-<% end %>
-<tr>
-  <td>Raw Score:</td>
-  <td><%= number_with_precision(all_scores[:raw_score], :precision => 2) %>
-    &nbsp;/&nbsp;<%= @gradesheet.max_score %></td>
-</tr>
-<tr>
-  <td>Raw Percentage</td>
-  <td><%= number_with_precision(100.0 * (all_scores[:raw_score] / @gradesheet.max_score), :precision => 2) %>%</td>
-</tr>
-<% if @submission.late? %>
-<tr>
-  <td>Days Late:</td>
-  <td><%= @submission.days_late %></td>
-</tr>
-<tr>
-  <td>Late Penalty:</td>
-  <td><%= number_with_precision(@submission.late_penalty, :precision => 2) %>%</td>
-</tr>
-<% end %>
-<tr>
-  <td>Total Score:</td>
-  <td><%= number_with_precision(@submission.score, :precision => 2) %>%</td>
-</tr>
+  <% g = @gradesheet.grades[:grades].find(sub: @submission).first
+     all_scores = if cur_reg.staff? then g[:staff_scores] else g[:blind_scores] end 
+     @gradesheet.configs.each_with_index do |c, i|
+       scores = all_scores[:scores][i] %>
+  <tr>
+    <td><%= c.type %></td>
+    <td>
+      <% if scores.kind_of?(Array) %>
+      <%= show_score(scores[0]) %>&nbsp;/&nbsp;<%= to_fixed(scores[1]) %>
+      <% if scores[-1] == "hidden" %> (hidden) <% end %>
+      <% else %>
+      <%= scores %>
+      <% end %>
+    </td>
+    <td><%= link_to "Grader output",
+            Upload.upload_path_for(@gradesheet.graders[@submission.id].find{|gr| gr.grader_config_id == c.id}
+                                              .grading_output) %></td>
+  </tr>
+  <% end %>
+  <tr>
+    <td>Raw Score:</td>
+    <td><%= to_fixed(all_scores[:raw_score]) %>&nbsp;/&nbsp;<%= to_fixed(@gradesheet.max_score) %></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Raw Percentage</td>
+    <td><%= to_fixed(100.0 * (all_scores[:raw_score] / @gradesheet.max_score)) %>%</td>
+    <td></td>
+  </tr>
+  <% if @submission.late? %>
+  <tr>
+    <td>Days Late:</td>
+    <td><%= @submission.days_late %></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Late Penalty:</td>
+    <td><%= to_fixed(@submission.late_penalty) %>%</td>
+    <td><%= if @submission.ignore_late_penalty then "(penalty ignored)" end %></td>
+  </tr>
+  <% end %>
+  <tr>
+    <td>Total Score:</td>
+    <td><%= show_score(@submission.score) %>%</td>
+    <td></td>
+  </tr>
 </table>
 
 <!-- <h1>Teacher Notes</h1> -->

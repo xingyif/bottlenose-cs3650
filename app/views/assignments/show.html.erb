@@ -69,81 +69,113 @@
       No submissions yet.
     </div>
   <% else %>
-    <table class="table table-striped row-vcenter">
-      <tr>
-        <th>Submitter</th>
-        <th>Date</th>
-        <th>Status</th>
-        <% @gradesheet.grades[:names].each do |c| %>
-        <th class="text-right"><%= c %></th>
-        <% end %>
-        <th class="text-right">Total</th>
-        <th>Grade</th>
-        <th class="text-right">Link</th>
-      </tr>
-      
-    <% @gradesheet.grades[:grades].each do |grade| %>
-      <% sub = grade[:sub] %>
-      <% if sub.stale_team? %>
-      <tr class='text-muted'>
-      <% else %>
-      <tr>
-      <% end %>
-        <td><%= sub.user.name %></td><!--<%= link_to sub.user.name, user_path(sub.user.id) %></td>-->
-        <td><span class="local-time"><%= sub.created_at %></span></td>
-        <% scores = if cur_reg.staff? then grade[:staff_scores] else grade[:blind_scores] end %>
-        <td><%= status_image(sub, scores[:raw_score]) %></td>
-        <% scores[:scores].each do |s| %>
-        <td class="text-right">
-          <% if s.kind_of?(Array) %>
-          <%= number_with_precision(s[0], :precision => 2) %>&nbsp;/&nbsp;<%= number_with_precision(s[1], :precision => 2)%>
-          <% else %>
-          <%= s %>
+    <table id="submissions" class="table table-striped row-vcenter">
+      <thead>
+        <tr>
+          <th>Submitter</th>
+          <th>Date</th>
+          <th>Status</th>
+          <% @gradesheet.grades[:names].each do |c| %>
+          <th class="text-right"><%= c %></th>
           <% end %>
-        </td>
-        <% end %>
-        <% if scores[:raw_score] && sub.score %>
-        <td class="text-right">
-          <%= number_with_precision(scores[:raw_score], :precision => 2)%>&nbsp;/&nbsp;<%= number_with_precision(@gradesheet.max_score, :precision => 2)%>
-        </td>
-        <td>(<%= number_with_precision(sub.score, :precision => 2) %>%)</td>
+          <th class="text-right">Total</th>
+          <th>Grade</th>
+          <th class="text-right">Link</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% @gradesheet.grades[:grades].each do |grade| %>
+        <% sub = grade[:sub] %>
+        <% if sub.stale_team? %>
+        <tr class='text-muted'>
         <% else %>
-        <td class="text-right"><%= image_tag("question-mark.png", height: 32) %></td>
-        <td>NONE</td>
+        <tr>
         <% end %>
-        <% if cur_reg.staff? %>
-        <td class="text-right">
-          <form method="link"
-                action="<%= course_assignment_submission_path(@course, @gradesheet.assignment, sub) %>">
-            <div class="btn-group">
-              <%= link_to "View",
-                  course_assignment_submission_path(@course, @gradesheet.assignment, sub),
-                  class: "btn btn-sm btn-default" %>
-              <button type="button" class="btn btn-sm btn-default dropdown-toggle"
-                      data-toggle="dropdown"
-                      aria-haspopup="true" aria-expanded="false">
-                <span class="caret"></span>
-                <span class="sr-only">Toggle Dropdown</span>
-              </button>
-              <ul class="dropdown-menu">
-                <li><%= link_to "View most recent", 
-                        course_assignment_submission_path(@course, @gradesheet.assignment, sub), 
-                        class: "dropdown-item" %></li>
-                <li><%= link_to "View all", 
-                        course_assignment_user_path(@course, @gradesheet.assignment, sub.user.id), 
-                        class: "dropdown-item" %></li>
-              <!-- <div class="dropdown-divider"></div> -->
-              </ul>
-            </div>        
-          </form>
-        </td>
-        <% else %>
-        <td><%= link_to "View", course_assignment_submission_path(@course, @gradesheet.assignment, sub) %></td>
-        <% end %>
-      </tr>
-    <% end %>
-
+          <td><%= sub.user.name %></td><!--<%= link_to sub.user.name, user_path(sub.user.id) %></td>-->
+          <td><span class="local-time"><%= sub.created_at %></span></td>
+          <% scores = if cur_reg.staff? then grade[:staff_scores] else grade[:blind_scores] end %>
+          <td><%= status_image(sub, scores[:raw_score] / @gradesheet.max_score) %></td>
+          <% scores[:scores].each do |s| %>
+          <td class="text-right">
+            <% if s.kind_of?(Array) %>
+            <%= to_fixed(s[0]) %>&nbsp;/&nbsp;<%= to_fixed(s[1])%>
+            <% else %>
+            <%= s %>
+            <% end %>
+          </td>
+          <% end %>
+          <% if scores[:raw_score] && sub.score %>
+          <td class="text-right">
+            <%= to_fixed(scores[:raw_score])%>&nbsp;/&nbsp;<%= to_fixed(@gradesheet.max_score)%>
+          </td>
+          <td>(<%= to_fixed(sub.score) %>%)</td>
+          <% else %>
+          <td class="text-right"><%= image_tag("question-mark.png", height: 32) %></td>
+          <td>NONE</td>
+          <% end %>
+          <% if cur_reg.staff? %>
+          <td class="text-right">
+            <form method="link"
+                  action="<%= course_assignment_submission_path(@course, @gradesheet.assignment, sub) %>">
+              <div class="btn-group">
+                <%= link_to "View",
+                    course_assignment_submission_path(@course, @gradesheet.assignment, sub),
+                    class: "btn btn-sm btn-default" %>
+                <button type="button" class="btn btn-sm btn-default dropdown-toggle"
+                        data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                  <span class="caret"></span>
+                  <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                  <li><%= link_to "View most recent", 
+                          course_assignment_submission_path(@course, @gradesheet.assignment, sub), 
+                          class: "dropdown-item" %></li>
+                  <li><%= link_to "View all", 
+                          course_assignment_user_path(@course, @gradesheet.assignment, sub.user.id), 
+                          class: "dropdown-item" %></li>
+                <!-- <div class="dropdown-divider"></div> -->
+                </ul>
+              </div>        
+            </form>
+          </td>
+          <% else %>
+          <td><%= link_to "View", course_assignment_submission_path(@course, @gradesheet.assignment, sub) %></td>
+          <% end %>
+        </tr>
+      <% end %>
+      </tbody>
     </table>
+    <script>
+      $(function() {
+        $.tablesorter.themes.bootstrap = {
+          caption      : 'caption',
+          sortNone     : '',
+          sortAsc      : '',
+          sortDesc     : '',
+          active       : '', // applied when column is sorted
+          hover        : '', // custom css required - a defined bootstrap style may not override other classes
+          // icon class names
+          icons        : '', // add "icon-white" to make them white; this icon class is added to the <i> in the header
+          iconSortAsc  : 'glyphicon glyphicon-chevron-up', // class name added to icon when column has ascending sort
+          iconSortDesc : 'glyphicon glyphicon-chevron-down', // class name added to icon when column has descending sort
+          filterRow    : '', // filter row class; use widgetOptions.filter_cssFilter for the input/select element
+          footerRow    : '',
+          footerCells  : '',
+          even         : '', // even row zebra striping
+          odd          : ''  // odd row zebra striping
+        };
+        $("#submissions").tablesorter({
+          headerTemplate: "{content} {icon}",
+          headers: {
+            2: { sorter: false },
+            8: { sorter: false },
+          },
+          theme: "bootstrap",
+          widgets: ['uitheme']
+        });
+      });
+    </script>    
   <% end %>
 <% else %>
 <%= render 'user_subs', user: current_user, course: @course, gradesheet: @gradesheet %>
