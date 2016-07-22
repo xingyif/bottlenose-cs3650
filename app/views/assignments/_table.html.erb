@@ -28,7 +28,7 @@
           %>
         <tr>
           <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
-          <td><%= assignment.due_date.strftime("%b %e, %l:%M %p") %></td>
+          <td><span class="local-time"><%= assignment.due_date %></span></td>
           <td><%= show_score(score, assignment) %></td>
           <td>
             <% submissions.limit(5).each do |submission| %>
