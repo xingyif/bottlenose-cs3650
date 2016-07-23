@@ -185,6 +185,10 @@ class Submission < ActiveRecord::Base
       UserSubmission.exists?(user: user, submission: self)
   end
 
+  def grade_complete?
+    graders.all?(&:available)
+  end
+  
   private
 
   def user_is_registered_for_course

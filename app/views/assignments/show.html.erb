@@ -54,6 +54,10 @@
   <% if cur_reg.staff? %>
     <%= link_to "Download all", 
         course_assignment_tarball_path(@course, @gradesheet.assignment), class: "btn btn-default" %>
+    <%= link_to "Publish grades", 
+        course_assignment_publish_path(@course, @gradesheet.assignment), class: "btn btn-default",
+        method: 'patch',
+        data: { confirm: "Are you sure you want to publish all grades?" }%>
   <% else %>
     <%= link_to "New Submission", 
         new_course_assignment_submission_path(@course, @gradesheet.assignment), class: "btn btn-success" %>

@@ -41,6 +41,7 @@ Bottlenose::Application.routes.draw do
         member do
           get :files
           get :use, to: 'submissions#use_for_grading', as: 'use'
+          patch :publish, to: 'submissions#publish', as: 'publish'
         end
       end
     end
@@ -56,6 +57,7 @@ Bottlenose::Application.routes.draw do
 
   get 'courses/:course_id/assignments/:id/user/:user_id' => 'assignments#show_user', as: 'course_assignment_user'
   get 'courses/:course_id/assignments/:id/tarball' => 'assignments#tarball', as: 'course_assignment_tarball'
+  patch 'courses/:course_id/assignments/:id/publish' => 'assignments#publish', as: 'course_assignment_publish'
 
   # # Staff routes.
   # ###############

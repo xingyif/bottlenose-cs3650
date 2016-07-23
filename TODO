@@ -10,6 +10,7 @@
    [ ] make sure it's only visible to faculty -- not just any staff!
 [ ] defered running of grading scripts
 [ ] meta-grading
+   [X] have a publish-grades button per assignment and per submission
 [ ] revise solution files for assignments
 [ ] user profiles
    [ ] NUID
@@ -25,3 +26,15 @@
    [ ] questionaire
    [ ] grading
 [ ] exams
+[ ] quizzes
+   [ ] online
+   [ ] auto-graded?
+[ ] dropping class
+   [ ] students self-dropping
+   [ ] profs dropping students
+   [ ] invalidating teams
+   [ ] storing date of drop
+   [ ] hide students from class roster
+   [ ] affect exporting?
+[ ] export course spreadsheet
+[ ] test with syntactically invalid inputs / compile-error inputs

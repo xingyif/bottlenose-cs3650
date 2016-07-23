@@ -101,11 +101,25 @@ class SubmissionsController < CoursesController
   end
 
   def use_for_grading
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
     @submission = Submission.find(params[:id])
     @submission.set_used_sub!
     redirect_to :back
   end
 
+  def publish
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+    @submission = Submission.find(params[:id])
+    @submission.graders.update_all(:available => true)
+    redirect_to :back
+  end
+  
   private
 
   def submission_params

@@ -125,7 +125,6 @@ class AssignmentsController < CoursesController
     @gradesheet = Gradesheet.new(assignment, submissions)
   end
 
-  # TODO: There is no route for this currently.
   def tarball
     unless current_user.site_admin? || current_user.registration_for(@course).staff?
       redirect_to root_path, alert: "Must be an admin or staff."
@@ -135,6 +134,21 @@ class AssignmentsController < CoursesController
     tb = SubTarball.new(params[:id])
     tb.update!
     redirect_to tb.path
+  end
+
+  def publish
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
+    assignment = Assignment.find(params[:id])
+    used = assignment.used_submissions
+    used.each do |u|
+      u.graders.update_all(:available => true)
+    end
+
+    redirect_to :back
   end
 
   protected
