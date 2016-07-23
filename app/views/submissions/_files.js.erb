@@ -1,0 +1,75 @@
+$(function (){
+  var comments = <%= raw(JSON.pretty_generate(@submission_files.map{|s| s[:comments]})) %>;
+  $("textarea.sourceCode").each(function(index, code) {
+    if ($(code).data("lang")) {
+      var cm = CodeMirror.fromTextArea(code, {
+        readOnly: true, indentUnit: 2,
+        mode: $(code).data("lang"),
+        theme: 'mdn-like', viewportMargin: Infinity,
+        lineNumbers: true, lineWrapping: false,
+        styleActiveLine: true
+      });
+      var height = cm.heightAtLine(75) - cm.heightAtLine(0);
+      cm.setSize(null, height + 30);
+      // cm.setSize(null, cm.heightAtLine(cm.getDoc().lineCount() + 1) - cm.heightAtLine(cm.getDoc().firstLine() - 1) + 30);
+      // CodeMirror.runMode($(code).text(), $(code).data(\"lang\"), code);
+      //cm.operation(function() {
+        var theseComments = comments[index];
+        Object.keys(theseComments).forEach(function(line, _) {
+          var commentsOnLine = theseComments[line];
+          commentsOnLine.forEach(function(comment, _) {
+            var widget = $("<div>").addClass(comment.info.severity);
+            var table = $("<table>");
+            widget.append(table);
+            var row = $("<tr>");
+            table.append(row);
+            var td = $("<td>").addClass("nowrap");
+            row.append(td);
+            var category = $("<span>").text(comment.info.category).addClass("label label-default");
+            td.append(category);
+            if (comment.info.suppressed) {
+              var icon = $("<span>").addClass("glyphicon glyphicon-flag")
+                  .data("toggle", "toolip").data("placement", "top")
+                  .attr("title", "Too many errors of this type were found; no further points were deducted");
+              td.append(icon);
+              var deduction = $("<span>").text("[-" + comment.info.weight + "]").addClass("label label-default")
+                  .data("toggle", "tooltip").data("placement", "top")
+                  .attr("title", "This problem would normally deduct " + comment.info.weight + " points");
+              td.append(deduction);
+            } else {
+              var deduction = $("<span>").text("-" + comment.info.weight).addClass("label label-danger");
+              td.append(deduction);
+            }
+            td = $("<td>");
+            row.append(td);
+            td.append($("<span>").addClass("description").text(comment.comment + ": " + comment.info.message));
+            cm.addLineWidget(parseInt(line) - 1, widget[0], {coverGutter: false, noHScroll: true});
+          });
+        });
+      //});
+      $(code).addClass("cm-s-mdn-like cm-s-default");
+    }
+    });
+  $(".tab-pane.hideAfterRender").each(function() {
+    $(this).removeClass("active").removeClass("hideAfterRender");
+  });
+  $("#files").treeview({
+    expandIcon: 'glyphicon glyphicon-chevron-down', // deliberately the same
+    collapseIcon: 'glyphicon glyphicon-chevron-down', // always expanded
+    enableLinks: true,
+    onNodeSelected: function(e, data) {
+      console.log(data);
+      e.preventDefault();
+      e.stopPropagation();
+      if (data.href !== undefined && data.href !== "#") {
+        $(".tab-pane").removeClass("active");
+        $(data.href).addClass("active");
+      }
+    },
+    data: <%= raw(@submission_dirs) %>
+  });
+  $("#files").treeview('expandAll', { silent: true });
+  $("#files").data("offset-top", $("#files").offset().top);
+  if (document.location.hash !== "")
+    $("#files a[href='" + document.location.hash + "']").tab('show');
+});

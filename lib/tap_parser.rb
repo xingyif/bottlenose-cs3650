@@ -1,6 +1,7 @@
 require 'yaml'
 
 class TapParser
+  attr_reader :text, :test_count, :tests, :commentary
   def initialize(text)
     @text = text
     @test_count = 0
@@ -11,7 +12,13 @@ class TapParser
       parse_version(lines)
       parse_count(lines)
       parse_commentary(lines)
-      parse_test(lines) while lines.count > 0
+      while lines.count > 0
+        count = lines.count
+        parse_test(lines)
+        if count == lines.count # no progress
+          raise "Could not parse TAP file at line #{lines[0]}"
+        end
+      end
       @tests.length.upto(@test_count - 1) do |i|
         @tests[i] = missing_test(i + 1)
       end

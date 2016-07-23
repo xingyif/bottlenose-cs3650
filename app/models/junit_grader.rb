@@ -3,6 +3,10 @@ require 'tap_parser'
 require 'audit'
 
 class JunitGrader < GraderConfig
+  def autograde?
+    true
+  end
+
   def grade(assignment, sub)
     g = self.grader_for sub
     u = sub.upload

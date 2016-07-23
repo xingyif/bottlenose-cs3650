@@ -85,6 +85,38 @@ table.row-vcenter > tbody > tr > td {
    margin-top: 0;
 }
 
+div.CodeMirror-linewidget > div {
+   background: $btn-default-bg;
+   border-radius: 5px;
+   color: black;
+   padding: 5px;
+}
+
+div.CodeMirror-linewidget > div td {
+   vertical-align: top;
+}
+div.CodeMirror-linewidget > div td.nowrap {
+   white-space: nowrap;
+}
+
+
+div.CodeMirror-linewidget > div span {
+   margin-left: 3px;
+   margin-right: 3px;
+}
+
+div.CodeMirror-linewidget > div.Error {
+   background: $alert-danger-bg;
+}
+
+div.CodeMirror-linewidget > div.Warning {
+   background: $alert-warning-bg;
+}
+
+div.CodeMirror-linewidget > div.Suggestion {
+   background: $alert-info-bg;
+}
+
 .spinner {
   width: 100px;
 }

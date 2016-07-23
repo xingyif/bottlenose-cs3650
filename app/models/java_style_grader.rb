@@ -2,6 +2,10 @@ require 'open3'
 require 'tap_parser'
 
 class JavaStyleGrader < GraderConfig
+  def autograde?
+    true
+  end
+
   def grade(assignment, sub)
     g = self.grader_for sub
     u = sub.upload

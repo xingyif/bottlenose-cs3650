@@ -57,46 +57,7 @@
 </div>
 
 <script>
-$(function (){
-  $("textarea.sourceCode").each(function(_, code) {
-    if ($(code).data("lang")) {
-      var cm = CodeMirror.fromTextArea(code, {
-        readOnly: true, indentUnit: 2,
-        mode: $(code).data("lang"),
-        theme: 'mdn-like', viewportMargin: Infinity,
-        lineNumbers: true, lineWrapping: false,
-        styleActiveLine: true
-      });
-      var height = cm.heightAtLine(75) - cm.heightAtLine(0);
-      cm.setSize(null, height + 30);
-      // cm.setSize(null, cm.heightAtLine(cm.getDoc().lineCount() + 1) - cm.heightAtLine(cm.getDoc().firstLine() - 1) + 30);
-      // CodeMirror.runMode($(code).text(), $(code).data(\"lang\"), code);
-      $(code).addClass("cm-s-mdn-like cm-s-default");
-    }
-    });
-  $(".tab-pane.hideAfterRender").each(function() {
-    $(this).removeClass("active").removeClass("hideAfterRender");
-  });
-  $("#files").treeview({
-    expandIcon: 'glyphicon glyphicon-chevron-down', // deliberately the same
-    collapseIcon: 'glyphicon glyphicon-chevron-down', // always expanded
-    enableLinks: true,
-    onNodeSelected: function(e, data) {
-      console.log(data);
-      e.preventDefault();
-      e.stopPropagation();
-      if (data.href !== undefined && data.href !== "#") {
-        $(".tab-pane").removeClass("active");
-        $(data.href).addClass("active");
-      }
-    },
-    data: <%= raw(@submission_dirs) %>
-  });
-  $("#files").treeview('expandAll', { silent: true });
-  $("#files").data("offset-top", $("#files").offset().top);
-  if (document.location.hash !== "")
-    $("#files a[href='" + document.location.hash + "']").tab('show');
-});
+  <%= render :partial => 'submissions/files.js' %>
 </script>
 
 <% unless @submission.assignment.grading_upload_id.nil? %>

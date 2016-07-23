@@ -22,6 +22,17 @@ class SubmissionsController < CoursesController
       redirect_to course_assignment_path(@course, @assignment)
     end
 
+    @commentsByFile = @submission.grader_comments
+    @commentsByFile.each do |file, cBF|
+      cBF.each do |line, byLine|
+        byLine.each do |comment|
+          if comment[:info] and comment[:info]["filename"]
+            comment[:info]["filename"] = Upload.upload_path_for(comment[:info]["filename"])
+          end
+        end
+      end
+    end
+    
     @submission_files = []
     def with_extracted(item)
       if item[:public_link]
@@ -44,7 +55,8 @@ class SubmissionsController < CoursesController
                   "zip"
                 else
                   "text/unknown"
-                end
+                end,
+          comments: @commentsByFile[item[:full_path].to_s] || {}
           })
         { text: item[:path], href: "#file_#{@submission_files.count}" }
       else
@@ -55,7 +67,7 @@ class SubmissionsController < CoursesController
         }
       end
     end
-    @submission_dirs = @submission.upload.extracted_files.map{|i| with_extracted(i)}.to_json
+    @submission_dirs = JSON.pretty_generate(@submission.upload.extracted_files.map{|i| with_extracted(i)})
   end
 
   def new
@@ -91,7 +103,7 @@ class SubmissionsController < CoursesController
 
     if @submission.save_upload and @submission.save
       @submission.set_used_sub!
-      @submission.grade!
+      @submission.autograde!
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Submission was successfully created.')
     else

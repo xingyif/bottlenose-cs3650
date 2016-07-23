@@ -6,6 +6,10 @@ class GraderConfig < ActiveRecord::Base
     fail NotImplementedError, "Each grader should implement this"
   end
 
+  def autograde?
+    false
+  end
+
   protected
   
   def grader_for(sub)

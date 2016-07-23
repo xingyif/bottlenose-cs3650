@@ -106,6 +106,10 @@ class Submission < ActiveRecord::Base
     end
   end
 
+  def grader_comments
+    self.graders.map(&:comments).reduce({}, &:merge)
+  end
+  
   def comments_upload_file=(data)
     return if data.nil?
 
@@ -144,22 +148,31 @@ class Submission < ActiveRecord::Base
       upload.submission_path
     end
   end
+  
+  def autograde!
+    complete = true
+    assignment.grader_configs.each do |c|
+      if c.autograde?
+        c.grade(assignment, self)
+      else
+        complete = false
+      end
+    end
+    self.compute_grade! if complete
+  end
 
-  def grade!
+  def compute_grade!
     ### A Submission's score is recorded as a percentage
     score = 0.0
     max_score = 0.0
     log = ""
-    assignment.grader_configs.each do |c|
-      begin
-        res = c.grade(assignment, self)
-        max_score += c.avail_score
-        log += "#{c.type} => #{res} / #{c.avail_score}, "
-        unless res.nil?
-          score += res
-        end
-      rescue NotImplementedError
-      end
+    self.graders.each do |g|
+      return if g.score.nil?
+      component_weight = g.grader_config.avail_score.to_f
+      grade_component = component_weight * (g.score.to_f / g.out_of.to_f)
+      log += "#{g.grader_config.type} => #{grade_component} / #{component_weight}, "
+      score += grade_component
+      max_score += component_weight
     end
     self.score = (100.0 * score.to_f) / max_score.to_f
     if self.ignore_late_penalty
