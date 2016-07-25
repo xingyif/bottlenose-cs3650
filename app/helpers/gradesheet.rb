@@ -47,7 +47,7 @@ class Gradesheet
             end
           else
             s_scores[:raw_score] += g.score.to_f
-            s_scores[:scores].push [g.score.to_f, c.avail_score, "hidden"]
+            s_scores[:scores].push [g.score, c.avail_score, "hidden"]
             b_scores[:raw_score] = nil
             b_scores[:scores].push "not ready"
           end

@@ -168,7 +168,7 @@ class Upload < ActiveRecord::Base
   end
 
   def self.upload_path_for(p)
-    p.to_s.sub(Rails.root.join("public").to_s, "")
+    p.to_s.gsub(Rails.root.join("public").to_s, "")
   end
 
   def store_meta!(meta)

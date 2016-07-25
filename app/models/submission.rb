@@ -106,8 +106,8 @@ class Submission < ActiveRecord::Base
     end
   end
 
-  def grader_comments
-    self.graders.map(&:comments).reduce({}, &:merge)
+  def grader_line_comments
+    self.graders.map(&:line_comments).reduce({}, &:merge)
   end
   
   def comments_upload_file=(data)

@@ -20,6 +20,7 @@
 //= require bootstrap-sprockets
 //= require bootstrap-datetimepicker
 //= require bootstrap.treeview
+//= require bootstrap-toggle
 //= require codemirror
 //= require codemirror/addons/runmode/runmode
 //= require codemirror/addons/selection/active-line
@@ -45,71 +46,99 @@ $(function() {
   });
 })
 
+
+function activateSpinner(obj, options) {
+  var spinner = $(obj || this);
+  var input = spinner.find('input');
+  var upArrow = spinner.find('.btn:first-of-type');
+  var downArrow = spinner.find('.btn:last-of-type');
+  var upInterval, downInterval;
+  var delta = input.data("delta") || 1;
+  var max = input.data("max");
+  var min = input.data("min");
+  var val = parseFloat(input.val(), 10);
+  var precision = parseInt(options.precision || spinner.data("precision") || "0");
+  if (max !== undefined && val >= max)
+    upArrow.addClass("disabled");
+  if (min !== undefined && val <= min)
+    downArrow.addClass("disabled");
+  function validate() {
+    var val = parseFloat(input.val(), 10);
+    if (max !== undefined && val >= max) {
+      upArrow.addClass("disabled");
+      clearInterval(upInterval);
+      upInterval = undefined;
+    }
+    if (min === undefined || val > min)
+      downArrow.removeClass("disabled");
+    if (min !== undefined && val <= min) {
+      downArrow.addClass("disabled");
+      clearInterval(downInterval);
+      downInterval = undefined;
+    }
+    if (max === undefined || val < max)
+      upArrow.removeClass("disabled");
+  }
+  input.on("change", validate);
+  function increment() {
+    var newVal = parseFloat(input.val(), 10) + delta;
+    if (max !== undefined) {
+      newVal = Math.min(max, newVal);
+    }
+    input.val(newVal.toFixed(precision)).change();
+  }
+  function decrement() {
+    var newVal = parseFloat(input.val(), 10) - delta;
+    if (min !== undefined) {
+      newVal = Math.max(min, newVal);
+    }
+    input.val(newVal.toFixed(precision)).change();
+  }
+  $(upArrow).on('mousedown', function() {
+    upInterval = setInterval(increment, 200);
+    increment();
+  });
+  $(downArrow).on('mousedown', function() {
+    downInterval = setInterval(decrement, 200);
+    decrement();
+  });
+  $(document).on('mouseup', function() {
+    if (upInterval) clearInterval(upInterval);
+    if (downInterval) clearInterval(downInterval);
+    upInterval = undefined;
+    downInterval = undefined;
+    return false;
+  });
+}
+
+function makeSpinner(options) {
+  var input = $("<input>").addClass("form-control").val(options.val || 0);
+  if (options.klass !== undefined)
+    input.addClass(options.klass);
+  if (options.max !== undefined)   input.data("max", options.max);
+  if (options.min !== undefined)   input.data("min", options.min);
+  if (options.delta !== undefined) input.data("delta", options.delta);
+  var div = $("<div>").addClass("input-group spinner")
+      .append(input)
+      .append($("<div>").addClass("input-group-btn-vertical")
+              .append($("<button>").addClass("btn btn-default")
+                      .append($("<i>").addClass("fa fa-caret-up")))
+              .append($("<button>").addClass("btn btn-default")
+                      .append($("<i>").addClass("fa fa-caret-down"))));
+  activateSpinner(div, options);
+  return div;
+}
+
 $(function() {
   $("#lateness-configuration .equal-height-group")
     .matchHeight({byRow: false, property: 'height'});
-  $('.spinner').each(function() {
-    var spinner = $(this);
-    var input = spinner.find('input');
-    var upArrow = spinner.find('.btn:first-of-type');
-    var downArrow = spinner.find('.btn:last-of-type');
-    var upInterval, downInterval;
-    var delta = input.data("delta") || 1;
-    var max = input.data("max");
-    var min = input.data("min");
-    var val = parseInt(input.val(), 10);
-    if (max !== undefined && val >= max)
-      upArrow.addClass("disabled");
-    if (min !== undefined && val <= min)
-      downArrow.addClass("disabled");
-    function validate() {
-      var val = parseInt(input.val(), 10);
-      if (max !== undefined && val >= max) {
-        upArrow.addClass("disabled");
-        clearInterval(upInterval);
-        upInterval = undefined;
-      }
-      if (min === undefined || val > min)
-        downArrow.removeClass("disabled");
-      if (min !== undefined && val <= min) {
-        downArrow.addClass("disabled");
-        clearInterval(downInterval);
-        downInterval = undefined;
-      }
-      if (max === undefined || val < max)
-        upArrow.removeClass("disabled");
-    }
-    input.on("change", validate);
-    function increment() {
-      var newVal = parseInt(input.val(), 10) + delta;
-      if (max !== undefined) {
-        newVal = Math.min(max, newVal);
-      }
-      input.val(newVal);
-      validate();
-    }
-    function decrement() {
-      var newVal = parseInt(input.val(), 10) - delta;
-      if (min !== undefined) {
-        newVal = Math.max(min, newVal);
-      }
-      input.val(newVal);
-      validate();
-    }
-    $(upArrow).on('mousedown', function() {
-      upInterval = setInterval(increment, 200);
-      increment();
-    });
-    $(downArrow).on('mousedown', function() {
-      downInterval = setInterval(decrement, 200);
-      decrement();
-    });
-    $(document).on('mouseup', function() {
-      if (upInterval) clearInterval(upInterval);
-      if (downInterval) clearInterval(downInterval);
-      upInterval = undefined;
-      downInterval = undefined;
-      return false;
-    });
-  });
+  $('.spinner').each(function() { activateSpinner(this) });
+});
+$(function() {
+  function fixSizes() {
+    var $affixElement = $('[data-spy="affix"]');
+    $affixElement.width($affixElement.parent().width());
+  }
+  $(window).resize(fixSizes);
+  fixSizes();
 });

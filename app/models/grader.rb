@@ -4,7 +4,11 @@ class Grader < ActiveRecord::Base
   belongs_to :submission
   belongs_to :grader_config
 
-  def comments
+  def complete?
+    !self.score.nil?
+  end
+  
+  def line_comments
     if self.grading_output.nil?
       {}
     else
@@ -18,8 +22,10 @@ class Grader < ActiveRecord::Base
         by_file = ans[t[:info]["filename"]]
         by_file = ans[t[:info]["filename"]] = {} if by_file.nil?
         by_line = by_file[t[:info]["line"]]
-        by_line = by_file[t[:info]["line"]] = [] if by_line.nil?
-        by_line.push t
+        by_line = by_file[t[:info]["line"]] = {} if by_line.nil?
+        by_type = by_line[self.grader_config.type]
+        by_type = by_line[self.grader_config.type] = [] if by_type.nil?
+        by_type.push t
       end
       ans
     end

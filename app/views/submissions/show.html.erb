@@ -7,7 +7,7 @@
 
 <h1>Submission</h1>
 
-<table class="table">
+<table class="table row-vcenter">
   <tr>
     <td><strong>Assignment</strong></td>
     <td><%= @submission.assignment.name %></td>
@@ -47,10 +47,11 @@
 
 <h1>Scoring Details</h1>
 
-<table class="table table-striped">
+<table class="table table-striped row-vcenter">
   <% grades = @gradesheet.grades[:grades].find(sub: @submission).first
      all_scores = if cur_reg.staff? then grades[:staff_scores] else grades[:blind_scores] end
-     incomplete = !(@gradesheet.graders[@submission.id].all?(&:available))
+     unavailable = !(@gradesheet.graders[@submission.id].all?(&:available))
+     complete = @gradesheet.graders[@submission.id].all?(&:complete?)
      @gradesheet.configs.each_with_index do |c, i|
        scores = all_scores[:scores][i]
        grader = @gradesheet.graders[@submission.id].find{|gr| gr.grader_config_id == c.id}
@@ -66,10 +67,28 @@
       <% end %>
     </td>
     <td>
-      <% if grader.available || cur_reg.staff? %>
-      <%= link_to "Grader output",
-          Upload.upload_path_for(grader.grading_output) %>
-      <%= if !grader.available then "(hidden)" end %>
+      <% if cur_reg.staff? %>
+        <% if !grader.grading_output.nil? %>
+          <%= link_to "Grader output", 
+              course_assignment_submission_grader_path(@course, @assignment, @submission, grader) %>
+          <%= if !grader.complete? then " (hidden)" end %>
+        <% end %>
+        <% if !grader.grader_config.autograde? %>
+          <% if grader.complete? %>
+          <%= link_to "Regrade",
+              edit_course_assignment_submission_grader_path(@course, @assignment, @submission, grader),
+              class: "btn btn-info"%>
+          <% else %>
+          <%= link_to "Grade",
+              edit_course_assignment_submission_grader_path(@course, @assignment, @submission, grader),
+              class: "btn btn-success"%>
+          <% end %>
+        <% end %>
+      <% else %>
+        <% if grader.available && !grader.grading_output.nil? %>
+          <%= link_to "Grader output",
+              course_assignment_submission_grader_path(@course, @assignment, @submission, grader) %>
+        <% end %>
       <% end %>
     </td>
   </tr>
@@ -81,7 +100,7 @@
       <%= image_tag("question-mark.png", height: 16) %>&nbsp;/&nbsp;<%= to_fixed(@gradesheet.max_score) %>
       <% else %>
       <%= to_fixed(all_scores[:raw_score]) %>&nbsp;/&nbsp;<%= to_fixed(@gradesheet.max_score) %>
-      <%= if incomplete then " (hidden)" end %>
+      <%= if !complete then " (hidden)" end %>
       <% end %>
     </td>
     <td></td>
@@ -93,7 +112,7 @@
       <%= image_tag("question-mark.png", height: 16) %>
       <% else %>
       <%= to_fixed(100.0 * (all_scores[:raw_score] / @gradesheet.max_score)) %>%
-      <%= if incomplete then " (hidden)" end %>
+      <%= if !complete then " (hidden)" end %>
       <% end %>
     </td>
     <td></td>
@@ -115,7 +134,7 @@
     <td>
       <% if !all_scores[:raw_score].nil? %>
       <%= show_score(@submission.score) %>%
-      <% if incomplete then %>
+      <% if !complete then %>
       (hidden)
       <% end %>
       <% else %>
@@ -123,15 +142,21 @@
       <% end %>
     </td>
     <td>
-      <% if incomplete && cur_reg.staff? %>
-      <%= link_to "Publish grades", 
-          publish_course_assignment_submission_path(@course, @gradesheet.assignment, @submission), class: "btn btn-default",
-          method: 'patch',
-          data: { confirm: "Are you sure you want to publish grades for this submission?" }%>
+      <% if cur_reg.staff? %>
+        <% if complete && unavailable %>
+        <%= link_to "Publish grades", 
+            publish_course_assignment_submission_path(@course, @gradesheet.assignment, @submission), class: "btn btn-default",
+            method: 'patch',
+            data: { confirm: "Are you sure you want to publish grades for this submission?" }%>
+        <% else %>
+        <span class="btn btn-default disabled">Finish grading before publishing score</span>
+        <% end %>
       <% end %>
     </td>
   </tr>
 </table>
+
+<h1>Notes</h1>
 
 <!-- <h1>Teacher Notes</h1> -->
 

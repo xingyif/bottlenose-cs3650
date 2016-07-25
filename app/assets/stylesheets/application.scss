@@ -11,6 +11,7 @@
 @import "font-awesome";
 @import "bootstrap-datetimepicker";
 @import "bootstrap-treeview";
+@import "bootstrap-toggle";
 
 // Internal stylesheets.
 @import "old";  // TODO: Delete me.
@@ -50,21 +51,8 @@ table.row-vcenter > tbody > tr > td {
    color: black;
 }
 
-@media (min-width: 1200px) {
-.hang-left.col-sm-3 {
-   margin-left: -26%;
-   width: (($container-desktop) / 3.25);
-}
 .affix {
    top: 0;
-   width: (($container-desktop) / 3.25) - 30px;
-}
-}
-@media (max-width: 1200px) {
-.hang-left.col-sm-3 {
-   width: 100%;
-}
-.affix { position: initial; }
 }
 
 .treeview.condensed {
@@ -104,6 +92,12 @@ div.CodeMirror-linewidget > div span {
    margin-left: 3px;
    margin-right: 3px;
 }
+div.CodeMirror-linewidget > div span.label {
+   vertical-align: middle;
+}
+div.CodeMirror-linewidget > div span.glyphicon {
+   vertical-align: middle;
+}
 
 div.CodeMirror-linewidget > div.Error {
    background: $alert-danger-bg;
@@ -115,6 +109,10 @@ div.CodeMirror-linewidget > div.Warning {
 
 div.CodeMirror-linewidget > div.Suggestion {
    background: $alert-info-bg;
+}
+
+li.list-group-item.unvisited {
+   background: $alert-danger-bg;
 }
 
 .spinner {

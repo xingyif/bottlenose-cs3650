@@ -1,12 +1,12 @@
 <% @page_title = "View Submission Details" %>
-
+<% content_for :wide_content_before do %>
 <p>
   <%= link_to "< Back to submission", course_assignment_submission_path(@course, @assignment, @submission) %>
 </p>
 
 <h1>Submission</h1>
 
-<table class="table">
+<table class="table row-vcenter">
   <tr>
     <td><strong>Assignment</strong></td>
     <td><%= @submission.assignment.name %></td>
@@ -33,51 +33,31 @@
     </td>
   </tr>
 </table>
+<% end %>
 
-<div class="row">
-  <div class="col-sm-3 hang-left">
-    <div id="files" class="nav treeview condensed" data-spy="affix">
-    </div>
+<% content_for :wide_content do %>
+<div class="col-sm-3">
+  <div id="files-sidebar" data-spy="affix">
+    <div id="files" class="nav treeview condensed"></div>
   </div>
-  <div class="col-sm-12 tab-content">
-    <% @submission_files.each_with_index do |f, i| %>
-    <div class="tab-pane panel-tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="file_<%= i + 1 %>">
-      <% if f[:ftype] == "image" %>
-      <%= image_tag f[:link], alt: f[:name] %>
-      <% elsif f[:ftype] == "zip" || f[:ftype] == "jar" %>
-      <%= link_to f[:link], "Download #{f[:name]}" %>
-      <% else %>
-      <div>
+</div>
+<div class="col-sm-9 tab-content">
+  <% @submission_files.each_with_index do |f, i| %>
+  <div class="tab-pane panel-tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="file_<%= i + 1 %>">
+    <% if f[:ftype] == "image" %>
+    <%= image_tag f[:link], alt: f[:name] %>
+    <% elsif f[:ftype] == "zip" || f[:ftype] == "jar" %>
+    <%= link_to f[:link], "Download #{f[:name]}" %>
+    <% else %>
+    <div>
       <textarea class="sourceCode" data-lang="<%= f[:type] %>" id="contents_<%= i %>"><%= render html: f[:contents] %></textarea>
-      </div>
-      <% end %>
     </div>
     <% end %>
   </div>
+  <% end %>
 </div>
 
 <script>
-  <%= render :partial => 'submissions/files.js' %>
+  <%= render :partial => 'submissions/render_comments.js' %>
 </script>
-
-<% unless @submission.assignment.grading_upload_id.nil? %>
-
-<h1>Autograding Output</h1>
-
-<script>
-  function reload_bottom() {
-    window.location.href = window.location.href + "#bottom";
-    window.location.reload(true);
-  }
-</script>
-
-<p id="bottom2"><%= link_to_function "Refresh Output", "reload_bottom();" %></p>
-
-<pre>
-<% # Lack of indentation important here. %>
-<%= @submission.grading_output %>
-</pre>
-
-<p id="bottom"><%= link_to_function "Refresh Output", "reload_bottom();" %></p>
-
 <% end %>

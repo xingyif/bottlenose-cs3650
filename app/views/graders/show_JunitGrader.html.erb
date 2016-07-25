@@ -1,0 +1,80 @@
+<% @page_title = "JavaStyle Grader" %>
+<% cur_reg = current_user.registration_for(@course) %>
+
+<p>
+  <%= link_to "Back to submission",
+      course_assignment_submission_path(@course, @assignment, @submission) %>
+</p>
+
+<h1>Submission</h1>
+
+<table class="table row-vcenter">
+  <tr>
+    <td><strong>Assignment</strong></td>
+    <td><%= @submission.assignment.name %></td>
+  </tr>
+  <% if @submission.team.nil? %>
+    <tr>
+      <td><strong>Student</strong></td>
+      <td><%= @submission.user.name %></td>
+    </tr>
+  <% else %>
+    <tr>
+      <td><strong>Team</strong></td>
+      <td><%= @submission.team %></td>
+    </tr>
+  <% end %>
+  <tr>
+    <td><strong>Submission Time</strong></td>
+    <td><span class="local-time"><%= @submission.created_at %></span></td>
+  </tr>
+  <tr>
+    <td><strong>Student Notes</strong></td>
+    <td>
+      <div class="prose"><%= @submission.student_notes %></div>
+    </td>
+  </tr>
+</table>
+
+
+<h1>Scoring Details: Junit grader</h1>
+
+<h3>
+  <%= @grading_header %>
+  <% if cur_reg.staff? && @grading_output.kind_of?(TapParser) %>
+  <span class="pull-right">Total score:
+    <%= to_fixed(@grading_output.points_earned) %>&nbsp;/&nbsp;
+    <%= to_fixed(@grading_output.points_available)%>
+  </span>
+  <% end %>
+</h3>
+<% if @grading_output.kind_of?(String) %>
+<pre><%= @grading_output %></pre>
+<% else %>
+<div id="tests">
+  <% @tests.each do |t| %>
+    <% if t[:passed] %>
+      <div class="alert alert-success">
+        <p>
+          <% if cur_reg.staff? %>
+          <span class="pull-right">Weight: <%= t[:info]["weight"] %></span>
+          <% end %>
+          <b>Passed:</b> <%= t[:comment] %>
+        </p>
+      </div>
+    <% else %>
+      <div class="alert alert-danger">
+        <p>
+          <% if cur_reg.staff? %>
+          <span class="pull-right">Weight: <%= t[:info]["weight"] %></span>
+          <% end %>
+          <b>Failed:</b> <%= t[:info]["header"] %>
+        </p>
+        <p>Message: <code class="text-muted"><%= t[:info]["message"] %></code></p>
+        <p style="display: inline-block;">Stack:</p>
+        <pre><%= t[:info]["stack"].join("\n") %></pre>
+      </div>
+    <% end %>
+  <% end %>  
+</div>
+<% end %>

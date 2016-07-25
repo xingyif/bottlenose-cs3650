@@ -22,12 +22,14 @@ class SubmissionsController < CoursesController
       redirect_to course_assignment_path(@course, @assignment)
     end
 
-    @commentsByFile = @submission.grader_comments
-    @commentsByFile.each do |file, cBF|
-      cBF.each do |line, byLine|
-        byLine.each do |comment|
-          if comment[:info] and comment[:info]["filename"]
-            comment[:info]["filename"] = Upload.upload_path_for(comment[:info]["filename"])
+    @lineCommentsByFile = @submission.grader_line_comments
+    @lineCommentsByFile.each do |file, cBF|
+      cBF.each do |type, byType|
+        byType.each do |line, byLine|
+          byLine.each do |comment|
+            if comment[:info] and comment[:info]["filename"]
+              comment[:info]["filename"] = Upload.upload_path_for(comment[:info]["filename"])
+            end
           end
         end
       end
@@ -56,7 +58,7 @@ class SubmissionsController < CoursesController
                 else
                   "text/unknown"
                 end,
-          comments: @commentsByFile[item[:full_path].to_s] || {}
+          lineComments: @lineCommentsByFile[item[:public_link].to_s] || {}
           })
         { text: item[:path], href: "#file_#{@submission_files.count}" }
       else

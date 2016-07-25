@@ -1,10 +1,11 @@
 require 'yaml'
 
 class TapParser
-  attr_reader :text, :test_count, :tests, :commentary
+  attr_reader :text, :test_count, :tests, :commentary, :passed_count
   def initialize(text)
     @text = text
     @test_count = 0
+    @passed_count = 0
     @tests = []
     @commentary = []
     if text != ""
@@ -59,6 +60,9 @@ class TapParser
       num = mm[2]
       comment = mm[3]
       directives = []
+      if passed
+        @passed_count += 1
+      end
       if mm[4]
         directives.push(mm[4][2..-1])
       end
@@ -148,7 +152,7 @@ class TapParser
       end
     end
     # Return the resulting points
-    total_points
+    [0, total_points].max
   end
 
   def summary

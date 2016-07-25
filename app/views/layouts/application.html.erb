@@ -27,9 +27,28 @@ window.current_page_name = "<%= params[:controller] %>/<%= params[:action] %>";
 
 <%= render "layouts/flash" %>
 
+<% if content_for?(:wide_content) %>
+<div class="container-fluid">
+  <% if content_for?(:wide_content_before) %>
+  <!-- Before wide content -->
+  <div class="container">
+<%= yield(:wide_content_before) %>
+  </div>
+  <% end %>
+  <!-- Wide content -->
+<%= yield(:wide_content) %>
+  <% if content_for?(:wide_content_after) %>
+  <!-- After wide content -->
+  <div class="container">
+<%= yield(:wide_content_after) %>
+  </div>
+  <% end %>
+</div>
+<% else %>
 <div class="container">
     <%= content_for?(:content) ? yield(:content) : yield %>
 </div>
+<% end %>
 
 <!-- TODO: Should this footer be here, or inside course templates? -->
 <% if @course %>

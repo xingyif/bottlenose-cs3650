@@ -43,6 +43,7 @@ Bottlenose::Application.routes.draw do
           get :use, to: 'submissions#use_for_grading', as: 'use'
           patch :publish, to: 'submissions#publish', as: 'publish'
         end
+        resources :graders, only: [:show, :edit, :update]
       end
     end
     resources :teams do
