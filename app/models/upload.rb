@@ -27,25 +27,6 @@ class Upload < ActiveRecord::Base
     end
     true
   end
-
-  def fix_submission
-    base = upload_dir
-    base.mkpath
-    begin
-      if File.exists?(base.join("_metadata"))
-        base.join("submission").mkpath
-        base.join("extracted").mkpath
-        base.join("graders").mkpath
-        FileUtils.mv(base.join("_metadata"), base.join("metadata.yaml"))
-        FileUtils.mv(base.join("strings.rkt"), base.join("submission/strings.rkt"))
-        FileUtils.cp_r(base.join("submission/."), base.join("extracted"))
-      end
-      true
-    rescue Exception => ee
-      print "Problem with #{self.id}: #{ee}\n"
-      false
-    end
-  end
   
   def create_submission_structure(upload, metadata)
     # upload_dir/
@@ -73,7 +54,6 @@ class Upload < ActiveRecord::Base
     end
 
     if upload.content_type == "application/zip"
-      debugger
       Zip::Archive.open(submission_path.to_s) do |ar|
         raise Exception.new("Too many files in zip!") if ar.num_files > 100
         ar.each do |zf|

@@ -14,8 +14,8 @@
 [ ] revise solution files for assignments
 [ ] user profiles
    [ ] NUID
-   [ ] profile picture
-   [ ] nickname
+   [X] profile picture
+   [X] nickname
    [ ] initial login experience
 [ ] clone course
    [ ] deep-clone assignments
@@ -37,4 +37,5 @@
    [ ] hide students from class roster
    [ ] affect exporting?
 [ ] export course spreadsheet
-[ ] test with syntactically invalid inputs / compile-error inputs
+[X] test with syntactically invalid inputs / compile-error inputs
+[ ] bulk random teams

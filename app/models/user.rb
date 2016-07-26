@@ -33,12 +33,12 @@ class User < ActiveRecord::Base
 
   def ldap_before_save
     res = Devise::LDAP::Adapter.get_ldap_entry(self.email)
-    self.name = res[:displayname]
+    self.name = res[:displayname][0]
     if res[:sn]
-      self.last_name = res[:sn]
+      self.last_name = res[:sn][0]
     end
     if res[:givenname]
-      self.first_name = res[:givenname]
+      self.first_name = res[:givenname][0]
     end
   end
 
@@ -98,11 +98,14 @@ class User < ActiveRecord::Base
   end
 
   def course_staff?(course)
-    course && (course_professor?(course) || course_assistant?(course))
+    return false if course.nil?
+    reg = registration_for(course)
+    return false if reg.nil?
+    reg.role == "professor" || reg.role == "assistant" || reg.role == "grader"
   end
 
   def professor_ever?
-    courses.any? {|c| self.course_professor?(c) }
+    Regsistration.where(user_id: self.user_id, role: RegRequest::roles["professor"]).count > 0
   end
 
   def course_professor?(course)
@@ -111,6 +114,10 @@ class User < ActiveRecord::Base
 
   def course_assistant?(course)
     course.registered_by?(self, as: 'assistant')
+  end
+
+  def course_grader?(course)
+    course.registered_by?(self, as: 'grader')
   end
 
   def course_student?(course)

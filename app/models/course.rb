@@ -50,6 +50,10 @@ class Course < ActiveRecord::Base
     users.where("registrations.role": RegRequest::roles["professor"])
   end
 
+  def graders
+    users.where("registrations.role": RegRequest::roles["grader"])
+  end
+
   def staff
     users.where("registrations.role <> #{RegRequest::roles["student"]}")
   end

@@ -10,7 +10,7 @@ class UsersController < ApplicationController
   end
 
   def show
-    unless current_user.site_admin?
+    unless current_user.site_admin? || params[:id].to_i == current_user.id
       redirect_to root_path, alert: "Must be an admin"
       return
     end
@@ -19,7 +19,7 @@ class UsersController < ApplicationController
   end
 
   def edit
-    unless current_user.site_admin?
+    unless current_user.site_admin? || params[:id].to_i == current_user.id
       redirect_to root_path, alert: "Must be an admin"
       return
     end
@@ -28,18 +28,32 @@ class UsersController < ApplicationController
   end
 
   def update
-    unless current_user.site_admin?
+    unless current_user.site_admin? || params[:id].to_i == current_user.id
       redirect_to root_path, alert: "Must be an admin"
       return
     end
 
     @user = User.find(params[:id])
 
-    if @user.update_attributes(user_params)
+    up = user_params
+
+    if @user.profile && File.exists?(@user.profile) && up[:profile]
+      FileUtils.rm(@user.profile)
+      @user.profile = nil
+    end
+    if up[:profile]
+      image = up[:profile]
+      secret = SecureRandom.urlsafe_base64
+      filename = Upload.base_upload_dir.join("#{secret}_#{image.original_filename}")
+      File.open(filename, "wb") do |f| f.write(image.read) end
+      up[:profile] = filename.to_s
+    end
+    
+    if @user.update_attributes(up)
       if current_user.site_admin?
         redirect_to user_path(@user), notice: 'User was successfully updated.'
       else
-        redirect_to '/courses', notice: "Name successfully updated"
+        redirect_to '/courses', notice: "Profile successfully updated"
       end
     else
       if current_user.site_admin?
@@ -55,6 +69,10 @@ class UsersController < ApplicationController
     unless current_user.site_admin?
       redirect_to root_path, alert: "Must be an admin"
       return
+    end
+
+    if self.profile && File.exists?(self.profile)
+      FileUtils.rm self.profile
     end
 
     @user = User.find(params[:id])
@@ -83,9 +101,9 @@ class UsersController < ApplicationController
 
   def user_params
     if current_user && current_user.site_admin?
-      params[:user].permit(:email, :name, :site_admin)
+      params[:user].permit(:email, :name, :nickname, :first_name, :last_name, :nuid, :profile, :site_admin)
     else
-      params[:user].permit(:email, :name)
+      params[:user].permit(:email, :name, :nickname, :first_name, :last_name, :nuid, :profile)
     end
   end
 end

@@ -1,37 +1,50 @@
 <% @page_title = "User: #{@user.name}" %>
 
-<p>
-  <%= link_to 'Back to List', users_path %> |
-  <%= link_to 'Edit User', edit_user_path(@user) %>
 </p>
 
 <h2>
   Basic Profile Information
-<% if current_user.site_admin? || current_user.professor_ever? %>
+  <%= link_to 'Edit Profile, edit_user_path(@user),
+      class: "btn btn-primary pull-right" %>
+</h2>
+<div class="row">
+  <div class="col-sm-3 text-center">
+    <%= image_tag Upload.upload_path_for(@user.profile || "silhouette.jpg"), width: "75%"  %>
+  </div>
+  <div class="col-sm-9">
+    <table class="table">
+      <tr>
+        <td>Name:</td>
+        <td><%= @user.name %></td>
+      </tr>
+      <tr>
+        <td>Nickname:</td>
+        <td><%= @user.nickname %></td>
+      </tr>
+      
+      <tr>
+        <td>Email:</td>
+        <td><%= @user.email %></td>
+      </tr>
+      <% if current_user.site_admin? %>
+      <tr>
+        <td>Site Admin?</td>
+        <td><%= @user.site_admin? ? "Yes" : "No" %></td>
+      </tr>
+      <% end %>
+    </table>
+  </div>
+</div>
+
+
+<h2>Registrations
+<% if (current_user.site_admin? || current_user.professor_ever?) &&
+   current_user.id != @user.id %>
 <%= link_to "Impersonate", impersonate_user_path(@user), 
     method: 'post',
     class: "btn btn-primary pull-right" %>
 <% end %>
 </h2>
-<table class="table">
-  <tr>
-    <td>Name:</td>
-    <td><%= @user.name %></td>
-  </tr>
-
-  <tr>
-    <td>Email:</td>
-    <td><%= @user.email %></td>
-  </tr>
-
-  <tr>
-    <td>Site Admin?</td>
-    <td><%= @user.site_admin? ? "Yes" : "No" %></td>
-  </tr>
-</table>
-
-
-<h2>Enrolled Courses</h2>
 
 <ul>
 <% @user.registrations.sort_by {|rr| rr.course.name }.each do |reg| %>

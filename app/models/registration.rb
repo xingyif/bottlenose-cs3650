@@ -1,20 +1,15 @@
 class Registration < ActiveRecord::Base
-  # The role for a regestration is a way for Bottlenose to allow a single user
+  # The role for a registration is a way for Bottlenose to allow a single user
   # to be a staff role for one course, while being a student in another.
   # Professors have extra privileges over assistants.
-  enum role: [:student, :assistant, :professor]
+  enum role: [:student, :grader, :assistant, :professor]
 
-  # A regestration is join model between a user and a course.
+  # A registration is join model between a user and a course.
   belongs_to :user
   belongs_to :course
 
-  # Only one regestration per user per course is allowed.
+  # Only one registration per user per course is allowed.
   validates :user_id, uniqueness: { scope: :course_id }
-
-  # TODO <refactor>: Delete, this looks unused, if only we have a compiler...
-  def self.get(c_id, u_id)
-    Registration.find_by_course_id_and_user_id(c_id, u_id)
-  end
 
   # Return true if the registration is a staff role (professor or assistant).
   def staff?
