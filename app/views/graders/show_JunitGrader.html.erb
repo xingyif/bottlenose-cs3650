@@ -42,6 +42,10 @@
 <h3>
   <%= @grading_header %>
   <% if cur_reg.staff? && @grading_output.kind_of?(TapParser) %>
+  <%= link_to Upload.upload_path_for(@grader.grading_output), class: "btn btn-default" do %>
+    <i class="glyphicon glyphicon-download-alt"></i> Download raw output
+  <% end %>
+
   <span class="pull-right">Total score:
     <%= to_fixed(@grading_output.points_earned) %>&nbsp;/&nbsp;
     <%= to_fixed(@grading_output.points_available)%>

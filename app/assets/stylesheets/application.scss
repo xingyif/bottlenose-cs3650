@@ -51,8 +51,10 @@ table.row-vcenter > tbody > tr > td {
    color: black;
 }
 
-.affix {
-   top: 0;
+@media(min-width: 768px) {
+   .affix {
+      top: 0;
+   }
 }
 @media(max-width: 767px) {
    .affix {

@@ -71,7 +71,9 @@
     <%= link_to f[:link], "Download #{f[:name]}" %>
     <% else %>
     <div>
-    <textarea class="sourceCode" data-lang="<%= f[:type] %>" id="contents_<%= i %>"><%= render html: f[:contents] %></textarea>
+      <textarea class="sourceCode" data-lang="<%= f[:type] %>"
+                data-source="<%= f[:link] %>"
+                id="contents_<%= i %>"><%= render html: f[:contents] %></textarea>
     </div>
     <% end %>
   </div>
@@ -79,8 +81,10 @@
 </div>
 
 <script>
+  var lineComments = <%= raw(JSON.pretty_generate(@submission_files.map{|s| s[:lineComments]})) %>;
   <%= render :partial => 'submissions/render_comments.js' %>
   <%= render :partial => 'graders/enter_comments.js' %>
+  $(function() { renderComments(lineComments); });
 </script>
 
 <% end %>

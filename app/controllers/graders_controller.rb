@@ -38,6 +38,12 @@ class GradersController < ApplicationController
     self.send(@grader.grader_config.type, false) if self.respond_to?(@grader.grader_config.type)
   end
 
+  def update
+    respond_to do |f|
+      f.json { render :json => params[:comments][0].keys }
+    end
+  end
+  
   def JavaStyleGrader(edit)
     redirect_to files_course_assignment_submission_path(@course, @assignment, @submission)
   end

@@ -26,12 +26,46 @@ $(function() {
     $("#score").text(Math.max(maxScore - deductions, 0).toFixed(2));
   }
 
+  var autosaveHandle = undefined;
+  var commentObjs = [];
+  function autosave() {
+    if (autosaveHandle === undefined) {
+      autosaveHandle = window.setTimeout(function() {
+        console.log("Sending:");
+        console.log(commentObjs);
+        $.ajax({
+          type: "PUT",
+          url: "<%= course_assignment_submission_grader_path(@course, @assignment, @submission, @grader) %>",
+          contentType: 'application/json; charset=UTF-8',
+          data: JSON.stringify({comments: commentObjs}, function(k, v) {
+            if (k === "saved") return undefined;
+            return v;
+          }),
+          success: function(msg) {
+            console.log("Success: " + msg);
+            commentObjs.forEach(function(c) { c.saved = true; });
+            autosaveHandle = undefined;
+          }
+        });
+      }, 1000);
+    }
+  }
+
   var commentID = 0;
-  function insertComment(cm, line, info) {
+  function insertComment(cm, line, comment) {
+    if (comment === undefined)
+      comment = {severity: "Error", deduction: 0, comment: ""};
+
+    comment.line = line + 1;
+    comment.file = $(cm.getTextArea).data("source");
+    comment.category = "<%= current_user.name %>";
+    commentObjs.push(comment);
+    
     var i = commentID++;
     var widget = $("<div>").attr("id", "comment_" + i).addClass("ManualGrader Error form-group");
     var table = $("<table>").addClass("container-fluid");
     widget.append(table);
+    widget.on("focusout", autosave);
     var row = $("<tr>");
     table.append(row);
     var td = $("<td>").addClass("nowrap col-sm-2");
@@ -43,51 +77,59 @@ $(function() {
         .append($("<option>").text("Suggestion"))
     categoryInput.on("change", function() {
       widget.removeClass(widget.data("severity")).data("severity", $(this).val()).addClass($(this).val());
+      comment.severity = $(this).val();
+      comment.saved = false;
     });
-    if (info && info.severity)
-      categoryInput.val(info.severity).change();
+    if (comment.severity)
+      categoryInput.val(comment.severity).change();
     
-    var category = $("<p>").append($("<label>").attr("for", "severity_" + i)
-                                     .text("Severity:")).append(categoryInput);
-    td.append(category);
+    td.append(
+      $("<p>").append($("<label>").attr("for", "severity_" + i)
+                      .text("Severity:")).append(categoryInput));
     var deductionInput = makeSpinner({klass: "deduction", min: 0, delta: 0.1, precision: 2})
         .attr("id", "deduction_" + i)
-    var deduction =      
-        $("<p>").append($("<label>").attr("for", "deduction_" + i).text("Deduction:"))
+    td.append(
+      $("<p>").append($("<label>").attr("for", "deduction_" + i).text("Deduction:"))
         .append($("<span>").css({"display": "inline-block", "vertical-align": "bottom"})
-                .append(deductionInput));
-    td.append(deduction);
+                .append(deductionInput)));
     deductionInput.on("change", function() {
+      comment.val = parseFloat($(this).val());
+      comment.saved = false;
       updateScore();
     });
-    if (info && info.deduction)
-      deductionInput.val(info.deduction).change();
+    if (comment.deduction)
+      deductionInput.val(comment.deduction).change();
     td = $("<td>").addClass("col-sm-10");
     row.append(td);
     var delComment = $("<span>").addClass("btn btn-alert pull-right").append($("<span>").addClass("glyphicon glyphicon-remove"));
     var commentText = $("<textarea>").attr("id", "message_" + i).addClass("form-control");
-    var comment =
-        $("<div>")
+    td.append(
+      $("<div>")
         .append(delComment)
         .append($("<label>").text("Comment:").attr("for", "message_" + i))
-        .append(commentText);
-    td.append(comment);
-    if (info && info.comment)
-      commentText.val(info.comment).change();
+        .append(commentText));
+    commentText.on("change", function() {
+      comment.comment = $(this).val();
+      comment.saved = false;
+    });
+    if (comment.comment)
+      commentText.val(comment.comment).change();
     
     var ret = {cmWidget: cm.addLineWidget(line, widget[0], {coverGutter: false, noHScroll: true}),
-               dom: widget};
+               dom: widget,
+               comment: comment};
     delComment.on("click", function() { deleteComment(ret); });
     return ret;
   }
   function deleteComment(comment) {
     comment.cmWidget.clear();
+    commentObjs.splice(commentObjs.indexOf(comment.comment), 1);
     updateScore();
   }
   updateScore();
 
   $(".CodeMirror").each(function(i) {
-    this.CodeMirror.on("gutterClick", insertComment);
+    this.CodeMirror.on("gutterClick", function(cm, line, gutter, e) { return insertComment(cm, line); });
   });
 
   var filesTree = $("#files");
