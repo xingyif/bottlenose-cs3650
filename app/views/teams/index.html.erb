@@ -1,7 +1,7 @@
 <% @page_title = "#{@course.name}: Teams" %>
 
 <% if current_user.registration_for(@course).staff? %>
-  <%= link_to "New Team", new_course_team_path(@course), class: "btn btn-success" %>
+  <%= link_to "Edit Teams", new_course_team_path(@course), class: "btn btn-success" %>
 <% end %>
 
 <h3>Active Teams</h3>

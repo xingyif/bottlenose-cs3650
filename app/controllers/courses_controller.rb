@@ -124,4 +124,16 @@ class CoursesController < ApplicationController
     params[:course].permit(:name, :footer, :total_late_days, :private, :public,
                            :term_id, :sub_max_size)
   end
+
+
+  protected
+  def plural(n, sing, pl = nil)
+    if n == 1
+      "1 #{sing}"
+    elsif pl
+      "#{n} #{pl}"
+    else
+      "#{n} #{sing}s"
+    end
+  end
 end

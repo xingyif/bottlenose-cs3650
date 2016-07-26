@@ -54,6 +54,35 @@ table.row-vcenter > tbody > tr > td {
 .affix {
    top: 0;
 }
+@media(max-width: 767px) {
+   .affix {
+      position: initial;
+   }
+}
+
+.middle-separator {
+    overflow: hidden;
+    text-align: center;
+}
+.middle-separator:before,
+.middle-separator:after {
+    background-color: #000;
+    content: "";
+    display: inline-block;
+    height: 1px;
+    position: relative;
+    vertical-align: middle;
+    width: 50%;
+}
+.middle-separator:before {
+    right: 0.5em;
+    margin-left: -50%;
+}
+.middle-separator:after {
+    left: 0.5em;
+    margin-right: -50%;
+}
+
 
 .treeview.condensed {
    overflow: scroll;

@@ -57,7 +57,7 @@ function activateSpinner(obj, options) {
   var max = input.data("max");
   var min = input.data("min");
   var val = parseFloat(input.val(), 10);
-  var precision = parseInt(options.precision || spinner.data("precision") || "0");
+  var precision = parseInt((options && options.precision) || spinner.data("precision") || "0");
   if (max !== undefined && val >= max)
     upArrow.addClass("disabled");
   if (min !== undefined && val <= min)

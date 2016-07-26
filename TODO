@@ -38,4 +38,4 @@
    [ ] affect exporting?
 [ ] export course spreadsheet
 [X] test with syntactically invalid inputs / compile-error inputs
-[ ] bulk random teams
+[X] bulk random teams

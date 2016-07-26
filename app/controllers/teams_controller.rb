@@ -68,6 +68,36 @@ class TeamsController < CoursesController
     redirect_to :back
   end
 
+
+  def disolve_all
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
+    teams = Team.where(course: @course, end_date: nil)
+    teams.each do |t| t.disolve(Date.current) end
+    redirect_to :back, notice: "#{plural(teams.count, 'team')} disolved"
+  end
+
+  def randomize
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+
+    count = 0
+    students_without_active_team.to_a.shuffle.each_slice(params[:random][:size].to_i).each do |t|
+      @team = Team.new(course: @course, start_date: params[:random][:start_date], end_date: params[:random][:end_date])
+      @team.users = t
+
+      if @team.save
+        count += 1
+      end
+    end
+    redirect_to :back, notice: "#{plural(count, 'random team')} created"
+  end
+
   private
 
   def students_without_active_team

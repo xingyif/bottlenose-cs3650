@@ -50,6 +50,10 @@ Bottlenose::Application.routes.draw do
       member do
         patch :disolve
       end
+      collection do
+        patch :disolve_all
+        patch :randomize
+      end
     end
     member do
       get :public
