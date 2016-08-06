@@ -8,6 +8,8 @@ class Registration < ActiveRecord::Base
   belongs_to :user
   belongs_to :course
 
+  has_one :term, through: :course
+
   # Only one registration per user per course is allowed.
   validates :user_id, uniqueness: { scope: :course_id }
 

@@ -46,12 +46,19 @@
 <% end %>
 </h2>
 
+<% grouped_regs = @user.grouped_registrations
+   terms = Term.all_sorted.to_a %>
+<% Registration.roles.to_a.reverse.each do |role_name, role_val| %>
+  <% as_role = grouped_regs[role_name] %>
+  <% if as_role[:count] > 0 %>
+<h3>As <%= role_name.capitalize %>:</h3>
 <ul>
-<% @user.registrations.sort_by {|rr| rr.course.name }.each do |reg| %>
-<li><%= reg.course.name %>
-  <% if reg.professor? %>
-  (Professor)
+    <% terms.each do |term| %>
+      <% by_term = as_role[term.name] %>
+      <% by_term.sort.each do |course| %>
+  <li><%= term.name %> &mdash; <%= course.name %> (<%= link_to "View", course %>)</li>
+      <% end %>
+    <% end %>
   <% end %>
-(<%= link_to "View", reg.course %>)</li>
-<% end %>
 </ul>
+<% end %>
