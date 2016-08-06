@@ -186,3 +186,8 @@ li.list-group-item.unvisited {
    background-image: initial;
    background-color: initial;
 }
+
+.long-table {
+   max-height: 500px;
+   overflow-y: auto;
+}

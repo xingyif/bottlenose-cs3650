@@ -82,7 +82,7 @@
       Generate random teams of size <%= spinner_tag "random[size]", 2, :min => 2, :max => 10 %>
     </div>
     <p class="col-sm-12">
-      <%= f.submit "Randomize all teams", id: "submit-random",
+      <%= f.submit "Generate random teams", id: "submit-random",
           class: 'btn btn-primary', method: :patch %>
     </p>
   </div>
@@ -116,6 +116,7 @@
           method: :patch, data: { confirm: "Are you sure you want to disolve all teams?" } %>
     </h3>
 
+    <div class="long-table">
     <table id="teams" class="table table-striped">
       <thead>
         <tr>
@@ -134,11 +135,13 @@
         <% end %>
       </tbody>
     </table>
+    </div>
   </div>
 
   <div class="col-md-6">
     <h3>Students Without Teams</h3>
 
+    <div class="long-table">
     <table id="users" class="table table-striped">
       <thead>
 	<tr>
@@ -155,5 +158,6 @@
 	<% end %>
       </tbody>
     </table>
+    </div>
   </div>
 </div>
