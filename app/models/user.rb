@@ -105,7 +105,7 @@ class User < ActiveRecord::Base
   end
 
   def professor_ever?
-    Regsistration.where(user_id: self.user_id, role: RegRequest::roles["professor"]).count > 0
+    Registration.where(user_id: self.id, role: RegRequest::roles["professor"]).count > 0
   end
 
   def course_professor?(course)
@@ -152,4 +152,24 @@ class User < ActiveRecord::Base
     @teams ||= teams.where(course: course)
   end
 
+  def grouped_registrations
+    ret = {}
+    regs = self.registrations
+    terms = Term.all_sorted.to_a
+    terms.each do |term|
+      regs_by_term = regs.joins(:course).where("courses.term_id = ?", term.id).to_a
+      Registration.roles.each do |role_name, role_val|
+        by_role = ret[role_name]
+        if by_role.nil? then by_role = ret[role_name] = {} end
+        if by_role[:count].nil? then by_role[:count] = 0 end
+        by_term = by_role[term.name]
+        if by_term.nil? then by_term = by_role[term.name] = [] end
+        regs_by_term.select{|r| r.role == role_name}.each do |r|
+          by_term.push(r.course)
+          by_role[:count] += 1
+        end
+      end
+    end
+    ret
+  end
 end
