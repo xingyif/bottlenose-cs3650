@@ -29,6 +29,31 @@ class JavaStyleGrader < GraderConfig
     g.updated_at = DateTime.now
     g.available = true
     g.save!
+
+    upload_inline_comments(tap, sub)
+    
     return self.avail_score.to_f * (tap.points_earned.to_f / tap.points_available.to_f)
   end
+
+  protected
+  
+  def upload_inline_comments(tap, sub)
+    InlineComment.where(submission: sub, grader_config: self).destroy_all
+    ics = tap.tests.map do |t|
+      InlineComment.new(
+        submission: sub,
+        title: t[:comment],
+        filename: t[:info]["filename"],
+        line: t[:info]["line"],
+        grader_config: self,
+        user: nil,
+        label: t[:info]["category"],
+        severity: InlineComment::severities[t[:info]["severity"].humanize(:capitalize => false)],
+        comment: t[:info]["message"],
+        weight: t[:info]["weight"],
+        suppressed: t[:info]["suppressed"])
+    end
+    InlineComment.import ics
+  end
+
 end

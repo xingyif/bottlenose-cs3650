@@ -38,6 +38,19 @@ class GradersController < ApplicationController
     self.send(@grader.grader_config.type, false) if self.respond_to?(@grader.grader_config.type)
   end
 
+  def regrade
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to :back, alert: "Must be an admin or staff."
+      return
+    end
+    @grader = Grader.find(params[:id])
+    @assignment = Assignment.find(params[:assignment_id])
+    @submission = Submission.find(params[:submission_id])
+    @grader.grader_config.grade(@assignment, @submission)
+    @submission.compute_grade! if @submission.grade_complete?
+    redirect_to :back
+  end
+  
   def update
     respond_to do |f|
       f.json { render :json => params[:comments][0].keys }
@@ -72,27 +85,59 @@ class GradersController < ApplicationController
         @tests = @grading_output.tets
       else
         @grading_header = "Selected test results"
-        @tests = @grading_output.tests.delete_if{|t| t[:passed]}.take(3)
+        @tests = @grading_output.tests.delete_if{|t| t[:passed]}.shuffle.take(3)
       end
     end
 
     render "show_JunitGrader"
   end
 
+  def CheckerGrader(edit)
+    if @grader.grading_output
+      @grading_output = File.read(@grader.grading_output)
+      begin
+        tap = TapParser.new(@grading_output)
+        @grading_output = tap
+        @tests = tap.tests
+      rescue Exception
+      end
+    end
+
+    if current_user.site_admin? || current_user.registration_for(@course).staff?
+      if @grading_output.kind_of?(String)
+        @grading_header = "Errors running tests"
+      else
+        @grading_header = "All test results"
+        @tests = @grading_output.tests
+      end
+    else
+      if @grading_output.kind_of?(String)
+        @grading_header = "Errors running tests"
+      elsif @grading_output.passed_count == @grading_output.test_count
+        @grading_header = "All tests passed"
+      else
+        @grading_header = "Selected test results"
+        @tests = @grading_output.tests.delete_if{|t| t[:passed]}.shuffle.take(3)
+      end
+    end
+
+    render "show_CheckerGrader"
+  end
+
   def ManualGrader(edit)
     if edit
       @lineCommentsByFile = @submission.grader_line_comments
-      @lineCommentsByFile.each do |file, cBF|
-        cBF.each do |type, byType|
-          byType.each do |line, byLine|
-            byLine.each do |comment|
-              if comment[:info] and comment[:info]["filename"]
-                comment[:info]["filename"] = Upload.upload_path_for(comment[:info]["filename"])
-              end
-            end
-          end
-        end
-      end
+      # @lineCommentsByFile.each do |file, cBF|
+      #   cBF.each do |type, byType|
+      #     byType.each do |line, byLine|
+      #       byLine.each do |comment|
+      #         if comment[:info] and comment[:info]["filename"]
+      #           comment[:info]["filename"] = Upload.upload_path_for(comment[:info]["filename"])
+      #         end
+      #       end
+      #     end
+      #   end
+      # end
       
       @submission_files = []
       def with_extracted(item)

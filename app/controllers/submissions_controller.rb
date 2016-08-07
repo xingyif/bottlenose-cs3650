@@ -23,17 +23,17 @@ class SubmissionsController < CoursesController
     end
 
     @lineCommentsByFile = @submission.grader_line_comments
-    @lineCommentsByFile.each do |file, cBF|
-      cBF.each do |type, byType|
-        byType.each do |line, byLine|
-          byLine.each do |comment|
-            if comment[:info] and comment[:info]["filename"]
-              comment[:info]["filename"] = Upload.upload_path_for(comment[:info]["filename"])
-            end
-          end
-        end
-      end
-    end
+    # @lineCommentsByFile.each do |file, cBF|
+    #   cBF.each do |type, byType|
+    #     byType.each do |line, byLine|
+    #       byLine.each do |comment|
+    #         if comment[:info] and comment[:info]["filename"]
+    #           comment[:info]["filename"] = Upload.upload_path_for(comment[:info]["filename"])
+    #         end
+    #       end
+    #     end
+    #   end
+    # end
     
     @submission_files = []
     def with_extracted(item)
@@ -111,6 +111,21 @@ class SubmissionsController < CoursesController
     else
       @submission.cleanup!
       render :new
+    end
+  end
+
+  def recreate_grader
+    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+      redirect_to :back, alert: "Must be an admin or staff."
+      return
+    end
+    @grader_config = GraderConfig.find(params[:grader_config_id])
+    @submission = Submission.find(params[:id])
+    if @submission.recreate_missing_grader(@grader_config)
+      @submission.compute_grade! if @submission.grade_complete?
+      redirect_to :back
+    else
+      redirect_to :back, alert: "Grader already exists; use Regrade to modify it instead"
     end
   end
 

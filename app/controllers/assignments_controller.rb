@@ -148,8 +148,22 @@ class AssignmentsController < CoursesController
       u.graders.update_all(:available => true)
     end
 
-    redirect_to :back
+    redirect_to :back, notice: 'Grades successfully published'
   end
+
+  def recreate_graders
+    @course = Course.find(params[:course_id])
+    @assignment = Assignment.find(params[:id])
+    confs = @assignment.grader_configs.to_a
+    count = @assignment.used_submissions.reduce(0) do |sum, sub|
+      sum + sub.recreate_missing_graders(confs)
+    end
+
+    redirect_to :back, notice: "#{plural(count, 'grader')} created"
+  end
+    
+
+  
 
   protected
 

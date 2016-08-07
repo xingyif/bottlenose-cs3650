@@ -1,4 +1,5 @@
 class Gradesheet
+  attr_reader :missing_graders
   attr_reader :assignment
   attr_reader :submissions
   attr_reader :configs
@@ -21,7 +22,9 @@ class Gradesheet
     @submissions = submissions
     @configs = @assignment.assignment_graders.order(:order).includes(:grader_config).map{ |c| c.grader_config }
     @max_score = @configs.sum(&:avail_score)
-    @graders = Grader.where(submission_id: @submissions.map(&:id)).group_by(&:submission_id)
+    raw_graders = Grader.where(submission_id: @submissions.map(&:id))
+    @graders = raw_graders.group_by(&:submission_id)
+    @missing_graders = (raw_graders.count != @configs.count * @submissions.count)
 
     @raw_score = 0
     @grades = {names: @configs.map(&:type), grades: []}
@@ -37,7 +40,7 @@ class Gradesheet
           else
             scaled = g.score.to_f * (c.avail_score.to_f / g.out_of.to_f)
           end
-          if g.available?
+          if g.available
             s_scores[:raw_score] += scaled
             s_scores[:scores].push [scaled, c.avail_score]
 

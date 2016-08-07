@@ -1,0 +1,131 @@
+<% @page_title = "Checker Grader" %>
+<% cur_reg = current_user.registration_for(@course) %>
+
+<p>
+  <%= link_to "Back to submission",
+      course_assignment_submission_path(@course, @assignment, @submission) %>
+</p>
+
+<h1>Submission</h1>
+
+<table class="table row-vcenter">
+  <tr>
+    <td><strong>Assignment</strong></td>
+    <td><%= @submission.assignment.name %></td>
+  </tr>
+  <% if @submission.team.nil? %>
+    <tr>
+      <td><strong>Student</strong></td>
+      <td><%= @submission.user.name %></td>
+    </tr>
+  <% else %>
+    <tr>
+      <td><strong>Team</strong></td>
+      <td><%= @submission.team %></td>
+    </tr>
+  <% end %>
+  <tr>
+    <td><strong>Submission Time</strong></td>
+    <td><span class="local-time"><%= @submission.created_at %></span></td>
+  </tr>
+  <tr>
+    <td><strong>Student Notes</strong></td>
+    <td>
+      <div class="prose"><%= @submission.student_notes %></div>
+    </td>
+  </tr>
+</table>
+
+
+<h1>Scoring Details: Checker grader</h1>
+
+<h3>
+  <%= @grading_header %>
+  <% if cur_reg.staff? && @grading_output.kind_of?(TapParser) %>
+  <%= link_to Upload.upload_path_for(@grader.grading_output), class: "btn btn-default" do %>
+    <i class="glyphicon glyphicon-download-alt"></i> Download raw output
+  <% end %>
+
+  <span class="pull-right">Total score:
+    <%= to_fixed(@grading_output.points_earned) %>&nbsp;/&nbsp;
+    <%= to_fixed(@grading_output.points_available)%>
+  </span>
+  <% end %>
+</h3>
+<% if @grading_output.kind_of?(String) %>
+<pre><%= @grading_output %></pre>
+<% else %>
+<div id="tests">
+  <% @tests.each do |t| %>
+    <% if t[:passed] %>
+      <div class="alert alert-success">
+        <p>
+          <% if cur_reg.staff? %>
+          <span class="pull-right">Weight: <%= t[:info]["weight"] %></span>
+          <% end %>
+          <b>Passed:</b> <%= t[:info]['message'] %> (using <code><%= t[:comment].strip %></code>)
+        </p>
+      </div>
+    <% else %>
+      <div class="alert alert-danger">
+        <p>
+          <% if cur_reg.staff? %>
+          <span class="pull-right">Weight: <%= t[:info]["weight"] %></span>
+          <% end %>
+          <b>Failed:</b> <%= t[:info]['message'] %> (using <code><%= t[:comment].strip %></code>)
+        </p>
+        <% if t[:info]["methodName"] %>
+        <p>Method signature:
+          <code class="text-muted"><%= t[:info]["methodName"] %>(<%= t[:info]["paramNames"].join(", ") %>)</code>
+        </p>
+        <p style="display: inline-block;">Given arguments:
+          <dl class="dl-horizontal">
+            <% t[:info]["paramNames"].zip(t[:info]["args"]).each do |param, arg| %>
+            <dt><code><%= param %></code></dt>
+            <dd><pre><%= arg.join("\n") %></pre></dd>
+            <% end %>
+          </dl>
+        </p>
+        <div class="row">
+          <% if t[:info]["actual"] == "" and t[:info]["expected"] == ""
+             t[:info]["actual"].shift
+             t[:info]["expected"].shift
+             end %>
+          <% diff = t[:info]["actual"].zip(t[:info]["expected"]).map{|a, e| a == e} %>
+          <div class="col-sm-6">
+            <p><b>Actual:</b></p>
+            <pre><% t[:info]["actual"].zip(diff).each do |a, d| %><% if !d then %><span class='alert-danger'><% else %><span><% end %><%= a %></span>
+              <% end %></pre>
+          </div>
+          <div class="col-sm-6">
+            <p><b>Expected:</b></p>
+            <pre><% t[:info]["expected"].zip(diff).each do |e, d| %><% if !d then %><span class='alert-danger'><% else %><span><% end %><%= e %></span>
+              <% end %></pre>
+          </div>
+        </div>
+        <% elsif t[:info]["targetClassName"] %>
+          TBD -- exception
+        <% else %>
+        <div class="row">
+          <% if t[:info]["actual"][0] == "" and t[:info]["expected"][0] == ""
+             t[:info]["actual"].shift
+             t[:info]["expected"].shift
+             end %>
+          <% diff = t[:info]["actual"].zip(t[:info]["expected"]).map{|a, e| a == e} %>
+          <div class="col-sm-6">
+            <p><b>Actual:</b></p>
+            <pre><% t[:info]["actual"].zip(diff).each do |a, d| %><% if !d then %><span class='alert-danger'><% else %><span><% end %><%= a %></span>
+<% end %></pre>
+          </div>
+          <div class="col-sm-6">
+            <p><b>Expected:</b></p>
+            <pre><% t[:info]["expected"].zip(diff).each do |e, d| %><% if !d then %><span class='alert-danger'><% else %><span><% end %><%= e %></span>
+<% end %></pre>
+          </div>
+        </div>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>  
+</div>
+<% end %>

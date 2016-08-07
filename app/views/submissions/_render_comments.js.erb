@@ -8,40 +8,40 @@ function renderComments(lineComments) {
         Object.keys(commentsOnLine).forEach(function(type, _) {
           var commentsByType = commentsOnLine[type];
           commentsByType.forEach(function(comment, _) {
-            var widget = $("<div>").addClass(comment.info.severity).addClass(type);
+            var widget = $("<div>").addClass(comment.severity).addClass(type);
             var table = $("<table>");
             widget.append(table);
             var row = $("<tr>");
             table.append(row);
             var td = $("<td>").addClass("nowrap");
             row.append(td);
-            var category = $("<span>").text(comment.info.category).addClass("label label-default");
-            td.append(category);
-            if (comment.info.suppressed) {
+            var label = $("<span>").text(comment.label || comment.author).addClass("label label-default");
+            td.append(label);
+            if (comment.suppressed) {
               var icon = $("<span>").addClass("glyphicon glyphicon-flag")
                   .data("toggle", "toolip").data("placement", "top")
                   .attr("title", "Too many errors of this type were found; no further points were deducted");
               td.append(icon);
-              var deduction = $("<span>").text("[-" + comment.info.weight + "]").addClass("label label-default")
+              var deduction = $("<span>").text("[-" + comment.weight + "]").addClass("label label-default")
                   .data("toggle", "tooltip").data("placement", "top")
-                  .attr("title", "This problem would normally deduct " + comment.info.weight + " points");
+                  .attr("title", "This problem would normally deduct " + comment.weight + " points");
               td.append(deduction);
             } else {
               var icon = $("<span>").addClass("glyphicon")
                   .data("toggle", "tooltip").data("placement", "top");
-              if (comment.info.severity === "Error")
+              if (comment.severity === "Error")
                 icon.addClass("glyphicon-ban-circle").attr("title", "Error");
-              else if (comment.info.severity === "Warning")
+              else if (comment.severity === "Warning")
                 icon.addClass("glyphicon-warning-sign").attr("title", "Warning");
               else
                 icon.addClass("glyphicon-info-sign").attr("title", "Suggestion");
               td.append(icon);
-              var deduction = $("<span>").text("-" + comment.info.weight).addClass("label label-danger");
+              var deduction = $("<span>").text("-" + comment.weight).addClass("label label-danger");
               td.append(deduction);
             }
             td = $("<td>");
             row.append(td);
-            td.append($("<span>").addClass("description").text(comment.comment + ": " + comment.info.message));
+            td.append($("<span>").addClass("description").text(comment.title + ": " + comment.comment));
             cm.addLineWidget(parseInt(line) - 1, widget[0], {coverGutter: false, noHScroll: true});
           });
         });
@@ -78,7 +78,8 @@ $(function (){
       e.stopPropagation();
       if (data.href !== undefined && data.href !== "#") {
         $(".tab-pane").removeClass("active");
-        $(data.href).addClass("active");
+        // make sure any comments are visible
+        $(data.href).addClass("active").find(".CodeMirror")[0].CodeMirror.refresh();
       }
     },
     data: <%= raw(@submission_dirs) %>

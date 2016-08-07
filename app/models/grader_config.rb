@@ -10,6 +10,10 @@ class GraderConfig < ActiveRecord::Base
     false
   end
 
+  def grader_exists_for(sub)
+    !Grader.find_by(grader_config_id: self.id, submission_id: sub.id).nil?
+  end
+  
   protected
   
   def grader_for(sub)

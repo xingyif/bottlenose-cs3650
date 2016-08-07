@@ -92,8 +92,8 @@ $(function() {
       $("<p>").append($("<label>").attr("for", "deduction_" + i).text("Deduction:"))
         .append($("<span>").css({"display": "inline-block", "vertical-align": "bottom"})
                 .append(deductionInput)));
-    deductionInput.on("change", function() {
-      comment.val = parseFloat($(this).val());
+    deductionInput.find("input").on("change", function() {
+      comment.deduction = parseFloat($(this).val());
       comment.saved = false;
       updateScore();
     });
@@ -101,7 +101,8 @@ $(function() {
       deductionInput.val(comment.deduction).change();
     td = $("<td>").addClass("col-sm-10");
     row.append(td);
-    var delComment = $("<span>").addClass("btn btn-alert pull-right").append($("<span>").addClass("glyphicon glyphicon-remove"));
+    var delComment = $("<span>").addClass("btn btn-alert pull-right")
+        .append($("<span>").addClass("glyphicon glyphicon-remove"));
     var commentText = $("<textarea>").attr("id", "message_" + i).addClass("form-control");
     td.append(
       $("<div>")

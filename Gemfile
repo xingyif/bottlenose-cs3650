@@ -15,6 +15,8 @@ gem 'therubyracer'
 
 gem 'yaml_db'
 
+gem 'activerecord-import'
+
 gem 'coffee-rails'
 gem 'coffee-rails-source-maps'
 gem 'uglifier'

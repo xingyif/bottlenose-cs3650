@@ -11,6 +11,7 @@ class Submission < ActiveRecord::Base
   has_many :graders
   has_many :user_submissions, dependent: :destroy
   has_many :users, through: :user_submissions
+  has_many :inline_comments, dependent: :destroy
 
   validates :assignment_id, :presence => true
 
@@ -107,7 +108,19 @@ class Submission < ActiveRecord::Base
   end
 
   def grader_line_comments
-    self.graders.map(&:line_comments).reduce({}, &:merge)
+    config_types = GraderConfig.pluck(:id, :type).to_h
+    self.inline_comments.group_by(&:filename).map do |filename, byfile|
+      [Upload.upload_path_for(filename), byfile.group_by(&:line).map do |line, byline|
+         [line, byline.group_by(&:grader_config_id).map do |config, bytype|
+            [config_types[config], bytype.map(&:to_json)]
+          end.to_h]
+       end.to_h]
+    end.to_h
+    # self.graders.map(&:line_comments).reduce({}, &:merge)
+  end
+
+  def grader_submission_comments
+    self.inline_comments.where(line: 0).group_by(&:filename)
   end
   
   def comments_upload_file=(data)
@@ -149,12 +162,34 @@ class Submission < ActiveRecord::Base
     end
   end
   
+  def recreate_missing_grader(config)
+    if config.grader_exists_for(self)
+      false
+    else
+      config.grade(assignment, self)
+    end
+  end
+
+  def recreate_missing_graders(configs)
+    configs.reduce(0) do |sum, c|
+      if recreate_missing_grader(c)
+        sum + 1
+      else
+        sum
+      end
+    end
+  end
+  
   def autograde!
     complete = true
     assignment.grader_configs.each do |c|
-      if c.autograde?
-        c.grade(assignment, self)
-      else
+      begin
+        if c.autograde?
+          c.grade(assignment, self)
+        else
+          complete = false
+        end
+      rescue Exception
         complete = false
       end
     end
@@ -199,6 +234,7 @@ class Submission < ActiveRecord::Base
   end
 
   def grade_complete?
+    graders.count == assignment.grader_configs.count &&
     graders.all?(&:available)
   end
   

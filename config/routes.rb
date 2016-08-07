@@ -37,13 +37,21 @@ Bottlenose::Application.routes.draw do
         get 'weights' => 'assignments#edit_weights'
         post 'weights' => 'assignments#update_weights'
       end
+      member do
+        post 'create_missing_graders' => 'assignments#recreate_graders'
+      end
       resources :submissions do
         member do
           get :files
           get :use, to: 'submissions#use_for_grading', as: 'use'
           patch :publish, to: 'submissions#publish', as: 'publish'
+          post 'recreate/:grader_config_id', to: 'submissions#recreate_grader', as: 'recreate_grader'
         end
-        resources :graders, only: [:show, :edit, :update]
+        resources :graders, only: [:show, :edit, :update] do
+          member do
+            post :regrade
+          end
+        end
       end
     end
     resources :teams do

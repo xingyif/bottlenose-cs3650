@@ -53,11 +53,19 @@
   Submissions (<%= @gradesheet.submissions.count %>)
   <% if cur_reg.staff? %>
     <%= link_to "Download all", 
-        course_assignment_tarball_path(@course, @gradesheet.assignment), class: "btn btn-default" %>
+        course_assignment_tarball_path(@course, @gradesheet.assignment),
+        class: "btn btn-default" %>
+    <% if @gradesheet.missing_graders %>
+    <%= link_to "Create missing graders",
+        create_missing_graders_course_assignment_path(@course, @gradesheet.assignment),
+        method: 'post', class: "btn btn-warning",
+        data: { confirm: "This may take a while; please be patient" } %>
+    <% else %>
     <%= link_to "Publish grades", 
         course_assignment_publish_path(@course, @gradesheet.assignment), class: "btn btn-default",
         method: 'patch',
         data: { confirm: "Are you sure you want to publish all grades?" }%>
+    <% end %>
   <% else %>
     <%= link_to "New Submission", 
         new_course_assignment_submission_path(@course, @gradesheet.assignment), class: "btn btn-success" %>

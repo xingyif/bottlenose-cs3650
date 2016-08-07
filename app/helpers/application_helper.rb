@@ -32,7 +32,8 @@ module ApplicationHelper
 
     if assignment.hide_grading?
       if admin
-        "(hidden #{score})"
+        debugger
+        "(hidden #{to_fixed(score, 2)})"
       else
         "not ready"
       end

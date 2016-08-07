@@ -6,7 +6,7 @@ class ManualGrader < GraderConfig
     g.out_of = self.avail_score
     
     g.updated_at = DateTime.now
-    g.available = true
+    g.available = false
     g.save!
 
     return self.avail_score * (g.score.to_f / g.out_of.to_f)
