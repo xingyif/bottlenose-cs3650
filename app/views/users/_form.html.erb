@@ -1,4 +1,25 @@
 <%= form_for(@user) do |f| %>
+<style>
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+</style>
   <% if @user.errors.any? %>
     <div id="error_explanation" class="alert alert-danger">
       <h2><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h2>
@@ -14,18 +35,28 @@
   <div class="row">
     <div class="col-sm-3 text-center">
       <%= image_tag Upload.upload_path_for(@user.profile || "silhouette.jpg"), width: "75%" %>
-      <%= f.file_field "profile", value: Upload.upload_path_for(@user.profile),
-          accept: 'image/png,image/gif,image/jpeg' %>
+      <label class="btn btn-default btn-file" style: "width: 75%;">
+        Select profile photo
+        <%= f.file_field "profile", value: Upload.upload_path_for(@user.profile),
+            accept: 'image/png,image/gif,image/jpeg', style: "display: none;"%>
+      </label>
     </div>
     <div class="col-sm-9">
       <table class="table">
         <tr class="form-group">
-          <td><%= f.label :name %></td>
-          <td><%= f.text_field :name, class: 'form-control' %></td>
+          <td><%= f.label :first_name %></td>
+          <td><%= f.text_field :first_name, class: 'form-control' %></td>
+        </tr>
+        <tr class="form-group form-inline">
+          <td><%= f.label :nickname %></td>
+          <td style="vertical-align: middle;">
+            <%= f.text_field :nickname, class: 'form-control', style: "width: 80%;" %>
+            <label style="float: right; margin-top: 0.4em;"><input type="checkbox" id="nick_is_name"> Use first name</label>
+          </td>
         </tr>
         <tr class="form-group">
-          <td><%= f.label :nickname %></td>
-          <td><%= f.text_field :nickname, class: 'form-control' %></td>
+          <td><%= f.label :last_name %></td>
+          <td><%= f.text_field :last_name, class: 'form-control' %></td>
         </tr>
         <tr class="form-group">
           <td><%= f.label :email %></td>
@@ -41,7 +72,16 @@
       </table>
     </div>
     <div class="form-group">
-      <%= f.submit nil, class: 'btn btn-primary' %>
+      <%= f.submit nil, class: 'btn btn-primary pull-right' %>
     </div>
   </div>
+  <script>
+    $(function() {
+      $("#nick_is_name").change(function() {
+        $("#user_nickname").prop('disabled', $(this).prop('checked'));
+        if ($(this).prop('checked'))
+          $("#user_nickname").val($("#user_first_name").val());
+      });
+    });
+  </script>
 <% end %>

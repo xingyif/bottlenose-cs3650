@@ -2,21 +2,22 @@
 [X] unzip archives
 [ ] per-file markup
    [X] edit the .../files endpoint
-[ ] automated graders
+[X] automated graders
    [X] junit
    [X] style
-   [ ] checker
+   [X] checker
+[ ] configuring graders for assignments
 [ ] NUID
    [ ] make sure it's only visible to faculty -- not just any staff!
 [ ] defered running of grading scripts
 [ ] meta-grading
    [X] have a publish-grades button per assignment and per submission
 [ ] revise solution files for assignments
-[ ] user profiles
+[X] user profiles
    [ ] NUID
    [X] profile picture
    [X] nickname
-   [ ] initial login experience
+   [X] initial login experience
 [ ] clone course
    [ ] deep-clone assignments
 [ ] backup database

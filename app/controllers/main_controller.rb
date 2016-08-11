@@ -4,7 +4,13 @@ class MainController < ApplicationController
   # GET /
   def home
     if current_user
-      render "dashboard"
+      if current_user.sign_in_count == 1 and (current_user.profile == "" or current_user.nickname == "")
+        debugger
+        redirect_to edit_user_path(current_user),
+                    notice: profile_notice
+      else
+        render "dashboard"
+      end
     else
       render "landing"
     end
@@ -27,5 +33,17 @@ class MainController < ApplicationController
 
   # GET /about
   def about
+  end
+
+  protected
+
+  def profile_notice
+    <<NOTICE.html_safe
+Please complete your user profile, so we can recognize you in class: 
+<ul>
+<li>Please give us a <i>recognizable</i> profile picture</li>
+<li>Please fill in your preferred nickname</li>
+</ul>
+NOTICE
   end
 end
