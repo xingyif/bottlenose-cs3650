@@ -103,8 +103,7 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.find(params[:id])
 
     @assignment.destroy
-    show_notice "Assignment has been deleted."
-    redirect_to @course
+    redirect_to @course, notice: "Assignment #{params[:id]} has been deleted."
   end
 
   def show_user

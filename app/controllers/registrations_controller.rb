@@ -17,8 +17,7 @@ class RegistrationsController < CoursesController
 
   def show
     unless current_user.course_admin?(@course) or @registration.user.id == current_user.id
-      show_error "I can't let you do that."
-      redirect_to @course
+      redirect_to @course, alert: "You don't have permission to access that page."
       return
     end
 

@@ -30,18 +30,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # TODO: Delete.
-  def show_notice(msg)
-    flash[:notice] = msg
-  end
-  deprecate :show_notice
-
-  # TODO: Delete.
-  def show_error(msg)
-    flash[:error] = msg
-  end
-  deprecate :show_error
-
   # Require that there is a `current_user` indicating that a user is currently
   # logged in.
   def require_current_user
@@ -60,57 +48,6 @@ class ApplicationController < ActionController::Base
       return
     end
   end
-
-  #
-  # def require_student
-  #   find_course
-  #
-  #   if current_user.nil?
-  #     show_error "You need to register first"
-  #     redirect_to '/'
-  #     return
-  #   end
-  #
-  #   if @course.nil?
-  #     show_error "No such course."
-  #     redirect_to courses_url
-  #     return
-  #   end
-  #
-  #   if current_user.site_admin?
-  #     return
-  #   end
-  #
-  #   reg = current_user.registrations.where(course_id: @course.id)
-  #
-  #   if reg.nil? or reg.empty?
-  #     show_error "You're not registered for that course."
-  #     redirect_to courses_url
-  #     return
-  #   end
-  # end
-  #
-  # def require_staff
-  #   find_course
-  #
-  #   if current_user.nil?
-  #     show_error "You need to register first"
-  #     redirect_to '/'
-  #     return
-  #   end
-  #
-  #   if @course.nil?
-  #     show_error "No such course."
-  #     redirect_to courses_url
-  #     return
-  #   end
-  #
-  #   unless current_user.site_admin? or @course.taught_by?(current_user)
-  #     show_error "You're not allowed to go there."
-  #     redirect_to course_url(@course)
-  #     return
-  #   end
-  # end
 
   def configure_permitted_parameters
     devise_parameter_sanitizer.for(:sign_up) do |user|

@@ -6,8 +6,8 @@ class SubmissionsController < CoursesController
     @assignment = @submission.assignment
 
     unless @submission.visible_to?(current_user)
-      show_error "That's not your submission."
-      redirect_to course_assignment_path(@course, @assignment)
+      redirect_to course_assignment_path(@course, @assignment), alert: "That's not your submission."
+      return
     end
 
     @gradesheet = Gradesheet.new(@assignment, [@submission])
@@ -18,8 +18,8 @@ class SubmissionsController < CoursesController
     @assignment = @submission.assignment
 
     unless @submission.visible_to?(current_user)
-      show_error "That's not your submission."
-      redirect_to course_assignment_path(@course, @assignment)
+      redirect_to course_assignment_path(@course, @assignment), alert: "That's not your submission."
+      return
     end
 
     @lineCommentsByFile = @submission.grader_line_comments
