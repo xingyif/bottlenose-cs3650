@@ -8,7 +8,7 @@ case Rails.env
 when "development"
   # Create four users.
   ben = User.create!(
-                     email: "blerner@ccs.neu.edu",
+                     username: "blerner",
                      name: "Benjamin Lerner",
                      first_name: "Benjamin",
                      last_name: "Lerner",
@@ -17,6 +17,7 @@ when "development"
                      )
   justin = User.create!(
                         email: "justin.case@fallback.ccs.neu",
+                        username: "justin.case@fallback.ccs.neu",
                         name: "Justin Case",
                         first_name: "Justin",
                         last_name: "Case",
@@ -26,13 +27,13 @@ when "development"
   justin.save!
 
   olin = User.create!(
-                      email: "shivers@ccs.neu.edu",
+                      username: "shivers",
                       name: "Olin Shivers",
                       first_name: "Olin",
                       last_name: "Shivers"
                       )
   amal = User.create!(
-                      email: "amal@ccs.neu.edu",
+                      username: "amal",
                       name: "Amal Ahmed",
                       first_name: "Amal",
                       last_name: "Ahmed"
@@ -84,6 +85,7 @@ when "development"
   students = 1.upto(300).map do |i|
     user = User.create!(
                         email: "user#{i}@example.com",
+                        username: "user#{i}@example.com",
                         name: "User #{i}",
                         )
     Registration.create!(

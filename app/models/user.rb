@@ -28,17 +28,24 @@ class User < ActiveRecord::Base
     Devise.stretches
   end
 
+  def email_changed?
+    false
+  end
+
   # Different people with the same name are fine.
   # If someone uses two emails, they get two accounts. So sad.
 
   def ldap_before_save
-    res = Devise::LDAP::Adapter.get_ldap_entry(self.email)
+    res = Devise::LDAP::Adapter.get_ldap_entry(self.username)
     self.name = res[:displayname][0]
     if res[:sn]
       self.last_name = res[:sn][0]
     end
     if res[:givenname]
       self.first_name = res[:givenname][0]
+    end
+    if res[:mail]
+      self.email = res[:mail][0]
     end
   end
 
@@ -64,7 +71,7 @@ class User < ActiveRecord::Base
 
   if ::Rails.env == "development"
     def valid_ldap_authentication?(pwd)
-      if self.email == "justin.case@fallback.ccs.neu" && 
+      if self.username == "justin.case@fallback.ccs.neu" && 
           Devise::Encryptor.compare(self.class, self.encrypted_password, pwd)
         Audit.log("Letting Justin in!")
         print("Letting Justin in!\n")
