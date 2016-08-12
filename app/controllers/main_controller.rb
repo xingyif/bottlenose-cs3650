@@ -43,6 +43,7 @@ Please complete your user profile, so we can recognize you in class:
 <ul>
 <li>Please give us a <i>recognizable</i> profile picture</li>
 <li>Please fill in your preferred nickname</li>
+<li>Please make sure you can receive email at the specified address</li>
 </ul>
 NOTICE
   end

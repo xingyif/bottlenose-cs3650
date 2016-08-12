@@ -5,7 +5,7 @@ class RegistrationsController < CoursesController
                         except: [:index, :new, :create, :bulk]
 
   def index
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end
@@ -16,7 +16,7 @@ class RegistrationsController < CoursesController
   end
 
   def show
-    unless current_user.course_admin?(@course) or @registration.user.id == current_user.id
+    unless current_user_prof_for?(@course) or current_user_has_id?(@registration.user.id)
       redirect_to @course, alert: "You don't have permission to access that page."
       return
     end
@@ -29,7 +29,7 @@ class RegistrationsController < CoursesController
   end
 
   def create
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end
@@ -56,7 +56,7 @@ class RegistrationsController < CoursesController
   end
 
   def bulk
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end
@@ -77,7 +77,7 @@ class RegistrationsController < CoursesController
   end
 
   def destroy
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end

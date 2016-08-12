@@ -16,7 +16,7 @@ class TermsController < ApplicationController
   end
 
   def create
-    unless current_user.site_admin?
+    unless current_user_site_admin?
       redirect_to root_path, alert: "Must be an admin."
       return
     end
@@ -31,7 +31,7 @@ class TermsController < ApplicationController
   end
 
   def update
-    unless current_user.site_admin?
+    unless current_user_site_admin?
       redirect_to root_path, alert: "Must be an admin."
       return
     end
@@ -46,7 +46,7 @@ class TermsController < ApplicationController
   end
 
   def destroy
-    unless current_user.site_admin?
+    unless current_user_site_admin?
       redirect_to root_path, alert: "Must be an admin."
       return
     end

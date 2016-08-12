@@ -2,7 +2,7 @@ class TeamsController < CoursesController
   # GET /staff/courses/:course_id/teams
   def index
     @course = Course.find(params[:course_id])
-    if current_user.site_admin? || current_user.registration_for(@course).staff?
+    if current_user_site_admin? || current_user_staff_for?(@course)
       @active_teams = @course.teams.select(&:active?)
       @inactive_teams = @course.teams.reject(&:active?)
     else
@@ -13,7 +13,7 @@ class TeamsController < CoursesController
 
   # GET /staff/course/:course_id/teams/new
   def new
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to course_teams_path, alert: "Must be an admin or staff."
       return
     end
@@ -26,7 +26,7 @@ class TeamsController < CoursesController
 
   # POST /staff/course/:course_id/teams
   def create
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to course_teams_path, alert: "Must be an admin or staff."
       return
     end
@@ -58,7 +58,7 @@ class TeamsController < CoursesController
   end
 
   def disolve
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end
@@ -70,7 +70,7 @@ class TeamsController < CoursesController
 
 
   def disolve_all
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end
@@ -81,7 +81,7 @@ class TeamsController < CoursesController
   end
 
   def randomize
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end

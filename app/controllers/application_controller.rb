@@ -40,13 +40,17 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Require that the `current_user` is a site admin.
-  def require_site_admin
-    unless current_user && current_user.site_admin?
-      msg = "You don't have permission to access that page."
-      redirect_to root_path, alert: msg
-      return
-    end
+  def current_user_site_admin?
+    current_user && current_user.site_admin?
+  end
+  def current_user_prof_for?(course)
+    current_user && (current_user.site_admin? || current_user.registration_for(course).professor?)
+  end
+  def current_user_staff_for?(course)
+    current_user && (current_user.site_admin? || current_user.registration_for(course).staff?)
+  end
+  def current_user_has_id?(id)
+    current_user && current_user.id == id
   end
 
   def configure_permitted_parameters

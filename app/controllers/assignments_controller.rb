@@ -2,7 +2,7 @@ class AssignmentsController < CoursesController
   def show
     assignment = Assignment.find(params[:id])
 
-    if current_user.site_admin? || current_user.registration_for(@course).staff?
+    if current_user_site_admin? || current_user_staff_for?(@course)
       submissions = assignment.used_submissions.includes(:user).order(created_at: :desc).to_a
     else
       submissions = current_user.submissions_for(assignment).includes(:user).order(created_at: :desc).to_a
@@ -27,14 +27,14 @@ class AssignmentsController < CoursesController
   end
 
   def edit_weights
-    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+    unless current_user_site_admin? || current_user_prof_for?(@course)
       redirect_to :back, alert: "Must be an admin or professor."
       return
     end
   end
 
   def update_weights
-    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+    unless current_user_site_admin? || current_user_prof_for?(@course)
       redirect_to :back, alert: "Must be an admin or professor."
       return
     end
@@ -45,7 +45,7 @@ class AssignmentsController < CoursesController
   end
   
   def create
-    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+    unless current_user_site_admin? || current_user_prof_for?(@course)
       redirect_to root_path, alert: "Must be an admin or professor."
       return
     end
@@ -64,7 +64,7 @@ class AssignmentsController < CoursesController
   end
 
   def update
-    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+    unless current_user_site_admin? || current_user_prof_for?(@course)
       redirect_to root_path, alert: "Must be an admin or professor."
       return
     end
@@ -95,7 +95,7 @@ class AssignmentsController < CoursesController
   end
 
   def destroy
-    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+    unless current_user_site_admin? || current_user_prof_for?(@course)
       redirect_to root_path, alert: "Must be an admin or professor."
       return
     end
@@ -110,7 +110,7 @@ class AssignmentsController < CoursesController
     if !current_user
       redirect_to :back, alert: "Must be logged in"
       return
-    elsif current_user.site_admin? || current_user.registration_for(@course).professor?
+    elsif current_user_site_admin? || current_user_prof_for?(@course)
       # nothing
     elsif current_user.id != params[:user_id]
       redirect_to :back, alert: "Not permitted to see submissions for other students"
@@ -125,7 +125,7 @@ class AssignmentsController < CoursesController
   end
 
   def tarball
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end
@@ -136,7 +136,7 @@ class AssignmentsController < CoursesController
   end
 
   def publish
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end

@@ -4,7 +4,7 @@ class SettingsController < ApplicationController
   end
 
   def update
-    unless current_user.site_admin?
+    unless current_user_site_admin?
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end

@@ -2,6 +2,10 @@ class SubmissionsController < CoursesController
   # before_filter :require_student
 
   def show
+    unless current_user
+      redirect_to :back, alert: "Must be logged in to view submissions"
+      return
+    end
     @submission = Submission.find(params[:id])
     @assignment = @submission.assignment
 
@@ -14,6 +18,10 @@ class SubmissionsController < CoursesController
   end
 
   def files
+    unless current_user
+      redirect_to :back, alert: "Must be logged in to view submissions"
+      return
+    end
     @submission = Submission.find(params[:id])
     @assignment = @submission.assignment
 
@@ -73,6 +81,10 @@ class SubmissionsController < CoursesController
   end
 
   def new
+    unless current_user
+      redirect_to :back, alert: "Must be logged in to create a new submission"
+      return
+    end
     @assignment = Assignment.find(params[:assignment_id])
     @submission = Submission.new
     @submission.assignment_id = @assignment.id
@@ -85,6 +97,10 @@ class SubmissionsController < CoursesController
   end
 
   def create
+    unless current_user
+      redirect_to :back, alert: "Must be logged in to create a submission"
+      return
+    end
     @assignment = Assignment.find(params[:assignment_id])
     @submission = Submission.new(submission_params)
     @submission.assignment_id = @assignment.id
@@ -95,7 +111,7 @@ class SubmissionsController < CoursesController
 
     @row_user = User.find_by_id(params[:row_user_id])
 
-    if current_user.course_staff?(@course)
+    if current_user_staff_for?(@course)
       @submission.user ||= current_user
       @submission.ignore_late_penalty = true
     else
@@ -115,7 +131,7 @@ class SubmissionsController < CoursesController
   end
 
   def recreate_grader
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to :back, alert: "Must be an admin or staff."
       return
     end
@@ -130,7 +146,7 @@ class SubmissionsController < CoursesController
   end
 
   def use_for_grading
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end
@@ -140,7 +156,7 @@ class SubmissionsController < CoursesController
   end
 
   def publish
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."
       return
     end
@@ -152,7 +168,7 @@ class SubmissionsController < CoursesController
   private
 
   def submission_params
-    if current_user.course_professor?(@course)
+    if current_user_prof_for?(@course)
       params[:submission].permit(:assignment_id, :user_id, :student_notes,
                                  :auto_score, :calc_score, :updated_at, :upload,
                                  :grading_output, :grading_uid, :team_id,

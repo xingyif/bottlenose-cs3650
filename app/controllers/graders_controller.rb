@@ -7,7 +7,7 @@ class GradersController < ApplicationController
     @assignment = Assignment.find(params[:assignment_id])
     @submission = Submission.find(params[:submission_id])
 
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to :back, alert: "Must be an admin or staff."
       return
     end
@@ -39,7 +39,7 @@ class GradersController < ApplicationController
   end
 
   def regrade
-    unless current_user.site_admin? || current_user.registration_for(@course).staff?
+    unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to :back, alert: "Must be an admin or staff."
       return
     end
@@ -72,7 +72,7 @@ class GradersController < ApplicationController
       end
     end
 
-    if current_user.site_admin? || current_user.registration_for(@course).staff?
+    if current_user_site_admin? || current_user_staff_for?(@course)
       if @grading_output.kind_of?(String)
         @grading_header = "Errors running tests"
       else
@@ -103,7 +103,7 @@ class GradersController < ApplicationController
       end
     end
 
-    if current_user.site_admin? || current_user.registration_for(@course).staff?
+    if current_user_site_admin? || current_user_staff_for?(@course)
       if @grading_output.kind_of?(String)
         @grading_header = "Errors running tests"
       else

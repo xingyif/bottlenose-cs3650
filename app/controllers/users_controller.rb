@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   def index
-    unless current_user.site_admin?
+    unless current_user_site_admin?
       redirect_to root_path, alert: "Must be an admin"
       return
     end
@@ -10,7 +10,7 @@ class UsersController < ApplicationController
   end
 
   def show
-    unless current_user.site_admin? || params[:id].to_i == current_user.id
+    unless current_user_site_admin? || current_user_has_id?(params[:id].to_i)
       redirect_to root_path, alert: "Must be an admin"
       return
     end
@@ -19,7 +19,7 @@ class UsersController < ApplicationController
   end
 
   def edit
-    unless current_user.site_admin? || params[:id].to_i == current_user.id
+    unless current_user_site_admin? || current_user_has_id?(params[:id].to_i)
       redirect_to root_path, alert: "Must be an admin"
       return
     end
@@ -28,7 +28,7 @@ class UsersController < ApplicationController
   end
 
   def update
-    unless current_user.site_admin? || params[:id].to_i == current_user.id
+    unless current_user_site_admin? || current_user_has_id?(params[:id].to_i)
       redirect_to root_path, alert: "Must be an admin"
       return
     end
@@ -50,13 +50,13 @@ class UsersController < ApplicationController
     end
     
     if @user.update_attributes(up)
-      if current_user.site_admin?
+      if current_user_site_admin?
         redirect_to user_path(@user), notice: 'User was successfully updated.'
       else
         redirect_to '/courses', notice: "Profile successfully updated"
       end
     else
-      if current_user.site_admin?
+      if current_user_site_admin?
         render action: "edit"
       else
         redirect_to '/main/auth',
@@ -66,7 +66,7 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    unless current_user.site_admin?
+    unless current_user_site_admin?
       redirect_to root_path, alert: "Must be an admin"
       return
     end
@@ -82,7 +82,7 @@ class UsersController < ApplicationController
   end
 
   def impersonate
-    unless current_user.site_admin?
+    unless current_user_site_admin?
       redirect_to root_path, alert: "Must be an admin"
       return
     end
@@ -100,7 +100,7 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    if current_user && current_user.site_admin?
+    if current_user_site_admin?
       params[:user].permit(:email, :name, :nickname, :first_name, :last_name, :nuid, :profile, :site_admin)
     else
       params[:user].permit(:email, :name, :nickname, :first_name, :last_name, :nuid, :profile)

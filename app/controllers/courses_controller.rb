@@ -28,7 +28,7 @@ class CoursesController < ApplicationController
   end
 
   def create
-    unless current_user.site_admin?
+    unless current_user_site_admin?
       redirect_to(root_path, alert: 'Must be an admin to update a course.')
       return
     end
@@ -45,7 +45,7 @@ class CoursesController < ApplicationController
   end
 
   def update
-    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+    unless current_user_site_admin? || current_user_prof_for?(@course)
       redirect_to(root_path, notice: 'Must be an admin or professor to update a course.')
       return
     end
@@ -75,7 +75,7 @@ class CoursesController < ApplicationController
   end
 
   def destroy
-    unless current_user.site_admin?
+    unless current_user_site_admin?
       redirect_to(root_path, notice: 'Must be an admin to destroy a course.')
       return
     end
@@ -100,7 +100,7 @@ class CoursesController < ApplicationController
 
 
   def gradesheet
-    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+    unless current_user_site_admin? || current_user_prof_for?(@course)
       redirect_to :back, notice: 'Must be an admin or professor to update a course.'
       return
     end
@@ -129,7 +129,7 @@ class CoursesController < ApplicationController
 
     @course = Course.find(params[:course_id] || params[:id])
 
-    if current_user.site_admin?
+    if current_user_site_admin?
       return
     end
 
