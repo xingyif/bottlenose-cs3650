@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:html="http://www.w3.org/TR/REC-html40">
+  <Styles>
+    <Style ss:ID="TwoPct">
+      <NumberFormat ss:Format="0.00%"/>
+    </Style>
+  </Styles>
+  <% @all_course_info.sheets.each do |s| %>
+  <Worksheet ss:Name="<%= s.name %>">
+    <Table>
+      <Row>
+        <% s.columns.each do |col| %>
+        <Cell><Data ss:Type="String"><%= col.name %></Data></Cell>
+        <% end %>
+      </Row>
+      <% s.header_rows.each_with_index do |hr, i| %>
+      <Row>
+        <% s.columns.zip(hr).each do |col, cell| %>
+        <%= cell.as_cell(col.type) %>
+        <% end %>        
+      </Row>
+      <% end %>
+      <% s.rows.each_with_index do |r, i| %>
+      <Row>
+        <% s.columns.zip(r).each do |col, cell| %>
+        <%= cell.as_cell(col.type) %>
+        <% end %>
+      </Row>
+      <% end %>
+    </Table>
+  </Worksheet>
+  <% end %>
+</Workbook>
+

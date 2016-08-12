@@ -65,6 +65,7 @@ Bottlenose::Application.routes.draw do
     end
     member do
       get :public
+      get :gradesheet
     end
   end
 

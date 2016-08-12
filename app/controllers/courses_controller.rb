@@ -1,3 +1,6 @@
+require 'csv'
+require 'course_spreadsheet'
+
 class CoursesController < ApplicationController
   layout 'course'
 
@@ -95,8 +98,26 @@ class CoursesController < ApplicationController
     end
   end
 
+
+  def gradesheet
+    unless current_user.site_admin? || current_user.registration_for(@course).professor?
+      redirect_to :back, notice: 'Must be an admin or professor to update a course.'
+      return
+    end
+    @course = Course.find(params[:id])
+    @all_course_info = all_course_info
+    respond_to do |format|
+      #      format.csv { send_data @all_course_info.to_csv(col_sep: "\t") }
+      format.xls
+    end
+  end
+
   protected
 
+  def all_course_info
+    CourseSpreadsheet.new(@course)
+  end
+  
   def load_and_verify_course_registration
     # We can't find the course for the action 'courses#index'.
     if controller_name == 'courses' &&

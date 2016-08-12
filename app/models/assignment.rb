@@ -248,7 +248,10 @@ class Assignment < ActiveRecord::Base
 
   def used_submissions
     # Only those unique submissions that are marked as used-for-grading for this assignment
-    Submission.joins(:subs_for_gradings).where(assignment_id: self.id).distinct
+    all_used_subs.distinct
+  end
+  def all_used_subs
+    Submission.joins(:subs_for_gradings).where(assignment_id: self.id)
   end
 
   def used_sub_for(user)

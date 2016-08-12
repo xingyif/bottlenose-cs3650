@@ -38,5 +38,10 @@
    [ ] hide students from class roster
    [ ] affect exporting?
 [ ] export course spreadsheet
+   [X] initial grade support
+   [ ] letter-grade computation
 [X] test with syntactically invalid inputs / compile-error inputs
 [X] bulk random teams
+[ ] support CRN section numbers
+   [ ] in course registration
+   [ ] in export
