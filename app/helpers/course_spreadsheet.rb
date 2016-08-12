@@ -151,7 +151,7 @@ end
     users = course.students.order(:last_name, :first_name).to_a
     
     users.each do |u|
-      sheet.push_row(nil, [u.last_name || u.name, u.first_name || "", "", "", u.email, "", false, "", ""])
+      sheet.push_row(nil, [u.last_name || u.name, u.first_name || "", "", u.nuid || "", u.email, "", false, "", ""])
     end
 
     return labels, weight, users

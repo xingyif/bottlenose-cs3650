@@ -184,11 +184,8 @@ class Submission < ActiveRecord::Base
     complete = true
     assignment.grader_configs.each do |c|
       begin
-        if c.autograde?
-          c.grade(assignment, self)
-        else
-          complete = false
-        end
+        complete = complete and c.autograde?
+        c.autograde!(assignment, self) # make sure we create all needed graders
       rescue Exception
         complete = false
       end

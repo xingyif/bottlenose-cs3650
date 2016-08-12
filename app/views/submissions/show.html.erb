@@ -156,12 +156,14 @@
     </td>
     <td>
       <% if cur_reg.staff? %>
-        <% if complete && unavailable %>
+        <% if @gradesheet.assignment.due_date > DateTime.now %>
+        <span class="btn btn-default disabled">Cannot publish grades before assignment is due</span>
+        <% elsif complete && unavailable %>
         <%= link_to "Publish grades", 
             publish_course_assignment_submission_path(@course, @gradesheet.assignment, @submission), class: "btn btn-default",
             method: 'patch',
             data: { confirm: "Are you sure you want to publish grades for this submission?" }%>
-        <% else %>
+        <% elsif !complete %>
         <span class="btn btn-default disabled">Finish grading before publishing score</span>
         <% end %>
       <% end %>

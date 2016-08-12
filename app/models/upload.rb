@@ -53,7 +53,8 @@ class Upload < ActiveRecord::Base
       file.write(upload.read)
     end
 
-    if upload.content_type == "application/zip"
+    if upload.content_type == "application/zip" ||
+       upload.original_filename.ends_with?(".zip")
       Zip::Archive.open(submission_path.to_s) do |ar|
         raise Exception.new("Too many files in zip!") if ar.num_files > 100
         ar.each do |zf|
@@ -70,11 +71,14 @@ class Upload < ActiveRecord::Base
           end
         end
       end
-    elsif upload.content_type == "application/x-tar"
+    elsif upload.content_type == "application/x-tar" ||
+          upload.original_filename.ends_with?(".tar")
       SubTarball.untar(submission_path, base.join("extracted"))
-    elsif upload.content_type == "application/x-compressed-tar"
+    elsif upload.content_type == "application/x-compressed-tar" ||
+          upload.original_filename.ends_with?(".tgz")
       SubTarball.untar_gz(submission_path, base.join("extracted"))
-    elsif upload.content_type == "application/gzip"
+    elsif upload.content_type == "application/gzip" ||
+          upload.original_filename.ends_with?(".gz")
       if upload.original_filename.ends_with?(".tar.gz")
         SubTarball.untar_gz(submission_path, base.join("extracted"))
       else
@@ -151,6 +155,23 @@ class Upload < ActiveRecord::Base
     p.to_s.gsub(Rails.root.join("public").to_s, "")
   end
 
+  def cleanup!
+    Audit.log("Skip cleanup: #{file_name} for #{user.name} (#{user_id}) at #{secret_key}")
+  end
+
+  def self.base_upload_dir
+    Rails.root.join("public", "uploads", Rails.env)
+  end
+
+  def self.cleanup_test_uploads!
+    dir = Rails.root.join("public", "uploads", "test").to_s
+    if dir.length > 8 && dir =~ /test/
+      FileUtils.rm_rf(dir)
+    end
+  end
+
+  protected
+  
   def store_meta!(meta)
     if File.exists?(metadata_path)
       raise Exception.new("Attempt to reset metadata on upload.")
@@ -175,18 +196,4 @@ class Upload < ActiveRecord::Base
     end
   end
 
-  def cleanup!
-    Audit.log("Skip cleanup: #{file_name} for #{user.name} (#{user_id}) at #{secret_key}")
-  end
-
-  def self.base_upload_dir
-    Rails.root.join("public", "uploads", Rails.env)
-  end
-
-  def self.cleanup_test_uploads!
-    dir = Rails.root.join("public", "uploads", "test").to_s
-    if dir.length > 8 && dir =~ /test/
-      FileUtils.rm_rf(dir)
-    end
-  end
 end

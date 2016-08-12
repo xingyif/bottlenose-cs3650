@@ -44,7 +44,6 @@
                           .group(:assignment_id).to_a
         %>
         <% assignments.each do |assn| %>
-        <% stat = stats.find{|r| r.a_id == assn.id} %>
         <% if assn.available > DateTime.current %>
         <tr class="text-muted">
           <td><%= link_to assn.name, course_assignment_path(@course, assn) %></td>
@@ -60,9 +59,16 @@
           <td><span class="local-time"><%= assn.available %></span></td>
           <td><span class="local-time"><%= assn.due_date %></span></td>
           <td><%= show_score(assn.points_available, assn, true) %>
-          <td><%= show_score(stat.min, assn, true) %>%</td>
-          <td><%= show_score(stat.avg, assn, true) %>%</td>
-          <td><%= show_score(stat.max, assn, true) %>%</td>
+          <% if assn.due_date > DateTime.current %>
+          <td class="text-muted">N/A</td>
+          <td class="text-muted">N/A</td>
+          <td class="text-muted">N/A</td>
+          <% else %>
+          <% stat = stats.find{|r| r.a_id == assn.id} %>
+          <td><%= show_score(stat && stat.min, assn, true) %>%</td>
+          <td><%= show_score(stat && stat.avg, assn, true) %>%</td>
+          <td><%= show_score(stat && stat.max, assn, true) %>%</td>
+          <% end %>
         <% end %>
         </tr>
         <% end %>

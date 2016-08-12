@@ -161,7 +161,9 @@ class SubmissionsController < CoursesController
       return
     end
     @submission = Submission.find(params[:id])
+    @submission.graders.where(score: nil).each do |g| g.grade(assignment, used) end
     @submission.graders.update_all(:available => true)
+    @submission.compute_grade!
     redirect_to :back
   end
   

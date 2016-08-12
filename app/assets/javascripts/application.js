@@ -38,11 +38,28 @@ $(function() {
     
     if (dd.isValid()) {
       var today = moment().startOf('day');
-      if (today.isBefore(dd))
+      var tomorrow = moment(today).add(1, 'days');
+      var twodays = moment(tomorrow).add(1, 'days');
+      if (today.isSameOrBefore(dd) && dd.isBefore(tomorrow))
         $(this).text("Today, " + dd.format("h:mm:ssa"));
+      else if (tomorrow.isSameOrBefore(dd) && dd.isBefore(twodays))
+        $(this).text("Tomorrow, " + dd.format("h:mm:ssa"));
       else
         $(this).text(dd.format("MMM D YYYY, h:mm:ssa"));
     }
+  });
+
+  var validKeys = {
+    "ArrowLeft": true,
+    "ArrowRight": true,
+    "Backspace": true,
+    "Delete": true,
+  };
+  $("input.numeric").on("keypress", function(e) {
+    if (validKeys[e.key]) return;
+    if (!Number.isNaN(Number.parseInt(e.key))) return;
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+    e.preventDefault();
   });
 })
 

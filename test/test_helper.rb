@@ -48,12 +48,12 @@ class ActiveSupport::TestCase
 
   def make_submission(uu, aa, file)
     upl = build(:upload)
-    upl.store_meta!({
-      type:       "Submission",
-      user:       "Test (0)",
-      date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
-    })
-    upl.store_upload!(assign_upload_obj(aa.name, file))
+    upl.store_upload!(assign_upload_obj(aa.name, file),
+                      {
+                        type:       "Submission",
+                        user:       "Test (0)",
+                        date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
+                      })
     upl.save!
 
     sub = create(

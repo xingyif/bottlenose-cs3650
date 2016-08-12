@@ -17,6 +17,6 @@ class CreateInlineComments < ActiveRecord::Migration
       t.timestamps                  null: false
     end
 
-   add_index "inline_comments", ["filename"], name: "index_inline_comments_on_filename", using: :btree
+    add_index "inline_comments", ["filename"], name: "index_inline_comments_on_filename", using: :btree
   end
 end

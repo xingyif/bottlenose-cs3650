@@ -16,7 +16,7 @@ class User < ActiveRecord::Base
   has_many :team_users, dependent: :destroy
   has_many :teams, through: :team_users, dependent: :destroy
 
-  validates :email, :format => { :with => /\@.*\./ }
+  validates :email, :format => { :with => /\@.*\./ }, :allow_nil => true
 
   validates :name,  length: { in: 2..30 }
 
@@ -32,6 +32,21 @@ class User < ActiveRecord::Base
     false
   end
 
+
+  attr_accessor :nuid_safe
+  def nuid_safe(who)
+    if who.nil?
+      nil
+    elsif who.id == self.id
+      self.nuid
+    elsif who.professor_ever?
+      self.nuid
+    else
+      nil
+    end
+  end
+    
+  
   # Different people with the same name are fine.
   # If someone uses two emails, they get two accounts. So sad.
 

@@ -51,7 +51,7 @@
 
 <h3>
   Submissions (<%= @gradesheet.submissions.count %>)
-  <% if cur_reg.staff? %>
+  <% if cur_reg.staff? && @gradesheet.assignment.due_date <= DateTime.now %>
     <%= link_to "Download all", 
         course_assignment_tarball_path(@course, @gradesheet.assignment),
         class: "btn btn-default" %>
@@ -110,7 +110,7 @@
           <% scores[:scores].each do |s| %>
           <td class="text-right">
             <% if s.kind_of?(Array) %>
-            <%= to_fixed(s[0]) %>&nbsp;/&nbsp;<%= to_fixed(s[1])%>
+            <%= show_score(s[0]) %>&nbsp;/&nbsp;<%= to_fixed(s[1])%>
             <% else %>
             <%= s %>
             <% end %>

@@ -25,11 +25,11 @@ class CheckerGrader < GraderConfig
         # build_dir.mkpath
           Audit.log("#{prefix}: Grading in #{build_dir}")
           FileUtils.cp_r("#{files_dir}/.", build_dir)
-          FileUtils.cp_r(Rails.root.join('lib/assets/.'), build_dir)
+          FileUtils.cp_r(Rails.root.join('lib/assets/tester-2.jar'), build_dir)
           FileUtils.cp(Rails.root.join("hw3/hw03_p1_tests.java"), build_dir)
-          # print "Contents of temp directory are:\n"
+          # details.write "Contents of temp directory are:\n"
           # output, status = Open3.capture2("ls", "-R", build_dir.to_s)
-          # print output
+          # details.write output
           
           FileUtils.cd(build_dir) do
             any_problems = false
@@ -46,9 +46,9 @@ class CheckerGrader < GraderConfig
               end
             end
             
-            # print "Contents of temp directory are:\n"
+            # details.write "Contents of temp directory are:\n"
             # output, status = Open3.capture2("ls", "-R", build_dir.to_s)
-            # print output
+            # details.write output
 
             Audit.log("#{prefix}: Running Checker")
             test_out, test_err, test_status = # FIXME

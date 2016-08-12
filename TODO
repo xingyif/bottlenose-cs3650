@@ -4,17 +4,17 @@
    [X] edit the .../files endpoint
 [X] automated graders
    [X] junit
-   [X] style
+   [X] java-style
    [X] checker
 [ ] configuring graders for assignments
-[ ] NUID
-   [ ] make sure it's only visible to faculty -- not just any staff!
+[X] NUID
+   [X] make sure it's only visible to faculty -- not just any staff!
 [ ] defered running of grading scripts
 [ ] meta-grading
    [X] have a publish-grades button per assignment and per submission
 [ ] revise solution files for assignments
 [X] user profiles
-   [ ] NUID
+   [X] NUID
    [X] profile picture
    [X] nickname
    [X] initial login experience
@@ -44,4 +44,5 @@
 [X] bulk random teams
 [ ] support CRN section numbers
    [ ] in course registration
+   [ ] in bulk registration
    [ ] in export

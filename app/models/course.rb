@@ -95,7 +95,7 @@ class Course < ActiveRecord::Base
       used = subs.select{|r| r.user_id == s.id}
       min = used.reduce(0.0) do |tot, sub| 
         if (assn_weights[sub.assignment_id] != 0)
-          tot + (sub.score * assn_weights[sub.assignment_id] / 100.0) 
+          tot + ((sub.score || 0) * assn_weights[sub.assignment_id] / 100.0) 
         else
           tot
         end

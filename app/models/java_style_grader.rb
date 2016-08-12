@@ -6,7 +6,9 @@ class JavaStyleGrader < GraderConfig
     true
   end
 
-  def grade(assignment, sub)
+  protected
+  
+  def do_grading(assignment, sub)
     g = self.grader_for sub
     u = sub.upload
     files_dir = u.extracted_path
@@ -34,8 +36,6 @@ class JavaStyleGrader < GraderConfig
     
     return self.avail_score.to_f * (tap.points_earned.to_f / tap.points_available.to_f)
   end
-
-  protected
   
   def upload_inline_comments(tap, sub)
     InlineComment.where(submission: sub, grader_config: self).destroy_all

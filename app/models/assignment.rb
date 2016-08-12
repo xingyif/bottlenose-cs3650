@@ -24,7 +24,7 @@ class Assignment < ActiveRecord::Base
   validate :valid_lateness_config
 
   def valid_lateness_config
-    if !self.lateness_config.nil? && !self.lateness_config.valid?
+    if !self.lateness_config.valid?
       self.lateness_config.errors.full_messages.each do |m|
         @errors[:base] << m
       end

@@ -101,7 +101,7 @@ class CoursesController < ApplicationController
 
   def gradesheet
     unless current_user_site_admin? || current_user_prof_for?(@course)
-      redirect_to :back, notice: 'Must be an admin or professor to update a course.'
+      redirect_to course_path(@course), alert: 'Must be an admin or professor to view that information.'
       return
     end
     @course = Course.find(params[:id])

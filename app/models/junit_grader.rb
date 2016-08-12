@@ -7,7 +7,8 @@ class JunitGrader < GraderConfig
     true
   end
 
-  def grade(assignment, sub)
+  protected
+  def do_grading(assignment, sub)
     g = self.grader_for sub
     u = sub.upload
     files_dir = u.extracted_path
@@ -25,12 +26,13 @@ class JunitGrader < GraderConfig
         # build_dir.mkpath
           Audit.log("#{prefix}: Grading in #{build_dir}")
           FileUtils.cp_r("#{files_dir}/.", build_dir)
-          FileUtils.cp_r(Rails.root.join('lib/assets/.'), build_dir)
+          FileUtils.cp_r(Rails.root.join('lib/assets/junit-4.12.jar'), build_dir)
+          FileUtils.cp_r(Rails.root.join('lib/assets/hamcrest-core-1.3.jar'), build_dir)
           FileUtils.cp(Rails.root.join("hw2/grading/Grade03resubmit.java"), build_dir)
           FileUtils.cp(Rails.root.join("hw2/grading/GradingSandbox.java"), build_dir)
-          # print "Contents of temp directory are:\n"
+          # details.write "Contents of temp directory are:\n"
           # output, status = Open3.capture2("ls", "-R", build_dir.to_s)
-          # print output
+          # details.write output
           
           FileUtils.cd(build_dir) do
             any_problems = false
@@ -40,16 +42,16 @@ class JunitGrader < GraderConfig
               details.write("Compiling #{file}: (exit status #{comp_status})\n")
               details.write(comp_out)
               if !comp_status.success?
-                details.write("Errors building student code:\n")
+                details.write("Errors building #{file}:\n")
                 details.write(comp_err)
                 Audit.log("#{prefix}: #{file} failed with compilation errors; see details.log")
                 any_problems = true
               end
             end
             
-            # print "Contents of temp directory are:\n"
+            # details.write "Contents of temp directory are:\n"
             # output, status = Open3.capture2("ls", "-R", build_dir.to_s)
-            # print output
+            # details.write output
 
             Audit.log("#{prefix}: Running JUnit")
             test_out, test_err, test_status = # FIXME

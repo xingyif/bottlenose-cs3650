@@ -70,6 +70,7 @@ private
           FileUtils.mkdir_p dest, :mode => entry.header.mode, :verbose => false
         elsif entry.file?
           FileUtils.rm_rf dest unless File.file? dest
+          FileUtils.mkdir_p(File.dirname(dest))
           File.open dest, "wb" do |f|
             f.print entry.read
           end

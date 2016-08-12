@@ -11,7 +11,7 @@ class UsersController < ApplicationController
 
   def show
     unless current_user_site_admin? || current_user_has_id?(params[:id].to_i)
-      redirect_to root_path, alert: "Must be an admin"
+      redirect_to root_path, alert: "You don't have sufficent permission to see that information"
       return
     end
 
@@ -20,7 +20,7 @@ class UsersController < ApplicationController
 
   def edit
     unless current_user_site_admin? || current_user_has_id?(params[:id].to_i)
-      redirect_to root_path, alert: "Must be an admin"
+      redirect_to root_path, alert: "You don't have sufficient permission to edit that information"
       return
     end
 
@@ -29,7 +29,7 @@ class UsersController < ApplicationController
 
   def update
     unless current_user_site_admin? || current_user_has_id?(params[:id].to_i)
-      redirect_to root_path, alert: "Must be an admin"
+      redirect_to root_path, alert: "You don't have sufficient information to update that information"
       return
     end
 
