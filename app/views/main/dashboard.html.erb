@@ -1,8 +1,17 @@
 <% @page_title = "Dashboard" %>
 
 <h2>Your courses</h2>
-<% current_user.active_courses.each do |course| %>
-    <h3><%= link_to course.name, course_path(course) %></h3>
+<% current_user.course_regs_by_term.each do |term, info| %>
+  <h3><%= term.name %></h3>
+  <% info.each do |term, course, section, dropped| %>
+    <% if dropped %>
+    <h4><%= course.name %></h4>
+    <div class="row">
+      <p class="col-sm-12">Withdrawn on <span class="local-time"><%= dropped %></span></p>
+    </div>
+    <% else %>
+    <h4><%= link_to course.name, course_path(course) %>
+      <span style="padding-left: 3em;">Section <%= section.to_s %></span></h4>
 
     <div class="row">
         <div class="col-md-7">
@@ -38,4 +47,6 @@
             </div>
         </div>
     </div>
+    <% end %>
+  <% end %>
 <% end %>

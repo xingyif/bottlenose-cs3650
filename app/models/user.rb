@@ -204,7 +204,12 @@ class User < ActiveRecord::Base
     to_disolve.each do |t| t.disolve(DateTime.now) end
   end
 
-  def active_courses
-    Course.joins(:registrations).where("registrations.user_id": self.id, "registrations.dropped_date": nil)
+  def course_regs_by_term
+    regs = self.registrations.includes(:course).includes(:section)
+    courses = regs.map(&:course)
+    sections = regs.map(&:section)
+    dropped = regs.map(&:dropped_date)
+    terms = Term.where(id: courses.map(&:term_id))
+    terms.zip(courses, sections, dropped).group_by{|tcsd| tcsd[0]}
   end
 end

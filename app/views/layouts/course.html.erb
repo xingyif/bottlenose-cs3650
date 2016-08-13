@@ -2,8 +2,9 @@
 <% cur_reg = current_user.registration_for(@course) %>
     <div class="page-header">
         <h1>
-            <%= @course.name %>
-            <small><%= @course.term.name %></small>
+          <%= @course.name %>
+          <br/>
+          <small><%= @course.term.name %>, Section <%= cur_reg.section.to_s %></small>
         </h1>
 
 
