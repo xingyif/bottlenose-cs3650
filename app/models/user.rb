@@ -6,15 +6,15 @@ class User < ActiveRecord::Base
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :ldap_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable
-  has_many :registrations
-  has_many :courses, through: :registrations, :dependent => :restrict_with_error
+  has_many :courses, through: :registrations
+  has_many :registrations, dependent: :destroy
 
+  has_many :submissions, through: :user_submissions
   has_many :user_submissions, dependent: :destroy
-  has_many :submissions, through: :user_submissions, :dependent => :restrict_with_error
   has_many :reg_requests, dependent: :destroy
 
-  has_many :team_users, dependent: :destroy
-  has_many :teams, through: :team_users, dependent: :destroy
+  has_many :teams, through: :team_users
+  has_many :team_users, dependent: :restrict_with_error
 
   validates :email, :format => { :with => /\@.*\./ }, :allow_nil => true
 
@@ -193,5 +193,18 @@ class User < ActiveRecord::Base
       end
     end
     ret
+  end
+
+  def disconnect(course = nil)
+    if course
+      to_disolve = teams.where(course_id: course.id, end_date: nil)
+    else
+      to_disolve = teams.where(end_date: nil)
+    end
+    to_disolve.each do |t| t.disolve(DateTime.now) end
+  end
+
+  def active_courses
+    Course.joins(:registrations).where("registrations.user_id": self.id, "registrations.dropped_date": nil)
   end
 end

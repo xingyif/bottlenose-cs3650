@@ -1,6 +1,7 @@
 class Course < ActiveRecord::Base
   belongs_to :term
 
+  has_many :course_sections, dependent: :destroy
   has_many :registrations, dependent: :destroy
   has_many :users, through: :registrations
 
@@ -46,6 +47,10 @@ class Course < ActiveRecord::Base
     users.where("registrations.role": RegRequest::roles["student"])
   end
 
+  def students_with_drop_info
+    users.where("registrations.role": RegRequest::roles["student"]).select("users.*", "registrations.dropped_date")
+  end
+
   def professors
     users.where("registrations.role": RegRequest::roles["professor"])
   end
@@ -62,21 +67,34 @@ class Course < ActiveRecord::Base
     professors.first
   end
 
-  def add_registration(email, role = :student)
-    email.downcase!
-
-    name, _ = email.split('@')
-    name.downcase!
+  def add_registration(username, crn, role = :student)
 
     # TODO: Check LDAP for user.
-    uu = User.where(email: email)
-             .first_or_create(name: name)
+    uu = User.find_by(username: username)
+    if uu.nil?
+      res = Devise::LDAP::Adapter.get_ldap_entry(username)
+      if res
+        uu = User.create!(username: username,
+                          name: res[:displayname][0],
+                          last_name: res[:sn][0],
+                          first_name: res[:givenname][0],
+                          email: res[:mail][0])
+      end
+    end
 
+    if uu.nil?
+      return nil
+    end
+    section = CourseSection.find_by(crn: crn)
+    if section.nil?
+      return nil
+    end
     # If creating the user fails, this will not create a registration
     # because there is a validation on user.
     registrations.where(user: uu)
                  .first_or_create(user_id: uu.id,
                                   course_id: self.id,
+                                  section: section,
                                   role: role,
                                   show_in_lists: role == 'student')
   end
@@ -91,7 +109,8 @@ class Course < ActiveRecord::Base
     avail = assn_weights.reduce(0) do |tot, kv| tot + kv[1] end
     remaining = 100.0 - avail
     ans = []
-    self.students.sort_by(&:sort_name).each do |s|
+    self.students_with_drop_info.sort_by(&:sort_name).each do |s|
+      dropped = s.dropped_date
       used = subs.select{|r| r.user_id == s.id}
       min = used.reduce(0.0) do |tot, sub| 
         if (assn_weights[sub.assignment_id] != 0)
@@ -102,7 +121,7 @@ class Course < ActiveRecord::Base
       end
       cur = (100.0 * min) / avail
       max = min + remaining
-      ans.push ({s: s, min: min, cur: cur, max: max})
+      ans.push ({s: s, dropped: dropped, min: min, cur: cur, max: max})
     end
     ans
   end

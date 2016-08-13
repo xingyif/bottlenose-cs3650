@@ -8,10 +8,7 @@
   <tr>
     <th>Name</th>
     <th>Email</th>
-    <th></th>
-    <th></th>
-    <th></th>
-    <th></th>
+    <th colspan="3">Actions</th>
   </tr>
 
 <% @users.each do |user| %>
@@ -20,9 +17,6 @@
     <td><%= user.email %></td>
     <td><%= link_to 'Show', user_path(user) %></td>
     <td><%= link_to 'Edit', edit_user_path(user) %></td>
-    <td>
-      <%= link_to 'Destroy', user_path(user), method: :delete, data: { confirm: 'Are you sure?' } %>
-    </td>
     <td><%= link_to 'Impersonate', impersonate_user_path(user), method: 'post' %></td>
   </tr>
 <% end %>

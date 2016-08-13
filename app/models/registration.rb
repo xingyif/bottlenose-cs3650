@@ -9,6 +9,7 @@ class Registration < ActiveRecord::Base
   belongs_to :course
 
   has_one :term, through: :course
+  belongs_to :section, class_name: "CourseSection", :foreign_key => :section_id, :primary_key => "crn"
 
   # Only one registration per user per course is allowed.
   validates :user_id, uniqueness: { scope: :course_id }
@@ -25,18 +26,5 @@ class Registration < ActiveRecord::Base
   # Return the submissions to the course the user is registered for.
   def submissions
     user.submissions.select { |s| s.course == course }
-  end
-
-  # Return the total score for the student in the course. This value is
-  # meaningless for staff and professors. The value is a percent.
-  def total_score
-    total = 0.0
-
-    course.buckets.each do |bb|
-      ratio = bb.points_ratio(user)
-      total += ratio * bb.weight
-    end
-
-    (total * 100.0).round
   end
 end

@@ -144,7 +144,7 @@ class AssignmentsController < CoursesController
     assignment = Assignment.find(params[:id])
     used = assignment.used_submissions
     used.each do |u|
-      u.graders.where(score: nil).each do |g| g.grade(assignment, used) end
+      u.graders.where(score: nil).each do |g| g.grader_config.grade(assignment, u) end
       u.graders.update_all(:available => true)
       u.compute_grade!
     end

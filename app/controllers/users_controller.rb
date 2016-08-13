@@ -65,22 +65,6 @@ class UsersController < ApplicationController
     end
   end
 
-  def destroy
-    unless current_user_site_admin?
-      redirect_to root_path, alert: "Must be an admin"
-      return
-    end
-
-    if self.profile && File.exists?(self.profile)
-      FileUtils.rm self.profile
-    end
-
-    @user = User.find(params[:id])
-    @user.destroy
-
-    redirect_to users_path
-  end
-
   def impersonate
     unless current_user_site_admin?
       redirect_to root_path, alert: "Must be an admin"

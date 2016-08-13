@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160812161345) do
+ActiveRecord::Schema.define(version: 20160813150534) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,6 +47,15 @@ ActiveRecord::Schema.define(version: 20160812161345) do
     t.integer  "lateness_config_id"
     t.datetime "available"
   end
+
+  create_table "course_sections", force: :cascade do |t|
+    t.integer "course_id",    null: false
+    t.integer "crn",          null: false
+    t.string  "instructor",   null: false
+    t.string  "meeting_time"
+  end
+
+  add_index "course_sections", ["crn"], name: "index_course_sections_on_crn", unique: true, using: :btree
 
   create_table "courses", force: :cascade do |t|
     t.string   "name",                               null: false
@@ -131,6 +140,7 @@ ActiveRecord::Schema.define(version: 20160812161345) do
     t.datetime "updated_at"
     t.integer  "user_id"
     t.integer  "role",       default: 0, null: false
+    t.integer  "section_id",             null: false
   end
 
   create_table "registrations", force: :cascade do |t|
@@ -141,6 +151,8 @@ ActiveRecord::Schema.define(version: 20160812161345) do
     t.boolean  "show_in_lists"
     t.string   "tags",          default: ""
     t.integer  "role",          default: 0,  null: false
+    t.integer  "section_id",                 null: false
+    t.datetime "dropped_date"
   end
 
   add_index "registrations", ["course_id"], name: "index_registrations_on_course_id", using: :btree

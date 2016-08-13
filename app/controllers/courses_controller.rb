@@ -98,13 +98,36 @@ class CoursesController < ApplicationController
     end
   end
 
+  def withdraw
+    @course = Course.find(params[:id])
+    unless current_user
+      redirect_to course_path(@course), alert: 'Must be logged in to withdraw from courses'
+      return
+    end
+    reg = current_user.registration_for(@course)
+    if reg.nil?
+      redirect_to course_path(@course), alert: "You cannot withdraw from a course you aren't registered for."
+      return
+    elsif reg.dropped_date
+      redirect_to course_path(@course), alert: "You have already withdrawn from this course."
+      return
+    elsif reg.role == "professor" && @course.professors.count == 1
+      redirect_to course_path(@course), alert: "You cannot withdraw from the course: you are the only instructor for it."
+      return
+    end
+    reg.dropped_date = DateTime.now
+    reg.show_in_lists = false
+    reg.save!
+    current_user.disconnect(@course)
+    redirect_to root_path, notice: "You have successfully withdrawn from #{@course.name}"
+  end
 
   def gradesheet
+    @course = Course.find(params[:id])
     unless current_user_site_admin? || current_user_prof_for?(@course)
       redirect_to course_path(@course), alert: 'Must be an admin or professor to view that information.'
       return
     end
-    @course = Course.find(params[:id])
     @all_course_info = all_course_info
     respond_to do |format|
       #      format.csv { send_data @all_course_info.to_csv(col_sep: "\t") }
@@ -135,8 +158,10 @@ class CoursesController < ApplicationController
 
     registration = current_user.registration_for(@course)
     if registration.nil?
-      msg = "You're not registered for that course."
-      redirect_to courses_url, alert: msg
+      redirect_to courses_url, alert: "You're not registered for that course."
+      return
+    elsif registration.dropped_date
+      redirect_to courses_url, alert: "You've already dropped that course."
       return
     end
   end

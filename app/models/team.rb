@@ -33,6 +33,7 @@ class Team < ActiveRecord::Base
   end
 
   def disolve(as_of)
+    return unless self.end_date.nil?
     self.update_attribute(:end_date, as_of)
     self.submissions.joins(:assignment).where('due_date >= ?', as_of)
       .update_all(stale_team: true)

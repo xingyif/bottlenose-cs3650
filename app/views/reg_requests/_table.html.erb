@@ -20,7 +20,7 @@
             <% end %>
             <%= link_to course_reg_request_reject_all_path(@course), 
                 method: :delete, 
-                data: { confirm: "Are you sure?" },
+                data: { confirm: "Are you sure you want to reject ALL registration requests?" },
                 class: "btn btn-danger btn-sm" do %>
               <span class="glyphicon glyphicon-remove"></span>
               <span style="padding-left: 1em;">Reject All</span>
@@ -48,7 +48,7 @@
             <% end %>
             <%= link_to course_reg_request_reject_path(@course, request), 
                 method: :delete, 
-                data: { confirm: "Are you sure?" },
+                data: { confirm: "Are you sure you want to reject this registration request?" },
                 class: "btn btn-danger btn-xs" do %>
               <span class="glyphicon glyphicon-remove"></span>
               <span style="padding-left: 0.5em;">Reject</span>

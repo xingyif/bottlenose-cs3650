@@ -72,8 +72,6 @@
   <% end %>
 </h3>
 
-<%# TODO: Show team members if this is a team assignment. %>
-
 <% if current_user.site_admin? || cur_reg.staff? %>
 
   <% if @gradesheet.submissions.empty? %>
@@ -103,14 +101,14 @@
         <% else %>
         <tr>
         <% end %>
-          <td><%= sub.user.name %></td><!--<%= link_to sub.user.name, user_path(sub.user.id) %></td>-->
+          <td><%= sub.user.name %></td>
           <td><span class="local-time"><%= sub.created_at %></span></td>
-          <% scores = if cur_reg.staff? then grade[:staff_scores] else grade[:blind_scores] end %>
+          <% scores = grade[:staff_scores] %>
           <td><%= status_image(sub, scores[:raw_score] / @gradesheet.max_score) %></td>
           <% scores[:scores].each do |s| %>
           <td class="text-right">
             <% if s.kind_of?(Array) %>
-            <%= show_score(s[0]) %>&nbsp;/&nbsp;<%= to_fixed(s[1])%>
+            <%= show_score(s[0], @gradesheet.assignment, true) %>&nbsp;/&nbsp;<%= to_fixed(s[1])%>
             <% else %>
             <%= s %>
             <% end %>
@@ -125,7 +123,6 @@
           <td class="text-right"><%= image_tag("question-mark.png", height: 32) %></td>
           <td>NONE</td>
           <% end %>
-          <% if cur_reg.staff? %>
           <td class="text-right">
             <form method="link"
                   action="<%= course_assignment_submission_path(@course, @gradesheet.assignment, sub) %>">
@@ -151,9 +148,6 @@
               </div>        
             </form>
           </td>
-          <% else %>
-          <td><%= link_to "View", course_assignment_submission_path(@course, @gradesheet.assignment, sub) %></td>
-          <% end %>
         </tr>
       <% end %>
       </tbody>

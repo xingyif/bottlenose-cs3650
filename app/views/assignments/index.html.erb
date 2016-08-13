@@ -38,10 +38,10 @@
       <tbody>
         <%
            assignments = @course.assignments.order(due_date: :desc)
-           stats = @course.submissions
-                          .select("min(assignment_id) as a_id")
-                          .select("min(score), avg(score), max(score)")
-                          .group(:assignment_id).to_a
+           stats = Submission.joins(:subs_for_gradings).where(assignment: assignments)
+                             .select("min(submissions.assignment_id) as a_id")
+                             .select("min(score), avg(score), max(score)")
+                             .group("submissions.assignment_id").to_a
         %>
         <% assignments.each do |assn| %>
         <% if assn.available > DateTime.current %>
@@ -81,9 +81,21 @@
   <div class="panel-heading">
     <div class="panel-title" data-toggle="collapse" data-target="#students-table">
       Students
+      <div id="toggle-dropped" class="pull-right btn-xs btn-default">Show dropped students</div>
+      <script>
+        $("#toggle-dropped").on("click", function(e) {
+          $("#students-table").toggleClass("hide-dropped");
+          if ($("#students-table").hasClass("hide-dropped"))
+            $(this).text("Show dropped students");
+          else
+            $(this).text("Hide dropped students");
+          e.stopPropagation();
+          e.preventDefault();
+        });
+      </script>
     </div>
   </div>
-  <div id="students-table" class="panel-body collapse in">
+  <div id="students-table" class="panel-body collapse in hide-dropped">
     <table class="table table-hover">
       <thead>
         <tr>
@@ -95,14 +107,18 @@
       </thead>
       <tbody>
         <% 
-        @course.score_summary.each do |info|
-        %>
+           @course.score_summary.each do |info|
+           %>
+          <% if info[:dropped] %>
+          <tr class="dropped text-muted">
+          <% else %>
           <tr>
-            <td width="1em"><%= mail_to "#{info[:s].name} <#{info[:s].email}>", "@" %></td>
-            <td><%= link_to info[:s].display_name, impersonate_user_path(info[:s]), method: 'post' %></td>
-            <td><%= show_score(info[:min], nil, true) %></td>
-            <td><%= show_score(info[:cur], nil, true) %></td>
-            <td><%= show_score(info[:max], nil, true) %></td>
+          <% end %>
+            <td width="1em"><span><%= mail_to "#{info[:s].name} <#{info[:s].email}>", "@" %></span></td>
+            <td><span><%= link_to info[:s].display_name, impersonate_user_path(info[:s]), method: 'post' %></span></td>
+            <td><span><%= show_score(info[:min], nil, true) %></span></td>
+            <td><span><%= show_score(info[:cur], nil, true) %></span></td>
+            <td><span><%= show_score(info[:max], nil, true) %></span></td>
           </tr>
         <% end %>
       </tbody>

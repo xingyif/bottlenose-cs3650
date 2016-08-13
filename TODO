@@ -30,19 +30,19 @@
 [ ] quizzes
    [ ] online
    [ ] auto-graded?
-[ ] dropping class
-   [ ] students self-dropping
-   [ ] profs dropping students
-   [ ] invalidating teams
-   [ ] storing date of drop
-   [ ] hide students from class roster
-   [ ] affect exporting?
+[X] dropping class
+   [X] students self-dropping
+   [X] profs dropping students -- via impersonation
+   [X] invalidating teams
+   [X] storing date of drop
+   [X] hide students from class roster
+   [X] affect exporting?
 [ ] export course spreadsheet
    [X] initial grade support
    [ ] letter-grade computation
 [X] test with syntactically invalid inputs / compile-error inputs
 [X] bulk random teams
-[ ] support CRN section numbers
-   [ ] in course registration
-   [ ] in bulk registration
-   [ ] in export
+[X] support CRN section numbers
+   [X] in course registration
+   [X] in bulk registration
+   [X] in export

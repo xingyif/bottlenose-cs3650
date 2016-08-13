@@ -7,7 +7,7 @@ Bottlenose::Application.routes.draw do
 
   resource :settings, only: [:edit, :update]
 
-  resources :users do
+  resources :users, except: [:destroy] do
     collection do
       post :stop_impersonating
     end
@@ -66,6 +66,7 @@ Bottlenose::Application.routes.draw do
     member do
       get :public
       get :gradesheet
+      delete :withdraw
     end
   end
 

@@ -142,16 +142,26 @@ end
     sheet.columns.push(
       Col.new("LastName"), Col.new("FirstName"), Col.new("Instructor"),
       Col.new("NUID", "String"), Col.new("Email"),
-      Col.new("Section", "Number"), Col.new("Withdrawn?", "Boolean"),
+      Col.new("Section", "Number"), Col.new("Withdrawn?", "DateTime"),
       Col.new(""), Col.new("")
     )
     labels = sheet.push_header_row(nil, ["", "", "", "", "", "", "", "", ""])
     weight = sheet.push_header_row(nil, ["", "", "", "", "", "", "", "", ""])
 
     users = course.students.order(:last_name, :first_name).to_a
-    
+
+    regs = course.registrations.includes(:section).to_a
     users.each do |u|
-      sheet.push_row(nil, [u.last_name || u.name, u.first_name || "", "", u.nuid || "", u.email, "", false, "", ""])
+      reg = regs.find{|r| r.user_id == u.id}
+      sheet.push_row(nil, [
+                       u.last_name || u.name,
+                       u.first_name || "",
+                       reg.section.instructor,
+                       u.nuid || "",
+                       u.email,
+                       reg.section.crn,
+                       reg.dropped_date || "",
+                       "", ""])
     end
 
     return labels, weight, users
@@ -194,7 +204,11 @@ end
           else
             sheet.push_row(i, assn.lateness_config.late_penalty(assn, sub[:sub]))
           end
-          sheet.push_row(i, sub[:sub].score / 100.0)
+          if sub[:sub].score
+            sheet.push_row(i, sub[:sub].score / 100.0)
+          else
+            sheet.push_row(i, 0)
+          end
         end
       end
     end

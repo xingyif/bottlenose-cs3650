@@ -4,6 +4,10 @@ require 'devise/encryptor'
   model.reset_column_information
 end
 
+def random(arr)
+  arr[rand(arr.count)]
+end
+
 case Rails.env
 when "development"
   # Create four users.
@@ -52,7 +56,21 @@ when "development"
                             term: fall,
                             lateness_config: fixed_lateness,
                             total_late_days: nil
-                            )
+  )
+
+  fundies_sections = [
+    CourseSection.create!(course: fundies1,
+                          crn: 12345,
+                          instructor: "Lerner",
+                          meeting_time: "MWTh 3:30--4:50"
+                           ),
+    CourseSection.create!(course: fundies1,
+                          crn: 87654,
+                          instructor: "Razzaq",
+                          meeting_time: "MWTh 10:30--11:45"
+                         )
+  ]
+  
   manual = ManualGrader.create!(avail_score: 42)
   junit = JunitGrader.create!(avail_score: 58)
   checker = CheckerGrader.create!(avail_score: 64)
@@ -82,11 +100,12 @@ when "development"
     Registration.create!(
                          user: professor,
                          course: fundies1,
+                         section: fundies_sections[0],
                          role: :professor,
                          show_in_lists: false,
                          )
   end
-  students = 1.upto(40).map do |i|
+  students = 1.upto(20).map do |i|
     user = User.create!(
                         email: "user#{i}@example.com",
                         username: "user#{i}@example.com",
@@ -96,6 +115,7 @@ when "development"
                          user: user,
                          course: fundies1,
                          role: :student,
+                         section: random(fundies_sections),
                          show_in_lists: true,
                          )
     user
@@ -111,12 +131,9 @@ when "development"
                  )
   end
 
-  def sub_file
-    subs = ["#{Rails.root}/hw1/strings.rkt",
-            "#{Rails.root}/hw2/grading/cs3500.tar.gz",
-            "#{Rails.root}/hw3/Strings.java"]
-    subs[rand(subs.count)]
-  end
+  subs = ["#{Rails.root}/hw1/strings.rkt",
+          "#{Rails.root}/hw2/grading/cs3500.tar.gz",
+          "#{Rails.root}/hw3/Strings.java"]
     
   fundies1.assignments.each do |assignment|
     if assignment.team_subs?
@@ -125,11 +142,10 @@ when "development"
         upload = Upload.new
         submit_time = assignment.due_date + 48.hours - rand(96).hours
         upload.user_id = student.id
-        submission_file = File.new(sub_file)
+        submission_file = File.new(random(subs))
         upload.store_upload!(
           ActionDispatch::Http::UploadedFile.new(filename: File.basename(submission_file),
-                                                 tempfile: submission_file,
-                                                 content_type: 
+                                                 tempfile: submission_file
                                                 ),
           
           {
@@ -158,7 +174,7 @@ when "development"
         upload = Upload.new
         submit_time = assignment.due_date + 48.hours - rand(96).hours
         upload.user_id = student.id
-        submission_file = File.new(sub_file)
+        submission_file = File.new(random(subs))
         upload.store_upload!(
           ActionDispatch::Http::UploadedFile.new(filename: File.basename(submission_file),
                                                  tempfile: submission_file,

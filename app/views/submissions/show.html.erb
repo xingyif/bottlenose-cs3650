@@ -60,7 +60,7 @@
     <td><%= c.type %></td>
     <td>
       <% if scores.kind_of?(Array) %>
-      <%= show_score(scores[0]) %>&nbsp;/&nbsp;<%= to_fixed(scores[1]) %>
+      <%= show_score(scores[0], @gradesheet.assignment, cur_reg.staff?) %>&nbsp;/&nbsp;<%= to_fixed(scores[1]) %>
       <% if scores[-1] == "hidden" %> (hidden) <% end %>
       <% else %>
       <%= scores %>
@@ -79,7 +79,7 @@
                 course_assignment_submission_grader_path(@course, @assignment, @submission, grader) %>
             <%= if !grader.complete? then " (hidden)" end %>
           <% end %>
-          <% if grader.grader_config.autograde? %>
+          <% if c.autograde? %>
             <%= link_to "Rerun autograder", 
                 regrade_course_assignment_submission_grader_path(@course, @assignment, @submission, grader),
                 method: 'post', class: "btn btn-default", style: "margin-left: 5em;" %>
@@ -146,7 +146,7 @@
     <td>Total Score:</td>
     <td>
       <% if !all_scores[:raw_score].nil? %>
-      <%= show_score(@submission.score) %>%
+      <%= show_score(@submission.score, @gradesheet.assignment, cur_reg.staff?) %>%
       <% if !complete then %>
       (hidden)
       <% end %>

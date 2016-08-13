@@ -27,43 +27,62 @@ class RegRequestsController < CoursesController
 
   def accept
     @request = RegRequest.find(params[:id])
-
-    if Registration.create(user: @request.user,
-                           course: @request.course,
-                           role: @request.role,
-                           show_in_lists: @request.role == :student)
-      @request.destroy
+    errs = accept_help(@request)
+    if errs
+      redirect_to :back, alert: errs
+    else
       redirect_to :back
     end
   end
 
-  def reject
-    RegRequest.find(params[:id]).destroy
-    redirect_to :back
+  def accept_all
+    count = 0
+    RegRequest.where(course_id: params[:course_id]).each do |req|
+      errs = accept_help(req)
+      if errs
+        redirect_to :back, alert: errs
+        return
+      end
+      count = count + 1
+    end
+    redirect_to :back, notice: "#{plural(count, 'registration')} added"
   end
 
-  def accept_all
-    RegRequest.where(course_id: params[:course_id]).each do |req|
-      if Registration.create(user: req.user,
-                             course: req.course,
-                             role: req.role,
-                             show_in_lists: req.role == :student)
-        req.destroy
+  def accept_help(request)
+    begin
+      reg = Registration.find_or_create_by(user: request.user,
+                                           course: request.course,
+                                           role: request.role,
+                                           section: request.section.crn)
+      if reg
+        reg.show_in_lists = (request.role == :student)
+        reg.dropped_date = nil
+        reg.save!
+        request.destroy
       end
+      nil
+    rescue Exception => err
+      debugger
+      err.record.errors
     end
+  end
+  
+
+  def reject
+    RegRequest.find(params[:id]).delete
     redirect_to :back
   end
 
   def reject_all
-    RegRequest.where(course: params[:course_id]).each do |req|
-      req.destroy 
-    end
+    RegRequest.where(course_id: params[:course_id]).delete_all # No dependents, so deletion is fine
     redirect_to :back
   end
 
   private
 
   def reg_request_params
-    params[:reg_request].permit(:notes, :role)
+    ans = params[:reg_request].permit(:notes, :role, :section)
+    ans[:section] = CourseSection.find_by(crn: ans[:section].to_i)
+    ans
   end
 end

@@ -65,9 +65,7 @@ class RegistrationsController < CoursesController
     num_added = 0
 
     CSV.parse(params[:emails]) do |row|
-      email = row[0]
-      if email =~ /\@.*\./
-        @course.add_registration(email)
+      if @course.add_registration(row[0], row[1])
         num_added += 1
       end
     end
