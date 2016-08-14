@@ -51,6 +51,8 @@ class CourseSpreadsheet
         ans << "\">".html_safe
         if type == "Boolean"
           ans << (if @value then "1" else "0" end)
+        elsif type == "DateTime"
+          ans << @value.to_formatted_s(:db)
         else
           ans << @value.to_s
         end
