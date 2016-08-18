@@ -2,11 +2,15 @@
 [X] unzip archives
 [ ] per-file markup
    [X] edit the .../files endpoint
+   [ ] save individual comments
 [X] automated graders
    [X] junit
    [X] java-style
    [X] checker
+[ ] background tasks
+   [ ] delayed jobs?
 [ ] configuring graders for assignments
+[ ] assigning tutors to grade particular students
 [X] NUID
    [X] make sure it's only visible to faculty -- not just any staff!
 [ ] defered running of grading scripts
@@ -46,3 +50,4 @@
    [X] in course registration
    [X] in bulk registration
    [X] in export
+[ ] sub-assignments (i.e. assignments in parts)

@@ -80,7 +80,9 @@ class GradersController < ApplicationController
         @tests = @grading_output.tests
       end
     else
-      if @grading_output.passed_count == @grading_output.test_count
+      if @grading_output.kind_of?(String)
+        @grading_header = "Errors running tests"
+      elsif @grading_output.passed_count == @grading_output.test_count
         @grading_header = "Test results"
         @tests = @grading_output.tets
       else
