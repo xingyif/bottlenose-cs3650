@@ -171,7 +171,7 @@ class AssignmentsController < CoursesController
   def assignment_params
     params[:assignment].permit(:name, :assignment, :due_date,
                                :points_available, :hide_grading, :blame_id,
-                               :assignment_file, :grading_file, :solution_file,
+                               :assignment_file, 
                                :course_id, :team_subs)
   end
 end

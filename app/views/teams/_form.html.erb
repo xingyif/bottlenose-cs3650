@@ -75,11 +75,12 @@
 <div class="well">
   <%= form_for(@course, :url => { action: :randomize, method: :patch }) do |f| %>
   <h3>Randomize all teams</h3>
+  <%= fields_for "random" do |rand| %>
   <div class="row">
     <div class="col-sm-12 form-inline">
-      <%= hidden_field_tag "random[start_date]" %>
-      <%= hidden_field_tag "random[end_date]" %>
-      Generate random teams of size <%= spinner_tag "random[size]", 2, :min => 2, :max => 10 %>
+      <%= rand.hidden_field "start_date" %>
+      <%= rand.hidden_field "end_date" %>
+      Generate random teams of size <%= rand.spinner "size", 2, :min => 2, :max => 10 %>
     </div>
     <p class="col-sm-12">
       <%= f.submit "Generate random teams", id: "submit-random",

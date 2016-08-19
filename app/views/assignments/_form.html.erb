@@ -18,24 +18,14 @@
   </div>
   <div class="form-group">
     <%= f.label :assignment, "Assignment Text" %>
-    <br>(Allows HTML markup)
+    <p>This description will appear on the homework-submission page,
+    and may be useful to remind students which files are expected, or
+      a link to the assignment itself.  HTML markup is allowed here.</p>
     <%= f.text_area :assignment, class: "form-control rich-text" %>
   </div>
   <div class="form-group">
     <%= f.label :assignment_file %>
     <%= f.file_field :assignment_file %>
-  </div>
-  <div class="form-group">
-    <% if !@assignment.grading_file_name.nil? && @assignment.grading_file_name != "" %>
-    <span>Existing file</span>
-    <%= link_to @assignment.grading_file_name, @assignment.grading_file_path %>
-    <% end %>
-    <%= f.label :grading_file %>
-    <%= f.file_field :grading_file %>
-  </div>
-  <div class="form-group">
-    <%= f.label :solution_file %>
-    <%= f.file_field :solution_file %>
   </div>
   <div class="form-group">
     <%= f.label :points_available %>
@@ -50,7 +40,24 @@
   </div>
   <div class="form-group">
     <p><strong>Late Penalty</strong></p>
-    <%= render 'lateness/picker', :within_course => true %>
+    <%= fields_for "lateness" do |late| %>
+    <%= render 'lateness/picker', :within_course => true, :f_late => late, :f_course => f %>
+    <% end %>
+  </div>
+  <div class="form-group">
+    <p><strong>Graders</strong></p>
+    <ol id="grader-defns"></ol>
+    <%= fields_for "graders[]", GraderConfig.new do |graders|
+      grader_text = graders.fields_for("grader", nil, :child_index => "new_grader") do |g|
+        render("graders/picker", :f_grader => g, :f_course => f)
+      end
+      link_to "Add assignment grader", "#", class: "btn btn-default",
+              id: "add-grader",
+              data: {on: :click, call: "add_grader", args: ["#{grader_text}"]}
+    end %>
+    <%= link_to "Remove assignment grader", "#", class: "btn btn-default disabled",
+              id: "remove-grader",
+              data: {on: :click, call: "remove_grader", args: []} %>
   </div>
   <div class="form-group">
     <%= f.label :team_subs, "Team Submissions?" %>
@@ -81,3 +88,18 @@
   <%= f.submit nil, class: 'btn btn-primary' %>
   </div>
 <% end %>
+<script>
+  $(function() { enableReflectiveCalls(); });
+  function add_grader(content) {
+    var new_id = new Date().getTime();
+    var regexp = new RegExp("new_grader", "g");
+    $("#grader-defns").append($("<li>").html(content.replace(regexp, new_id)));
+    $("#remove-grader").removeClass("disabled");
+  }
+  function remove_grader() {
+    var defns = $("#grader-defns > li");
+    if (defns.length == 1)
+      $("#remove-grader").addClass("disabled");
+    defns.last().remove();
+  }    
+</script>

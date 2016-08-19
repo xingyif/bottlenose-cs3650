@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160813150534) do
+ActiveRecord::Schema.define(version: 20160818190604) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,16 +28,13 @@ ActiveRecord::Schema.define(version: 20160813150534) do
     t.string   "name",                                 null: false
     t.datetime "due_date",                             null: false
     t.string   "assignment_file_name"
-    t.string   "grading_file_name"
     t.text     "assignment"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "secret_dir"
     t.boolean  "hide_grading",         default: false
     t.integer  "assignment_upload_id"
-    t.integer  "grading_upload_id"
     t.integer  "blame_id"
-    t.integer  "solution_upload_id"
     t.string   "tar_key"
     t.integer  "course_id",                            null: false
     t.boolean  "team_subs"

@@ -51,14 +51,6 @@ class Assignment < ActiveRecord::Base
     Upload.find_by_id(assignment_upload_id)
   end
 
-  def grading_upload
-    Upload.find_by_id(grading_upload_id)
-  end
-
-  def solution_upload
-    Upload.find_by_id(solution_upload_id)
-  end
-
   def assignment_file
     if assignment_upload_id.nil?
       ""
@@ -71,36 +63,8 @@ class Assignment < ActiveRecord::Base
     assignment_file
   end
 
-  def grading_file
-    if grading_upload_id.nil?
-      ""
-    else
-      grading_upload.file_name
-    end
-  end
-
-  def grading_file_name
-    grading_file
-  end
-
-  def solution_file
-    if solution_upload_id.nil?
-      ""
-    else
-      solution_upload.file_name
-    end
-  end
-
-  def solution_file_name
-    solution_file
-  end
-
   def assignment_full_path
     assignment_upload.submission_path
-  end
-
-  def grading_full_path
-    grading_upload.submission_path
   end
 
   def assignment_file_path
@@ -110,37 +74,8 @@ class Assignment < ActiveRecord::Base
       assignment_upload.path
     end
   end
-
-  def grading_file_path
-    if grading_upload_id.nil?
-      ""
-    else
-      grading_upload.path
-    end
-  end
-
-  def solution_file_path
-    if solution_upload_id.nil?
-      ""
-    else
-      solution_upload.path
-    end
-  end
-
   def assignment_file=(data)
     @assignment_file_data = data
-  end
-
-  def grading_file=(data)
-    @grading_file_data = data
-  end
-
-  def solution_file=(data)
-    @solution_file_data = data
-  end
-
-  def has_grading?
-    !grading_upload_id.nil?
   end
 
   def save_uploads!
@@ -168,68 +103,6 @@ class Assignment < ActiveRecord::Base
       Audit.log("Assn #{id}: New assignment file upload by #{user.name} " +
                 "(#{user.id}) with key #{up.secret_key}")
     end
-
-    unless @grading_file_data.nil?
-      unless assignment_upload_id.nil?
-        Audit.log("Assn #{id}: Orphaning grading upload " +
-                  "#{assignment_upload_id} (#{assignment_upload.secret_key})")
-      end
-
-      up = Upload.new
-      up.user_id = user.id
-      up.store_upload!(@grading_file_data, {
-        type:       "Assignment Grading File",
-        user:       "#{user.name} (#{user.id})",
-        course:     "#{course.name} (#{course.id})",
-        date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
-      })
-      up.save!
-
-      self.grading_upload_id = up.id
-      self.save!
-
-      Audit.log("Assn #{id}: New grading file upload by #{user.name} " +
-                "(#{user.id}) with key #{up.secret_key}")
-    end
-
-    unless @solution_file_data.nil?
-      unless solution_upload_id.nil?
-        Audit.log("Assn #{id}: Orphaning solution upload " +
-                  "#{solution_upload_id} (#{solution_upload.secret_key})")
-      end
-
-      up = Upload.new
-      up.user_id = user.id
-      up.store_upload!(@solution_file_data, {
-        type:       "Assignment Solution File",
-        user:       "#{user.name} (#{user.id})",
-        course:     "#{course.name} (#{course.id})",
-        date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
-      })
-      up.save!
-
-      self.solution_upload_id = up.id
-      self.save!
-
-      Audit.log("Assn #{id}: New solution file upload by #{user.name} " +
-                "(#{user.id}) with key #{up.secret_key}")
-    end
-  end
-
-  def tarball_path
-    if tar_key.blank?
-      self.tar_key = SecureRandom.hex(16)
-      save!
-    end
-
-    dir = "downloads/#{tar_key}/"
-    FileUtils.mkdir_p(Rails.root.join('public', dir))
-
-    return '/' + dir + "assignment_#{id}.tar.gz"
-  end
-
-  def tarball_full_path
-    Rails.root.join('public', tarball_path.sub(/^\//, ''))
   end
 
   def submissions_for(user)

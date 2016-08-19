@@ -90,4 +90,17 @@ module ApplicationHelper
   def new_chapter_assignment_path(ch)
     new_course_assignment_path(ch.course) + "?chapter_id=#{ch.id}"
   end
+
+
+  
+
+  def link_to_add_grader(name, f, association)
+    fields = f.fields_for(association, nil, :child_index => "new_#{association}") do |builder|
+      render("graders/picker", :f_grader => builder)
+    end
+    link_to_function(name, "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")".html_safe)
+  end
+
+
+
 end

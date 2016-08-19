@@ -40,7 +40,7 @@ class Course < ActiveRecord::Base
   end
 
   def active_registrations
-    registrations.where(:show_in_lists?).order(:last_name, :first_name)
+    registrations.where(show_in_lists: true).joins(:user).order("users.last_name", "users.first_name")
   end
 
   def students

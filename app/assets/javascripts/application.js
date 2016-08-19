@@ -29,6 +29,45 @@
 //= require codemirror/modes/scheme
 //= require_tree .
 
+
+
+// Based on https://stackoverflow.com/questions/14324919/status-of-rails-link-to-function-deprecation
+function enableReflectiveCalls() {
+  $('[data-on][data-call][data-args]').each(function(d){
+    if ($(this).data("already-enabled-reflective-call")) return;
+    var event = $(this).data('on');
+    $(this).on(event, function() {
+      var toCall = $(this).data('call');
+      var args = $(this).data('args');
+      if (typeof(window[toCall]) !== 'function')
+        throw new Error("No such function to call: " + toCall);
+      if (!(args instanceof Array))
+        throw new Error("Arguments are not an array: " + args);
+      window[toCall].apply(this, args);
+    });
+    $(this).data("already-enabled-reflective-call-" + event, true);
+  });
+}
+
+
+var validKeys = {
+  "ArrowLeft": true,
+  "ArrowRight": true,
+  "Backspace": true,
+  "Delete": true,
+  "Tab": true,
+};
+var validKeyCodes = {
+  9: true
+};
+
+function validateNumericInput(e) {
+  if (validKeys[e.key] || validKeyCodes[e.keyCode]) return;
+  if (!Number.isNaN(Number.parseInt(e.key))) return;
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
+  e.preventDefault();
+};
+
 $(function() {
   $('[data-toggle="tooltip"]').tooltip()
   
@@ -48,19 +87,8 @@ $(function() {
         $(this).text(dd.format("MMM D YYYY, h:mm:ssa"));
     }
   });
-
-  var validKeys = {
-    "ArrowLeft": true,
-    "ArrowRight": true,
-    "Backspace": true,
-    "Delete": true,
-  };
-  $("input.numeric").on("keypress", function(e) {
-    if (validKeys[e.key]) return;
-    if (!Number.isNaN(Number.parseInt(e.key))) return;
-    if (e.ctrlKey || e.altKey || e.metaKey) return;
-    e.preventDefault();
-  });
+  
+  $("input.numeric").on("keypress", validateNumericInput);
 })
 
 
@@ -111,6 +139,12 @@ function activateSpinner(obj, options) {
     }
     input.val(newVal.toFixed(precision)).change();
   }
+  input.on("keypress", function(e) {
+    validateNumericInput(e);
+    if (e.key === "ArrowUp") { increment(); return; }
+    if (e.key === "ArrowDown") { decrement(); return; }
+  });
+  
   $(upArrow).on('mousedown', function() {
     upInterval = setInterval(increment, 200);
     increment();
@@ -129,7 +163,7 @@ function activateSpinner(obj, options) {
 }
 
 function makeSpinner(options) {
-  var input = $("<input>").addClass("form-control").val(options.val || 0);
+  var input = $("<input>").addClass("form-control numeric").val(options.val || 0);
   if (options.klass !== undefined)
     input.addClass(options.klass);
   if (options.max !== undefined)   input.data("max", options.max);
@@ -146,11 +180,6 @@ function makeSpinner(options) {
   return div;
 }
 
-$(function() {
-  $("#lateness-configuration .equal-height-group")
-    .matchHeight({byRow: false, property: 'height'});
-  $('.spinner').each(function() { activateSpinner(this) });
-});
 $(function() {
   function fixSizes() {
     var $affixElement = $('[data-spy="affix"]');

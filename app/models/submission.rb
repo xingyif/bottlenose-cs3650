@@ -154,7 +154,6 @@ class Submission < ActiveRecord::Base
   end
 
   def file_full_path
-    raise Exception.new("Don't do this!")
     if upload_id.nil?
       ""
     else

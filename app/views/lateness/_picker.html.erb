@@ -1,14 +1,14 @@
 <div id="lateness-configuration" class="">
   <p class="col-sm-12">(This is the default late policy for all
     assignments in this course.)</p>    
-  <%= hidden_field_tag "lateness[type]" %>
+  <%= f_late.hidden_field :type %>
   <ul class="nav nav-tabs">
     <% if within_course %>
     <li><a data-toggle="tab" href="#UseCourseDefaultConfig">Course default</a></li>
     <% end %>
     <li><a data-toggle="tab" href="#LatePerDayConfig">Late-per-day</a></li>
     <li><a data-toggle="tab" href="#FixedDaysConfig">Limited number</a></li>
-    <li><a data-toggle="tab" href="#reuse">Copy existing settings</a></li>
+    <li><a data-toggle="tab" href="#reuse-lateness">Copy existing settings</a></li>
   </ul>
   <div class="tab-content">
     <% if within_course %>
@@ -17,35 +17,39 @@
       <p><%= @course.lateness_config.to_s %></p>
     </div>
     <% end %>
+    <%= f_late.fields_for :LatePerDayConfig do |lpd| %>
     <div id="LatePerDayConfig" class="tab-pane equal-height-group form-group">
       <div class="form-inline">
         Deduct
-        <%= spinner_tag "lateness[LatePerDayConfig][percent_off]", 20, :min => 0, :max => 100, :delta => 5 %>
+        <%= lpd.spinner "percent_off", 20, :min => 0, :max => 100, :delta => 5 %>
         percent every
-        <%= spinner_tag "lateness[LatePerDayConfig][frequency]", 1, :min => 0, :max => 100 %>
+        <%= lpd.spinner "frequency", 1, :min => 0, :max => 100 %>
         days late to a maximum of
-        <%= spinner_tag "lateness[LatePerDayConfig][max_penalty]", 100, :min => 0, :max => 100, :delta => 5 %>
+        <%= lpd.spinner "max_penalty", 100, :min => 0, :max => 100, :delta => 5 %>
         percent off.
       </div>
       <br>
       <div class="form-inline">
         Stop accepting assignments after
-        <%= spinner_tag "lateness[LatePerDayConfig][days_per_assignment]", 5, :min => 0, :max => 5 %>
+        <%= lpd.spinner "days_per_assignment", 5, :min => 0, :max => 5 %>
         days.
       </div>
     </div>
+    <% end %>
+    <%= f_late.fields_for :FixedDaysConfig do |fd| %>
     <div id="FixedDaysConfig" class="tab-pane equal-height-group form-group">
       <div class="form-inline">
         Allow users or teams at most
-        <%= spinner_tag "lateness[FixedDaysConfig][days_per_assignment]", 2, :min => 0, :max => 5 %>
+        <%= fd.spinner "days_per_assignment", 2, :min => 0, :max => 5 %>
         late days per assignment with no penalty, up to
-        <%= spinner_tag "course[total_late_days]", 4, :min => 0 %>
+        <%= f_course.spinner "total_late_days", 4, :min => 0 %>
         late days for the entire course.
       </div>
     </div>
-    <div id="reuse" class="tab-pane equal-height-group form-group">
+    <% end %>
+    <div id="reuse-lateness" class="tab-pane equal-height-group form-group">
       <label for="sel1">Select list:</label>
-      <select class="form-control" id="config-options">
+      <select class="form-control" id="lateness-config-options">
         <% LatenessConfig.unique.each do |c| %>
         <%  attribs = c.attributes.map do |k, v| ["data-" + k, v || ""] end.to_h %>
         <%= content_tag :option, attribs do c.to_s end %>
@@ -53,7 +57,7 @@
       </select>
       <br>
       <div class="text-right">
-        <button id="select-config" class="btn btn-info">Use this configuration</button>
+        <button id="select-lateness-config" class="btn btn-info">Use this configuration</button>
       </div>
     </div>
   </div>
@@ -62,7 +66,7 @@
   $(function() {
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
       var target = $(e.target).attr("href") // activated tab
-      $("#lateness_type").val(target.substr(1));
+      $("#<%= f_late.object_name %>_type").val(target.substr(1));
     });
     <% if within_course %>
     $("[href='#UseCourseDefaultConfig']").tab('show');
@@ -87,8 +91,8 @@
       <% end %>
     <% end %>
 
-    var sel = $("#config-options");
-    $("#select-config").on("click", function(e) {
+    var sel = $("#lateness-config-options");
+    $("#select-lateness-config").on("click", function(e) {
       e.stopPropagation();
       e.preventDefault();
       sel.find("option:selected").each(function() {
@@ -97,12 +101,18 @@
         var props = Object.keys(opt_data)
         for (var i = 0; i < props.length; i++) {
           if (props[i] === "type") continue;
-          var id = "#lateness_" + type + "_" + props[i];
+          var id = "#<%= f_late.object_name %>_" + type + "_" + props[i];
           console.log(id, opt_data[props[i]]);
           $(id).val(opt_data[props[i]]);
         }
         $("[href='#" + type + "']").tab('show');
       });
     });
+  });
+
+  $(function() {
+    $("#lateness-configuration .equal-height-group")
+      .matchHeight({byRow: false, property: 'height'});
+    $('#lateness-configuration .spinner').each(function() { activateSpinner(this) });
   });
 </script>

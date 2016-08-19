@@ -1,0 +1,71 @@
+<div id="new_grader" name="grader-configuration" class="grader-config">
+  <%= f_grader.hidden_field "type" %>
+  <ul class="nav nav-tabs">
+    <li><a data-toggle="tab" href="#new_grader_JavaStyleGrader">Java style</a></li>
+    <li><a data-toggle="tab" href="#new_grader_CheckerGrader">Checker tests</a></li>
+    <li><a data-toggle="tab" href="#new_grader_JunitGrader">JUnit tests</a></li>
+    <li><a data-toggle="tab" href="#new_grader_ManualGrader">Manual grading</a></li>
+    <li><a data-toggle="tab" href="#new_grader_reuse">Copy existing settings</a></li>
+  </ul>
+  <div class="tab-content">
+    <%= f_grader.fields_for "JavaStyleGrader" do |jsg| %>
+    <div id="new_grader_JavaStyleGrader" class="tab-pane equal-height-group form-group">
+      <div class="form-inline">
+        Deduct
+        <%= jsg.spinner "percent_off", 20, :min => 0, :max => 100, :delta => 5 %>
+      </div>
+    </div>
+    <% end %>
+    <div id="new_grader_reuse" class="tab-pane equal-height-group form-group">
+      <label for="sel1">Select list:</label>
+      <select class="form-control" id="new_grader_grader-config-options">
+        <!--
+        < % LatenessConfig.unique.each do |c| %>
+        < %  attribs = c.attributes.map do |k, v| ["data-" + k, v || ""] end.to_h %>
+        < %= content_tag :option, attribs do c.to_s end %>
+        < % end %>
+        -->
+      </select>
+      <br>
+      <div class="text-right">
+        <button id="new_grader_select-grader-config" class="btn btn-info">Use this configuration</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(function() {
+    $('#new_grader a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+      var target = $(e.target).attr("href") // activated tab
+      $("#new_grader <%= f_grader.object_name %>_type").val(target.substr(1));
+    });
+    $("[href='#new_grader_JavaStyleGrader']").tab('show');
+  
+    var sel = $("#new_grader_grader-config-options");
+    $("#new_grader_select-grader-config").on("click", function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      sel.find("option:selected").each(function() {
+        var opt_data = $(this).data();
+        var type = opt_data["type"];
+        var props = Object.keys(opt_data)
+        /*
+        for (var i = 0; i < props.length; i++) {
+          if (props[i] === "type") continue;
+          var id = "#<%= f_grader.object_name %>_" + type + "_" + props[i];
+          console.log(id, opt_data[props[i]]);
+          $(id).val(opt_data[props[i]]);
+        }
+        $("[href='#" + type + "']").tab('show');
+        */
+      });
+    });
+  });
+
+
+  $(function() {
+    $("#new_grader .equal-height-group")
+      .matchHeight({byRow: false, property: 'height'});
+    $('#new_grader .spinner').each(function() { activateSpinner(this) });
+  });
+</script>
