@@ -7,6 +7,11 @@ class JunitGrader < GraderConfig
     true
   end
 
+  def to_s
+    klass, filename = "Grade03Resubumit:hw_03.zip".split(":") #self.config
+    "#{self.avail_score} points: Run JUnit tests in #{klass} from #{filename}"
+  end
+  
   protected
   def do_grading(assignment, sub)
     g = self.grader_for sub

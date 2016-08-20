@@ -64,6 +64,7 @@ var validKeyCodes = {
 function validateNumericInput(e) {
   if (validKeys[e.key] || validKeyCodes[e.keyCode]) return;
   if (!Number.isNaN(Number.parseInt(e.key))) return;
+  if (e.key == "." && e.currentTarget.value.indexOf(".") < 0) return;
   if (e.ctrlKey || e.altKey || e.metaKey) return;
   e.preventDefault();
 };

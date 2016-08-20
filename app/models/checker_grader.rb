@@ -7,6 +7,11 @@ class CheckerGrader < GraderConfig
     true
   end
 
+  def to_s
+    klass, filename = "ExamplesStringReference:hw_02.zip".split(":") #self.config
+    "#{self.avail_score} points: Run Checker tests in #{klass} from #{filename}"
+  end
+
   def grade(assignment, sub)
     g = self.grader_for sub
     u = sub.upload

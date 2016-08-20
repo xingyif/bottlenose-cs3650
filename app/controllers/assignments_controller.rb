@@ -83,6 +83,7 @@ class AssignmentsController < CoursesController
   def set_lateness_config
     lateness = params[:lateness]
     type = lateness[:type]
+    type = type.split("_")[1] unless type.nil?
     lateness = lateness[type] unless lateness.nil? || type.nil?
     lateness[:type] = type
     if type == "UseCourseDefaultConfig"

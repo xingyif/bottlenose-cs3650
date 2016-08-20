@@ -1,24 +1,24 @@
-<div id="lateness-configuration" class="">
+<div id="<%= f_late.object_name %>_lateness-configuration" class="">
   <p class="col-sm-12">(This is the default late policy for all
     assignments in this course.)</p>    
   <%= f_late.hidden_field :type %>
   <ul class="nav nav-tabs">
     <% if within_course %>
-    <li><a data-toggle="tab" href="#UseCourseDefaultConfig">Course default</a></li>
+    <li><a data-toggle="tab" href="#<%= f_late.object_name %>_UseCourseDefaultConfig">Course default</a></li>
     <% end %>
-    <li><a data-toggle="tab" href="#LatePerDayConfig">Late-per-day</a></li>
-    <li><a data-toggle="tab" href="#FixedDaysConfig">Limited number</a></li>
-    <li><a data-toggle="tab" href="#reuse-lateness">Copy existing settings</a></li>
+    <li><a data-toggle="tab" href="#<%= f_late.object_name %>_LatePerDayConfig">Late-per-day</a></li>
+    <li><a data-toggle="tab" href="#<%= f_late.object_name %>_FixedDaysConfig">Limited number</a></li>
+    <li><a data-toggle="tab" href="#<%= f_late.object_name %>_reuse-lateness">Copy existing settings</a></li>
   </ul>
   <div class="tab-content">
     <% if within_course %>
-    <div id="UseCourseDefaultConfig" class="tab-pane equal-height-group form-group">
+    <div id="<%= f_late.object_name %>_UseCourseDefaultConfig" class="tab-pane equal-height-group form-group">
       <p>Use course-default lateness policy:</p>
       <p><%= @course.lateness_config.to_s %></p>
     </div>
     <% end %>
     <%= f_late.fields_for :LatePerDayConfig do |lpd| %>
-    <div id="LatePerDayConfig" class="tab-pane equal-height-group form-group">
+    <div id="<%= f_late.object_name %>_LatePerDayConfig" class="tab-pane equal-height-group form-group">
       <div class="form-inline">
         Deduct
         <%= lpd.spinner "percent_off", 20, :min => 0, :max => 100, :delta => 5 %>
@@ -37,7 +37,7 @@
     </div>
     <% end %>
     <%= f_late.fields_for :FixedDaysConfig do |fd| %>
-    <div id="FixedDaysConfig" class="tab-pane equal-height-group form-group">
+    <div id="<%= f_late.object_name %>_FixedDaysConfig" class="tab-pane equal-height-group form-group">
       <div class="form-inline">
         Allow users or teams at most
         <%= fd.spinner "days_per_assignment", 2, :min => 0, :max => 5 %>
@@ -47,9 +47,9 @@
       </div>
     </div>
     <% end %>
-    <div id="reuse-lateness" class="tab-pane equal-height-group form-group">
-      <label for="sel1">Select list:</label>
-      <select class="form-control" id="lateness-config-options">
+    <div id="<%= f_late.object_name %>_reuse-lateness" class="tab-pane equal-height-group form-group">
+      <label for="sel1">Select existing lateness policy:</label>
+      <select class="form-control" id="<%= f_late.object_name %>_lateness-config-options">
         <% LatenessConfig.unique.each do |c| %>
         <%  attribs = c.attributes.map do |k, v| ["data-" + k, v || ""] end.to_h %>
         <%= content_tag :option, attribs do c.to_s end %>
@@ -57,21 +57,21 @@
       </select>
       <br>
       <div class="text-right">
-        <button id="select-lateness-config" class="btn btn-info">Use this configuration</button>
+        <button id="<%= f_late.object_name %>_select-lateness-config" class="btn btn-info">Use this configuration</button>
       </div>
     </div>
   </div>
 </div>
 <script>
   $(function() {
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('#<%= f_late.object_name %>_lateness-configuration a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
       var target = $(e.target).attr("href") // activated tab
       $("#<%= f_late.object_name %>_type").val(target.substr(1));
     });
     <% if within_course %>
-    $("[href='#UseCourseDefaultConfig']").tab('show');
+    $("[href='#<%= f_late.object_name %>_UseCourseDefaultConfig']").tab('show');
     <% else %>
-    $("[href='#LatePerDayConfig']").tab('show');
+    $("[href='#<%= f_late.object_name %>_LatePerDayConfig']").tab('show');
     <% end %>
 
     <% if within_course && @assignment.lateness_config != @course.lateness_config
@@ -85,24 +85,24 @@
       $("[href='#<%= @course.lateness_config.type %>']").tab('show');
       <% lateness.attributes.each do |k, v|
            unless k == "type" 
-             id = "#lateness_" + lateness.type + "_" + k %>
+             id = "##{f_late.object_name}_" + lateness.type + "_" + k %>
              $("<%= id %>").val(<%= v %>);
       <%   end %>
       <% end %>
     <% end %>
 
-    var sel = $("#lateness-config-options");
-    $("#select-lateness-config").on("click", function(e) {
+    var sel = $("#<%= f_late.object_name %>_lateness-config-options");
+    $("#<%= f_late.object_name %>_select-lateness-config").on("click", function(e) {
       e.stopPropagation();
       e.preventDefault();
       sel.find("option:selected").each(function() {
         var opt_data = $(this).data();
-        var type = opt_data["type"];
+        var type = "<%= f_late.object_name %>_" + opt_data["type"];
         var props = Object.keys(opt_data)
         for (var i = 0; i < props.length; i++) {
           if (props[i] === "type") continue;
-          var id = "#<%= f_late.object_name %>_" + type + "_" + props[i];
-          console.log(id, opt_data[props[i]]);
+          var id = "#" + type + "_" + props[i];
+          console.log(id, $(id).length, opt_data[props[i]]);
           $(id).val(opt_data[props[i]]);
         }
         $("[href='#" + type + "']").tab('show');
@@ -111,8 +111,8 @@
   });
 
   $(function() {
-    $("#lateness-configuration .equal-height-group")
+    $("#<%= f_late.object_name %>_lateness-configuration .equal-height-group")
       .matchHeight({byRow: false, property: 'height'});
-    $('#lateness-configuration .spinner').each(function() { activateSpinner(this) });
+    $('#<%= f_late.object_name %>_lateness-configuration .spinner').each(function() { activateSpinner(this) });
   });
 </script>

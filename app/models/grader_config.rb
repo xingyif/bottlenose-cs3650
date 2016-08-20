@@ -2,6 +2,10 @@ class GraderConfig < ActiveRecord::Base
   belongs_to :submission
   belongs_to :grader_config
 
+  def self.unique
+    select(column_names - ["id"]).distinct
+  end
+
   def grade(assignment, submission)
     ans = do_grading(assignment, submission)
     submission.compute_grade! if submission.graders.pluck(:available).all?

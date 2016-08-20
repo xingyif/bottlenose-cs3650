@@ -12,6 +12,11 @@ class ManualGrader < GraderConfig
     return nil
   end
 
+  def to_s
+    "#{self.avail_score} points: Manual grading"
+  end
+
+  
   protected
   
   def do_grading(assignment, sub)

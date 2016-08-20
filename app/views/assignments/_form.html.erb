@@ -31,7 +31,7 @@
     <%= f.label :points_available %>
     <br>(This is the percentage of the final grade that this
     assignment is worth.  Default: same as previous assignment)
-    <%= f.text_field :points_available, size: 10, class: 'form-control' %>
+    <%= f.text_field :points_available, size: 10, class: 'form-control numeric' %>
   </div>
   <div class="form-group">
     <%= f.label :hide_grading, "Hide Grading?" %>
@@ -46,16 +46,24 @@
   </div>
   <div class="form-group">
     <p><strong>Graders</strong></p>
-    <ol id="grader-defns"></ol>
-    <%= fields_for "graders[]", GraderConfig.new do |graders|
-      grader_text = graders.fields_for("grader", nil, :child_index => "new_grader") do |g|
-        render("graders/picker", :f_grader => g, :f_course => f)
-      end
-      link_to "Add assignment grader", "#", class: "btn btn-default",
-              id: "add-grader",
-              data: {on: :click, call: "add_grader", args: ["#{grader_text}"]}
-    end %>
-    <%= link_to "Remove assignment grader", "#", class: "btn btn-default disabled",
+    <%= fields_for "graders[]", GraderConfig.new do |graders| %>
+      <ol id="grader-defns">
+      <% @assignment.grader_configs.each do |conf| %>
+        <li><%= graders.fields_for "", conf do |g| %>
+          <%= render("graders/picker", :f_grader => g, 
+                     :target => conf, :new_grader => "graderconf#{conf.id}") %>
+        <% end %></li>
+      <% end %>
+      </ol>
+      <% grader_text = fields_for("graders", GraderConfig.new, :index => "new_grader") do |g|
+            render("graders/picker", :f_grader => g, :target => g.object)
+      end %>
+      <%= link_to "Add assignment grader", "#", class: "btn btn-default",
+                  id: "add-grader",
+                  data: {on: :click, call: "add_grader", args: ["#{grader_text}"]} %>
+    <% end %>
+    <% if @assignment.grader_configs.count > 0 then disabled="" else disabled="disabled" end %>
+    <%= link_to "Remove assignment grader", "#", class: "btn btn-default #{disabled}",
               id: "remove-grader",
               data: {on: :click, call: "remove_grader", args: []} %>
   </div>
@@ -70,15 +78,20 @@
     submitted after this time. Default: one week from today.)</p></div>
     <div class="row">
       <div class="col-sm-6">
-        <%= f.text_field :due_date, class: 'form-control' %>
+        <%= f.text_field :due_date, value: (@assignment.nil? ? nil : @assignment.due_date.strftime("%Y-%m-%d %H:%M")),
+            class: 'form-control' %>
       </div>
       <script type="text/javascript">
         $(function () {
           $('#assignment_due_date').datetimepicker({
             sideBySide: true,
             format: "YYYY/MM/DD h:mm A",
-            minDate: "<%= @course.created_at.strftime("%Y/%m/%d") %>",
-            defaultDate: "<%= (DateTime.current.end_of_day + 1.week).strftime("%Y/%m/%d %H:%M") %>"
+            minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
+            <% if @assignment.due_date.nil? %>
+            defaultDate: "<%= (DateTime.current.end_of_day + 1.week).strftime("%Y-%m-%d %H:%M") %>"
+            <% else %>
+            defaultDate: "<%= @assignment.due_date.strftime("%Y-%m-%d %H:%M") %>"
+            <% end %>
           });
         });
       </script>
@@ -95,6 +108,7 @@
     var regexp = new RegExp("new_grader", "g");
     $("#grader-defns").append($("<li>").html(content.replace(regexp, new_id)));
     $("#remove-grader").removeClass("disabled");
+    $("[href='#" + new_id + "_JavaStyleGrader']").tab('show');
   }
   function remove_grader() {
     var defns = $("#grader-defns > li");

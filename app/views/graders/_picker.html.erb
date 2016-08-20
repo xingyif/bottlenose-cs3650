@@ -1,71 +1,123 @@
-<div id="new_grader" name="grader-configuration" class="grader-config">
+<% new_grader ||= "new_grader" %>
+<% prefix = "#{new_grader}" %>
+<div id="<%= new_grader %>" name="grader-configuration" class="grader-config">
   <%= f_grader.hidden_field "type" %>
+  <%= f_grader.hidden_field "id" %>
   <ul class="nav nav-tabs">
-    <li><a data-toggle="tab" href="#new_grader_JavaStyleGrader">Java style</a></li>
-    <li><a data-toggle="tab" href="#new_grader_CheckerGrader">Checker tests</a></li>
-    <li><a data-toggle="tab" href="#new_grader_JunitGrader">JUnit tests</a></li>
-    <li><a data-toggle="tab" href="#new_grader_ManualGrader">Manual grading</a></li>
-    <li><a data-toggle="tab" href="#new_grader_reuse">Copy existing settings</a></li>
+    <li><a data-toggle="tab" href="#<%= new_grader %>_JavaStyleGrader">Java style</a></li>
+    <li><a data-toggle="tab" href="#<%= new_grader %>_CheckerGrader">Checker tests</a></li>
+    <li><a data-toggle="tab" href="#<%= new_grader %>_JunitGrader">JUnit tests</a></li>
+    <li><a data-toggle="tab" href="#<%= new_grader %>_ManualGrader">Manual grading</a></li>
+    <li><a data-toggle="tab" href="#<%= new_grader %>_reuse">Copy existing settings</a></li>
   </ul>
   <div class="tab-content">
     <%= f_grader.fields_for "JavaStyleGrader" do |jsg| %>
-    <div id="new_grader_JavaStyleGrader" class="tab-pane equal-height-group form-group">
+    <div id="<%= new_grader %>_JavaStyleGrader" class="tab-pane equal-height-group form-group">
+      <table class="table" style="margin-bottom: 0px;">
+        <tr>
+          <td><%= jsg.label "avail_score", "Points available:" %></td>
+          <td><%= jsg.spinner "avail_score", target.avail_score || 50, :min => 0, :delta => 5 %></td>
+        </tr>
+        <tr>
+          <td><%= jsg.label "custom_file", "Custom configuration:" %></td>
+          <td><%= jsg.file_field "custom_file" %></td>
+        </tr>
+      </table>
+    </div>
+    <% end %>
+    <%= f_grader.fields_for "CheckerGrader" do |cg| %>
+    <div id="<%= new_grader %>_CheckerGrader" class="tab-pane equal-height-group form-group">
+      <table class="table" style="margin-bottom: 0px;">
+        <tr class="form-group">
+          <td><%= cg.label "avail_score", "Points available:" %></td>
+          <td><%= cg.spinner "avail_score", target.avail_score || 50, :min => 0, :delta => 5 %></td>
+        </tr>
+        <tr class="form-group">
+          <td><%= cg.label "reference_tests", "Reference tests:" %></td>
+          <td><%= cg.file_field "reference_tests" %></td>
+        </tr>
+        <tr class="form-group">
+          <td><%= cg.label "test_class", "Test class:" %></td>
+          <td><%= cg.text_field "test_class" %></td>
+        </tr>
+      </table>
+    </div>
+    <% end %>
+    <%= f_grader.fields_for "JunitGrader" do |jg| %>
+    <div id="<%= new_grader %>_JunitGrader" class="tab-pane equal-height-group form-group">
+      <table class="table" style="margin-bottom: 0px;">
+        <tr class="form-group">
+          <td><%= jg.label "avail_score", "Points available:" %></td>
+          <td><%= jg.spinner "avail_score", target.avail_score || 50, :min => 0, :delta => 5 %></td>
+        </tr>
+        <tr class="form-group">
+          <td><%= jg.label "reference_tests", "Reference tests:" %></td>
+          <td><%= jg.file_field "reference_tests" %></td>
+        </tr>
+        <tr class="form-group">
+          <td><%= jg.label "test_class", "Test class:" %></td>
+          <td><%= jg.text_field "test_class" %></td>
+        </tr>
+      </table>
+    </div>
+    <% end %>
+    <%= f_grader.fields_for "ManualGrader" do |mg| %>
+    <div id="<%= new_grader %>_ManualGrader" class="tab-pane equal-height-group form-group">
       <div class="form-inline">
-        Deduct
-        <%= jsg.spinner "percent_off", 20, :min => 0, :max => 100, :delta => 5 %>
+        <%= mg.label "avail_score", "Points available:" %>
+        <%= mg.spinner "avail_score", target.avail_score || 50, :min => 0, :delta => 5 %>
       </div>
     </div>
     <% end %>
-    <div id="new_grader_reuse" class="tab-pane equal-height-group form-group">
-      <label for="sel1">Select list:</label>
-      <select class="form-control" id="new_grader_grader-config-options">
-        <!--
-        < % LatenessConfig.unique.each do |c| %>
-        < %  attribs = c.attributes.map do |k, v| ["data-" + k, v || ""] end.to_h %>
-        < %= content_tag :option, attribs do c.to_s end %>
-        < % end %>
-        -->
+    <div id="<%= new_grader %>_reuse" class="tab-pane equal-height-group form-group">
+      <label for="sel1">Select existing grader configuration:</label>
+      <select class="form-control" id="<%= new_grader %>_grader-config-options">
+        <% GraderConfig.unique.each do |c| %>
+        <%  attribs = c.attributes.map do |k, v| ["data-" + k, v || ""] end.to_h %>
+        <%= content_tag :option, attribs do c.to_s end %>
+        <% end %>
       </select>
       <br>
       <div class="text-right">
-        <button id="new_grader_select-grader-config" class="btn btn-info">Use this configuration</button>
+        <button id="<%= new_grader %>_select-grader-config" class="btn btn-info">Use this configuration</button>
       </div>
     </div>
   </div>
 </div>
 <script>
   $(function() {
-    $('#new_grader a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    $('#<%= new_grader %> a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
       var target = $(e.target).attr("href") // activated tab
-      $("#new_grader <%= f_grader.object_name %>_type").val(target.substr(1));
+      $("#<%= new_grader %> <%= f_grader.object_name %>_<%= f_grader.index || f_grader.instance_variable_get(:@auto_index) %>_type").val(target.substr(1));
     });
-    $("[href='#new_grader_JavaStyleGrader']").tab('show');
-  
-    var sel = $("#new_grader_grader-config-options");
-    $("#new_grader_select-grader-config").on("click", function(e) {
+    <% if target %>
+    $("[href='#<%= new_grader %>_<%= target.type %>']").tab('show');
+    <% else %>
+    $("[href='#<%= new_grader %>_JavaStyleGrader']").tab('show');
+    <% end %>
+    var sel = $("#<%= new_grader %>_grader-config-options");
+    $("#<%= new_grader %>_select-grader-config").on("click", function(e) {
       e.stopPropagation();
       e.preventDefault();
       sel.find("option:selected").each(function() {
         var opt_data = $(this).data();
-        var type = opt_data["type"];
+        var type = "<%= f_grader.object_name %>_<%= f_grader.index || f_grader.instance_variable_get(:@auto_index) %>_" + opt_data["type"];
         var props = Object.keys(opt_data)
-        /*
         for (var i = 0; i < props.length; i++) {
           if (props[i] === "type") continue;
-          var id = "#<%= f_grader.object_name %>_" + type + "_" + props[i];
-          console.log(id, opt_data[props[i]]);
+          var id = "#" + type + "_" + props[i];
+          console.log(id, $(id).length, opt_data[props[i]]);
           $(id).val(opt_data[props[i]]);
         }
-        $("[href='#" + type + "']").tab('show');
-        */
+        $("[href='#<%= new_grader %>_" + opt_data["type"] + "']").tab('show');
       });
     });
   });
 
 
   $(function() {
-    $("#new_grader .equal-height-group")
+    $("#<%= new_grader %> .equal-height-group")
       .matchHeight({byRow: false, property: 'height'});
-    $('#new_grader .spinner').each(function() { activateSpinner(this) });
+    $('#<%= new_grader %> .spinner').each(function() { activateSpinner(this) });
   });
 </script>

@@ -6,6 +6,14 @@ class JavaStyleGrader < GraderConfig
     true
   end
 
+  def to_s
+    if self.params && self.params != ""
+      "#{self.avail_score} points: Run Java style checker, using #{self.params}"
+    else
+      "#{self.avail_score} points: Run Java style checker"
+    end
+  end
+
   protected
   
   def do_grading(assignment, sub)
