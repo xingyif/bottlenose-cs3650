@@ -79,6 +79,7 @@ class Submission < ActiveRecord::Base
 
   def save_upload
     if @upload_data.nil?
+      errors[:base] << "You need to submit a file."
       return
     end
 
@@ -246,7 +247,7 @@ class Submission < ActiveRecord::Base
   end
 
   def submitted_file_or_manual_grade
-    if upload_id.nil? && teacher_score.nil?
+    if upload_id.nil?
       errors[:base] << "You need to submit a file."
     end
   end

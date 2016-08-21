@@ -49,6 +49,12 @@ class ApplicationController < ActionController::Base
   def current_user_staff_for?(course)
     current_user && (current_user.site_admin? || current_user.registration_for(course).staff?)
   end
+  def true_user_prof_for?(course)
+    true_user && (true_user.site_admin? || true_user.registration_for(course).professor?)
+  end
+  def true_user_staff_for?(course)
+    true_user && (true_user.site_admin? || true_user.registration_for(course).staff?)
+  end
   def current_user_has_id?(id)
     current_user && current_user.id == id
   end

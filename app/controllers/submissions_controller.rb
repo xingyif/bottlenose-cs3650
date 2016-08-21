@@ -111,9 +111,12 @@ class SubmissionsController < CoursesController
 
     @row_user = User.find_by_id(params[:row_user_id])
 
-    if current_user_staff_for?(@course)
+    if true_user_staff_for?(@course) || current_user_staff_for?(@course)
       @submission.user ||= current_user
-      @submission.ignore_late_penalty = true
+      @submission.ignore_late_penalty = (submission_params[:ignore_late_penalty].to_i > 0)
+      if submission_params[:created_at] and !@submission.ignore_late_penalty
+        @submission.created_at = DateTime.parse(submission_params[:created_at])
+      end
     else
       @submission.user = current_user
       @submission.ignore_late_penalty = false
@@ -170,9 +173,9 @@ class SubmissionsController < CoursesController
   private
 
   def submission_params
-    if current_user_prof_for?(@course)
+    if true_user_prof_for?(@course) or current_user_prof_for?(@course)
       params[:submission].permit(:assignment_id, :user_id, :student_notes,
-                                 :auto_score, :calc_score, :updated_at, :upload,
+                                 :auto_score, :calc_score, :created_at, :updated_at, :upload,
                                  :grading_output, :grading_uid, :team_id,
                                  :teacher_score, :teacher_notes,
                                  :ignore_late_penalty, :upload_file,
