@@ -48,15 +48,17 @@
     <p><strong>Graders</strong></p>
     <%= fields_for "graders[]", GraderConfig.new do |graders| %>
       <ol id="grader-defns">
+      <% unique_configs = GraderConfig.unique %>
       <% @assignment.grader_configs.each do |conf| %>
         <li class="grader"><%= graders.fields_for "", conf do |g| %>
           <%= render("graders/picker", :f_grader => g, 
-                     :target => conf, :new_grader => "graderconf#{conf.id}") %>
+                     :target => conf, :new_grader => "graderconf#{conf.id}",
+                     :unique_configs => unique_configs) %>
         <% end %></li>
       <% end %>
       </ol>
       <% grader_text = fields_for("graders", GraderConfig.new, :index => "new_grader") do |g|
-            render("graders/picker", :f_grader => g, :target => g.object)
+            render("graders/picker", :f_grader => g, :target => g.object, :unique_configs => unique_configs)
       end %>
       <%= link_to "Add assignment grader", "#", class: "btn btn-default",
                   id: "add-grader",
