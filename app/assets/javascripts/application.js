@@ -36,13 +36,15 @@ function enableReflectiveCalls() {
   $('[data-on][data-call][data-args]').each(function(d){
     if ($(this).data("already-enabled-reflective-call")) return;
     var event = $(this).data('on');
-    $(this).on(event, function() {
+    $(this).on(event, function(e) {
       var toCall = $(this).data('call');
-      var args = $(this).data('args');
+      var args = $(this).data('args')
       if (typeof(window[toCall]) !== 'function')
         throw new Error("No such function to call: " + toCall);
       if (!(args instanceof Array))
         throw new Error("Arguments are not an array: " + args);
+      args = args.slice();
+      args.push(e);
       window[toCall].apply(this, args);
     });
     $(this).data("already-enabled-reflective-call-" + event, true);

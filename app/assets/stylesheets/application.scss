@@ -23,6 +23,30 @@ table.row-vcenter > tbody > tr > td {
    vertical-align: middle;
 }
 
+
+ol#grader-defns {
+   list-style: none;
+}
+li.grader {
+   counter-increment: item;
+   margin-bottom: 5px;
+}
+li.grader:before {
+   margin-right: -6em;
+   content: counter(item);
+   background: #286090;
+   border-radius: 25%;
+   color: white;
+   width: 1.4em;
+   text-align: center;
+   float: left;
+   position: relative;
+   right: 1.6em;
+   display: inline-block;
+   font-size: 200%;
+}
+
+
 input.no-spinners {
    -moz-appearance:textfield;
 }

@@ -80,9 +80,9 @@
          lateness = @course.lateness_config
        end %>
     <% if lateness %>
-      $("div.spinner > input[type='text']").val("");
-      $("input#course_total_late_days").val(<%= @course.total_late_days %>);
-      $("[href='#<%= @course.lateness_config.type %>']").tab('show');
+      $("<%= f_late.object_name %>_lateness-configuration div.spinner > input[type='text']").val("");
+      $("<%= f_late.object_name %>_lateness-configuration input#course_total_late_days").val(<%= @course.total_late_days %>);
+      $("<%= f_late.object_name %>_lateness-configuration [href='#<%= @course.lateness_config.type %>']").tab('show');
       <% lateness.attributes.each do |k, v|
            unless k == "type" 
              id = "##{f_late.object_name}_" + lateness.type + "_" + k %>

@@ -105,8 +105,10 @@
     $("#grader-defns").append($("<li class='grader'>").html(content.replace(regexp, new_id)));
     $("[href='#" + new_id + "_JavaStyleGrader']").tab('show');
   }
-  function remove_grader() {
+  function remove_grader(e) {
     var defns = $(this).closest("li.grader");
     defns.remove();
+    e.stopPropagation();
+    e.preventDefault();
   }    
 </script>
