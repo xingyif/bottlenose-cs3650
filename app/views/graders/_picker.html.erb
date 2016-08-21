@@ -9,6 +9,10 @@
     <li><a data-toggle="tab" href="#<%= new_grader %>_JunitGrader">JUnit tests</a></li>
     <li><a data-toggle="tab" href="#<%= new_grader %>_ManualGrader">Manual grading</a></li>
     <li><a data-toggle="tab" href="#<%= new_grader %>_reuse">Copy existing settings</a></li>
+    <li class="pull-right"><%= link_to "Delete this grader", "#", class: "btn btn-warning",
+                    id: "remove-grader",
+                    data: {on: :click, call: "remove_grader", args: []} %></li>
+
   </ul>
   <div class="tab-content">
     <%= f_grader.fields_for "JavaStyleGrader" do |jsg| %>
@@ -88,7 +92,7 @@
   $(function() {
     $('#<%= new_grader %> a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
       var target = $(e.target).attr("href") // activated tab
-      $("#<%= new_grader %> <%= f_grader.object_name %>_<%= f_grader.index || f_grader.instance_variable_get(:@auto_index) %>_type").val(target.substr(1));
+      $("#<%= new_grader %> #<%= f_grader.object_name %>_<%= f_grader.index || f_grader.instance_variable_get(:@auto_index) %>_type").val(target.substr(1));
     });
     <% if target %>
     $("[href='#<%= new_grader %>_<%= target.type %>']").tab('show');

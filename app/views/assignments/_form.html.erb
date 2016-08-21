@@ -49,7 +49,7 @@
     <%= fields_for "graders[]", GraderConfig.new do |graders| %>
       <ol id="grader-defns">
       <% @assignment.grader_configs.each do |conf| %>
-        <li><%= graders.fields_for "", conf do |g| %>
+        <li class="grader"><%= graders.fields_for "", conf do |g| %>
           <%= render("graders/picker", :f_grader => g, 
                      :target => conf, :new_grader => "graderconf#{conf.id}") %>
         <% end %></li>
@@ -62,10 +62,6 @@
                   id: "add-grader",
                   data: {on: :click, call: "add_grader", args: ["#{grader_text}"]} %>
     <% end %>
-    <% if @assignment.grader_configs.count > 0 then disabled="" else disabled="disabled" end %>
-    <%= link_to "Remove assignment grader", "#", class: "btn btn-default #{disabled}",
-              id: "remove-grader",
-              data: {on: :click, call: "remove_grader", args: []} %>
   </div>
   <div class="form-group">
     <%= f.label :team_subs, "Team Submissions?" %>
@@ -106,14 +102,11 @@
   function add_grader(content) {
     var new_id = new Date().getTime();
     var regexp = new RegExp("new_grader", "g");
-    $("#grader-defns").append($("<li>").html(content.replace(regexp, new_id)));
-    $("#remove-grader").removeClass("disabled");
+    $("#grader-defns").append($("<li class='grader'>").html(content.replace(regexp, new_id)));
     $("[href='#" + new_id + "_JavaStyleGrader']").tab('show');
   }
   function remove_grader() {
-    var defns = $("#grader-defns > li");
-    if (defns.length == 1)
-      $("#remove-grader").addClass("disabled");
-    defns.last().remove();
+    var defns = $(this).closest("li.grader");
+    defns.remove();
   }    
 </script>
