@@ -2,20 +2,36 @@
 <div id="<%= new_grader %>" name="grader-configuration" class="grader-config">
   <%= f_grader.hidden_field "type" %>
   <%= f_grader.hidden_field "id" %>
+  <%= f_grader.hidden_field "removed", value: false %>
   <ul class="nav nav-tabs">
-    <li><a data-toggle="tab" href="#<%= new_grader %>_JavaStyleGrader">Java style</a></li>
-    <li><a data-toggle="tab" href="#<%= new_grader %>_CheckerGrader">Checker tests</a></li>
-    <li><a data-toggle="tab" href="#<%= new_grader %>_JunitGrader">JUnit tests</a></li>
-    <li><a data-toggle="tab" href="#<%= new_grader %>_ManualGrader">Manual grading</a></li>
-    <li><a data-toggle="tab" href="#<%= new_grader %>_reuse">Copy existing settings</a></li>
+    <% @in_use = usage_counts[target.id].to_i > 0 %>
+    <% @target = target %>
+    <% @new_grader = new_grader %>
+    <% def tab_if_type(type, text)
+         if (@in_use and (type == @target.type)) or !@in_use
+           content_tag(:a, text, data: {toggle: "tab"}, href: "##{@new_grader}_#{type}")
+         else
+           content_tag(:a, text, data: {toggle: ""})
+         end
+       end %>           
+    <li><%= tab_if_type("JavaStyleGrader", "Java style") %></li>
+    <li><%= tab_if_type("CheckerGrader", "Checker tests") %></li>
+    <li><%= tab_if_type("JunitGrader", "JUnit tests") %></li>
+    <li><%= tab_if_type("ManualGrader", "Manual grading") %></li>
+    <li><%= tab_if_type("reuse", "Copy existing settings") %></li>
     <li class="pull-right">
+      <% if @in_use %>
+      <span class="btn btn-warning disabled">Grader is in use</span>
+      <% else %>
       <span id="remove-grader" class="btn btn-warning"
             data-on="click" data-call="remove_grader" data-args="[]">
         Delete this grader</span>
+      <% end %>
     </li>
 
   </ul>
   <div class="tab-content">
+    <% cur_file = target.upload_file %>
     <%= f_grader.fields_for "JavaStyleGrader" do |jsg| %>
     <div id="<%= new_grader %>_JavaStyleGrader" class="tab-pane equal-height-group form-group">
       <table class="table" style="margin-bottom: 0px;">
@@ -24,8 +40,12 @@
           <td><%= jsg.spinner "avail_score", target.avail_score || 50, :min => 0, :delta => 5 %></td>
         </tr>
         <tr>
-          <td><%= jsg.label "custom_file", "Custom configuration:" %></td>
-          <td><%= jsg.file_field "custom_file" %></td>
+          <td><%= jsg.label "upload_file", "Custom configuration:" %></td>
+          <td><%= jsg.file_field "upload_file" %>
+            <% if cur_file %>
+            <br>Current file: <%= cur_file %>
+            <% end %>
+          </td>
         </tr>
       </table>
     </div>
@@ -38,12 +58,16 @@
           <td><%= cg.spinner "avail_score", target.avail_score || 50, :min => 0, :delta => 5 %></td>
         </tr>
         <tr class="form-group">
-          <td><%= cg.label "reference_tests", "Reference tests:" %></td>
-          <td><%= cg.file_field "reference_tests" %></td>
+          <td><%= cg.label "upload_file", "Reference tests:" %></td>
+          <td><%= cg.file_field "upload_file" %>
+            <% if cur_file %>
+            <br>Current file: <%= cur_file %>
+            <% end %>
+          </td>
         </tr>
         <tr class="form-group">
-          <td><%= cg.label "test_class", "Test class:" %></td>
-          <td><%= cg.text_field "test_class" %></td>
+          <td><%= cg.label "params", "Test class:" %></td>
+          <td><%= cg.text_field "params" %></td>
         </tr>
       </table>
     </div>
@@ -56,12 +80,16 @@
           <td><%= jg.spinner "avail_score", target.avail_score || 50, :min => 0, :delta => 5 %></td>
         </tr>
         <tr class="form-group">
-          <td><%= jg.label "reference_tests", "Reference tests:" %></td>
-          <td><%= jg.file_field "reference_tests" %></td>
+          <td><%= jg.label "upload_file", "Reference tests:" %></td>
+          <td><%= jg.file_field "upload_file" %>
+            <% if cur_file %>
+            <br>Current file: <%= cur_file %>
+            <% end %>
+          </td>
         </tr>
         <tr class="form-group">
-          <td><%= jg.label "test_class", "Test class:" %></td>
-          <td><%= jg.text_field "test_class" %></td>
+          <td><%= jg.label "params", "Test class:" %></td>
+          <td><%= jg.text_field "params" %></td>
         </tr>
       </table>
     </div>

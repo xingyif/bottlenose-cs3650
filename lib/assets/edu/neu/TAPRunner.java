@@ -1,4 +1,4 @@
-package edu.neu.cs3500;
+package edu.neu;
 
 import java.util.List;
 import java.util.ArrayList;

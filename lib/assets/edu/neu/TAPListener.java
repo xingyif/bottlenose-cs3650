@@ -1,4 +1,4 @@
-package edu.neu.cs3500;
+package edu.neu;
 
 import java.io.PrintStream;
 import java.text.NumberFormat;

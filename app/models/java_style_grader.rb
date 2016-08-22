@@ -7,8 +7,8 @@ class JavaStyleGrader < GraderConfig
   end
 
   def to_s
-    if self.params && self.params != ""
-      "#{self.avail_score} points: Run Java style checker, using #{self.params}"
+    if self.upload
+      "#{self.avail_score} points: Run Java style checker, using #{self.upload.file_name}"
     else
       "#{self.avail_score} points: Run Java style checker"
     end

@@ -71,11 +71,6 @@ when "development"
                          )
   ]
   
-  manual = ManualGrader.create!(avail_score: 42)
-  junit = JunitGrader.create!(avail_score: 58)
-  checker = CheckerGrader.create!(avail_score: 64)
-  style = JavaStyleGrader.create!(avail_score: 55)
-
   0.upto(5).each do |i|
     assignment = Assignment.create!(
                                     name: "Homework #{i}",
@@ -88,12 +83,32 @@ when "development"
                                     available: Time.now + ((i - 4) * 1.week),
                                     due_date: Time.now + ((i - 3) * 1.week),
                                     )
-    if assignment.id > 3
+    if i == 2
+      testfile = File.new("#{Rails.root}/hw2/hw2.tgz")
+      testfile = ActionDispatch::Http::UploadedFile.new(filename: File.basename(testfile),
+                                                        tempfile: testfile)
+      junit = JunitGrader.new({avail_score: 58, params: "Grade03resubmit", upload_file: testfile})
+      if junit.save_upload(ben)
+        junit.save
+      else
+        raise junit.errors.to_a
+      end
       AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: junit.id, order: 1)
-    elsif assignment.id > 1
+    elsif i == 3
+      testfile = File.new("#{Rails.root}/hw3/hw03_p1_tests.java")
+      testfile = ActionDispatch::Http::UploadedFile.new(filename: File.basename(testfile),
+                                                        tempfile: testfile)
+      checker = CheckerGrader.new({avail_score: 64, params: "ExamplesStringsReference", upload_file: testfile})
+      if checker.save_upload(ben)
+        checker.save
+      else
+        raise checker.errors.to_a
+      end
       AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: checker.id, order: 1)
     end
+    style = JavaStyleGrader.create!(avail_score: 55)
     AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: style.id, order: 2)
+    manual = ManualGrader.create!(avail_score: 42)
     AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: manual.id, order: 3)
   end
   [ben, olin, amal].each do |professor|

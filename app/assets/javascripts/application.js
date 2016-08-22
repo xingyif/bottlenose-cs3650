@@ -47,7 +47,7 @@ function enableReflectiveCalls() {
       args.push(e);
       window[toCall].apply(this, args);
     });
-    $(this).data("already-enabled-reflective-call-" + event, true);
+    $(this).data("already-enabled-reflective-call", true);
   });
 }
 

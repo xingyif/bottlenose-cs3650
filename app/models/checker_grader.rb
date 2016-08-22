@@ -3,13 +3,20 @@ require 'tap_parser'
 require 'audit'
 
 class CheckerGrader < GraderConfig
+  validates :upload, presence: true
+  validates :params, length: {minimum: 3}
+  
   def autograde?
     true
   end
 
   def to_s
-    klass, filename = "ExamplesStringReference:hw_02.zip".split(":") #self.config
-    "#{self.avail_score} points: Run Checker tests in #{klass} from #{filename}"
+    if self.upload
+      filename = self.upload.file_name
+    else
+      filename = "<no file>"
+    end
+    "#{self.avail_score} points: Run Checker tests in #{self.params} from #{filename}"
   end
 
   def grade(assignment, sub)
@@ -30,8 +37,8 @@ class CheckerGrader < GraderConfig
         # build_dir.mkpath
           Audit.log("#{prefix}: Grading in #{build_dir}")
           FileUtils.cp_r("#{files_dir}/.", build_dir)
-          FileUtils.cp_r(Rails.root.join('lib/assets/tester-2.jar'), build_dir)
-          FileUtils.cp(Rails.root.join("hw3/hw03_p1_tests.java"), build_dir)
+          FileUtils.cp("#{assets_dir}/tester-2.jar", build_dir)
+          FileUtils.cp_r("#{self.upload.extracted_path}/.", build_dir)
           # details.write "Contents of temp directory are:\n"
           # output, status = Open3.capture2("ls", "-R", build_dir.to_s)
           # details.write output
@@ -56,9 +63,8 @@ class CheckerGrader < GraderConfig
             # details.write output
 
             Audit.log("#{prefix}: Running Checker")
-            test_out, test_err, test_status = # FIXME
-                                Open3.capture3("java", "-cp", ".:./*", "tester.Main",
-                                               "-tap", "ExamplesStringsReference")
+            test_out, test_err, test_status =
+                                Open3.capture3("java", "-cp", ".:./*", "tester.Main", "-tap", self.params)
             details.write("Checker output: (exit status #{test_status})\n")
             details.write(test_out)
             if !test_status.success?

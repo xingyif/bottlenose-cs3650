@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
-import edu.neu.cs3500.TestWeight;
+import edu.neu.TestWeight;
 
 import static org.junit.Assert.*;
 

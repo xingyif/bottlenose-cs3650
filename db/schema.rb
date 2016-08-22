@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160818190604) do
+ActiveRecord::Schema.define(version: 20160822125135) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -22,6 +22,7 @@ ActiveRecord::Schema.define(version: 20160818190604) do
     t.integer "order"
   end
 
+  add_index "assignment_graders", ["assignment_id", "grader_config_id"], name: "unique_assignment_graders", unique: true, using: :btree
   add_index "assignment_graders", ["assignment_id"], name: "index_assignment_graders_on_assignment_id", using: :btree
 
   create_table "assignments", force: :cascade do |t|
@@ -85,9 +86,10 @@ ActiveRecord::Schema.define(version: 20160818190604) do
   add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
 
   create_table "grader_configs", force: :cascade do |t|
-    t.string "type"
-    t.float  "avail_score"
-    t.string "params"
+    t.string  "type"
+    t.float   "avail_score"
+    t.string  "params"
+    t.integer "upload_id"
   end
 
   create_table "graders", force: :cascade do |t|

@@ -3,13 +3,20 @@ require 'tap_parser'
 require 'audit'
 
 class JunitGrader < GraderConfig
+  validates :upload, presence: true
+  validates :params, length: {minimum: 3}
+  
   def autograde?
     true
   end
 
   def to_s
-    klass, filename = "Grade03Resubumit:hw_03.zip".split(":") #self.config
-    "#{self.avail_score} points: Run JUnit tests in #{klass} from #{filename}"
+    if self.upload
+      filename = self.upload.file_name
+    else
+      filename = "<no file>"
+    end
+    "#{self.avail_score} points: Run JUnit tests in #{self.params} from #{filename}"
   end
   
   protected
@@ -31,10 +38,10 @@ class JunitGrader < GraderConfig
         # build_dir.mkpath
           Audit.log("#{prefix}: Grading in #{build_dir}")
           FileUtils.cp_r("#{files_dir}/.", build_dir)
-          FileUtils.cp_r(Rails.root.join('lib/assets/junit-4.12.jar'), build_dir)
-          FileUtils.cp_r(Rails.root.join('lib/assets/hamcrest-core-1.3.jar'), build_dir)
-          FileUtils.cp(Rails.root.join("hw2/grading/Grade03resubmit.java"), build_dir)
-          FileUtils.cp(Rails.root.join("hw2/grading/GradingSandbox.java"), build_dir)
+          FileUtils.cp("#{assets_dir}/junit-4.12.jar", build_dir)
+          FileUtils.cp("#{assets_dir}/junit-tap.jar", build_dir)
+          FileUtils.cp("#{assets_dir}/hamcrest-core-1.3.jar", build_dir)
+          FileUtils.cp_r("#{self.upload.extracted_path}/.", build_dir)
           # details.write "Contents of temp directory are:\n"
           # output, status = Open3.capture2("ls", "-R", build_dir.to_s)
           # details.write output
@@ -59,8 +66,8 @@ class JunitGrader < GraderConfig
             # details.write output
 
             Audit.log("#{prefix}: Running JUnit")
-            test_out, test_err, test_status = # FIXME
-                                Open3.capture3("java", "-cp", ".:./*", "edu.neu.cs3500.TAPRunner", "Grade03resubmit")
+            test_out, test_err, test_status =
+                                Open3.capture3("java", "-cp", ".:./*", "edu.neu.TAPRunner", self.params)
             details.write("JUnit output: (exit status #{test_status})\n")
             details.write(test_out)
             if !test_status.success?

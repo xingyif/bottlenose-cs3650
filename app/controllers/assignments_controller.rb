@@ -53,7 +53,10 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.new(assignment_params)
     @assignment.course_id = @course.id
     @assignment.blame_id = current_user.id
-    set_lateness_config
+    unless set_lateness_config and set_grader_configs
+      render action: "new"
+      return
+    end
 
     if @assignment.save
       @assignment.save_uploads!
@@ -70,7 +73,10 @@ class AssignmentsController < CoursesController
     end
 
     @assignment = Assignment.find(params[:id])
-    set_lateness_config
+    unless set_lateness_config and set_grader_configs
+      render action: "edit"
+      return
+    end
 
     if @assignment.update_attributes(assignment_params)
       @assignment.save_uploads!
@@ -82,9 +88,19 @@ class AssignmentsController < CoursesController
 
   def set_lateness_config
     lateness = params[:lateness]
+    if lateness.nil?
+      @assignment.errors.add(:lateness, "Lateness parameter is missing")
+      return false
+    end
+      
     type = lateness[:type]
-    type = type.split("_")[1] unless type.nil?
-    lateness = lateness[type] unless lateness.nil? || type.nil?
+    if type.nil?
+      @assignment.errors.add(:lateness, "Lateness type is missing")
+      return false
+    end
+    type = type.split("_")[1]
+    
+    lateness = lateness[type]
     lateness[:type] = type
     if type == "UseCourseDefaultConfig"
       @assignment.lateness_config = @course.lateness_config
@@ -93,8 +109,54 @@ class AssignmentsController < CoursesController
       @assignment.lateness_config = late_config
       late_config.save
     end
+    return true
   end
 
+  def set_grader_configs
+    params_graders = params[:graders]
+    if params_graders.nil?
+      @assignment.errors.add(:graders, "parameter is missing")
+      return false
+    end
+
+    problems = false
+    graders = {}
+    params_graders.each do |id, grader|
+      grader[:removed] = true if grader[:removed] == "true"
+      grader[:removed] = false if grader[:removed] == "false"
+      if grader[:removed]
+        graders[id] = grader
+        next
+      end
+      
+      type = grader[:type]
+      if type.nil?
+        @assignment.errors.add(:graders, "type is missing")
+        problems = true
+        next
+      end
+      type = type.split("_")[1]
+      
+      grader = grader[type]
+      grader[:type] = type
+      graders[id] = grader
+    end
+    return problems if problems
+
+    existing_confs = @assignment.grader_configs.to_a
+    to_remove = existing_confs.select do |c|
+      ans = false
+      conf = graders[c.id.to_s]
+      ans = true if conf[:removed]
+      ans = true if conf[:type] != c.type
+      ans = true if conf[:avail_score].to_f != c.avail_score
+      ans
+    end
+    
+    debugger
+    return problems
+  end
+  
   def destroy
     unless current_user_site_admin? || current_user_prof_for?(@course)
       redirect_to root_path, alert: "Must be an admin or professor."
