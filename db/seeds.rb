@@ -87,23 +87,23 @@ when "development"
       testfile = File.new("#{Rails.root}/hw2/hw2.tgz")
       testfile = ActionDispatch::Http::UploadedFile.new(filename: File.basename(testfile),
                                                         tempfile: testfile)
-      junit = JunitGrader.new({avail_score: 58, params: "Grade03resubmit", upload_file: testfile})
-      if junit.save_upload(ben)
-        junit.save
-      else
-        raise junit.errors.to_a
-      end
+      up = Upload.new
+      up.user_id = ben.id
+      up.store_upload!(testfile, {type: "Junit Configuration", date: Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")})
+      up.save
+      junit = JunitGrader.new({avail_score: 58, params: "Grade03resubmit", upload_file: up})
+      junit.save
       AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: junit.id, order: 1)
     elsif i == 3
       testfile = File.new("#{Rails.root}/hw3/hw03_p1_tests.java")
       testfile = ActionDispatch::Http::UploadedFile.new(filename: File.basename(testfile),
                                                         tempfile: testfile)
-      checker = CheckerGrader.new({avail_score: 64, params: "ExamplesStringsReference", upload_file: testfile})
-      if checker.save_upload(ben)
-        checker.save
-      else
-        raise checker.errors.to_a
-      end
+      up = Upload.new
+      up.user_id = ben.id
+      up.store_upload!(testfile, {type: "Checker Configuration", date: Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")})
+      up.save
+      checker = CheckerGrader.new({avail_score: 64, params: "ExamplesStringsReference", upload_file: up})
+      checker.save
       AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: checker.id, order: 1)
     end
     style = JavaStyleGrader.create!(avail_score: 55)

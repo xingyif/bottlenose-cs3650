@@ -35,7 +35,7 @@
   </div>
   <div class="form-group">
     <%= f.label :hide_grading, "Hide Grading?" %>
-    <%= f.check_box :hide_grading, checked: true %>
+    <%= f.check_box :hide_grading, checked: @assignment.hide_grading %>
     <br>(Assignment scores and teacher notes are hidden.)
   </div>
   <div class="form-group">

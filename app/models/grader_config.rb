@@ -37,32 +37,12 @@ class GraderConfig < ActiveRecord::Base
   end
   
   def upload_file=(data)
-    return if data.nil?
-    @upload_data = data
-  end
-
-  def save_upload(user)
-    if @upload_data.nil?
+    if data.nil?
       errors[:base] << "You need to submit a file."
       return
     end
-
-    data = @upload_data
-
-    up = Upload.new
-    up.user_id = user.id
-    up.store_upload!(data, {
-      type:       "#{@type} Configuration",
-      date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
-    })
-    if up.save
-      self.upload_id = up.id
-      
-      Audit.log("Sub #{id}: New configuration " +
-                "(#{user.id}) with key #{up.secret_key}")
-    else
-      false
-    end
+    self.upload_id_will_change! if self.upload.nil? or (self.upload.id != data.id)
+    self.upload = data
   end
   
   protected

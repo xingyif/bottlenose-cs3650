@@ -113,13 +113,13 @@ class AssignmentsController < CoursesController
   end
 
   def set_grader_configs
-    params_graders = params[:graders]
+    params_graders = graders_params
     if params_graders.nil?
       @assignment.errors.add(:graders, "parameter is missing")
       return false
     end
 
-    problems = false
+    no_problems = true
     graders = {}
     params_graders.each do |id, grader|
       grader[:removed] = true if grader[:removed] == "true"
@@ -132,29 +132,72 @@ class AssignmentsController < CoursesController
       type = grader[:type]
       if type.nil?
         @assignment.errors.add(:graders, "type is missing")
-        problems = true
+        no_problems = false
         next
       end
       type = type.split("_")[1]
       
       grader = grader[type]
       grader[:type] = type
+
+      upload = grader[:upload_file]
+      if upload
+        up = Upload.new
+        up.user_id = current_user.id
+        up.store_upload!(upload, {
+                           type: "#{type} Configuration",
+                           date: Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
+                         })
+        unless up.save
+          @assignment.errors.add(:upload_file, "could not save upload")
+          no_problems = false
+          next
+        end
+        grader[:upload_file] = up
+      end
+      
       graders[id] = grader
     end
-    return problems if problems
+    return no_problems unless no_problems
 
-    existing_confs = @assignment.grader_configs.to_a
-    to_remove = existing_confs.select do |c|
-      ans = false
-      conf = graders[c.id.to_s]
-      ans = true if conf[:removed]
-      ans = true if conf[:type] != c.type
-      ans = true if conf[:avail_score].to_f != c.avail_score
-      ans
+
+    GraderConfig.transaction do
+      existing_confs = @assignment.grader_configs.to_a
+      existing_ags = @assignment.assignment_graders.to_a
+      max_order = existing_ags.reduce(0) do |acc, ag| [acc, ag.order].max end
+      existing_confs.each do |c|
+        conf = graders[c.id.to_s]
+        graders.delete c.id.to_s
+        if conf[:removed]
+          existing_ags.find{|g| g.grader_config_id == c.id}.destroy
+          next
+        else
+          c.assign_attributes(conf)
+          if c.changed?
+            unless c.save
+              @assignment.errors << c.errors
+              no_problems = false
+              raise ActiveRecord::Rollback
+            end
+          end
+        end
+      end
+
+      graders.each do |k, conf|
+        next if conf[:removed]
+        c = GraderConfig.new(conf)
+        if c.invalid? or !c.save
+          no_problems = false
+          @assignment.errors.add(:graders, "Could not create grader #{c.to_s}")
+          raise ActiveRecord::Rollback
+        else
+          AssignmentGrader.create!(assignment_id: @assignment.id, grader_config_id: c.id, order: max_order)
+          max_order += 1
+        end
+      end
     end
-    
-    debugger
-    return problems
+
+    return no_problems
   end
   
   def destroy
@@ -236,5 +279,19 @@ class AssignmentsController < CoursesController
                                :points_available, :hide_grading, :blame_id,
                                :assignment_file, 
                                :course_id, :team_subs)
+  end
+
+  def graders_params
+    if params[:graders].nil?
+      nil
+    else
+      params[:graders].map do |k, v|
+        [k, v.permit([:id, :type, :removed,
+                      :JavaStyleGrader => [:avail_score, :upload_file, :params, :type],
+                      :CheckerGrader => [:avail_score, :upload_file, :params, :type],
+                      :JunitGrader => [:avail_score, :upload_file, :params, :type],
+                    :ManualGrader => [:avail_score, :upload_file, :params, :type]])]
+      end.to_h
+    end
   end
 end

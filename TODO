@@ -8,15 +8,15 @@
    [X] java-style
    [X] checker
 [ ] background tasks
+   [ ] defered running of grading scripts
    [ ] delayed jobs?
-[ ] configuring graders for assignments
+[X] configuring graders for assignments
 [ ] assigning tutors to grade particular students
 [X] NUID
    [X] make sure it's only visible to faculty -- not just any staff!
-[ ] defered running of grading scripts
 [ ] meta-grading
    [X] have a publish-grades button per assignment and per submission
-[ ] revise solution files for assignments
+[?] revise solution files for assignments
 [X] user profiles
    [X] NUID
    [X] profile picture
