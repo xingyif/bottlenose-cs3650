@@ -4,7 +4,7 @@
         <h1>
           <%= @course.name %>
           <br/>
-          <small><%= @course.term.name %>, Section <%= cur_reg.section.to_s %></small>
+          <small><%= @course.term.name %><% if cur_reg %>, Section <%= cur_reg.section.to_s %><% end %></small>
         </h1>
 
 
@@ -23,7 +23,7 @@
         <div>
             <%= link_to "Teams", course_teams_path(@course), class: "btn btn-sm btn-default" %>
             <%= link_to "Assignments", course_assignments_path(@course), class: "btn btn-sm btn-default" %>
-            <% if cur_reg.staff? %>
+            <% if cur_reg && cur_reg.staff? %>
                 <%= link_to "Registrations", course_registrations_path(@course), class: "btn btn-sm btn-default" %>
             <% end %>
             <% if current_user.course_professor?(@course) %>
