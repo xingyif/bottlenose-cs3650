@@ -1,8 +1,8 @@
 [ ] time-taken
 [X] unzip archives
-[ ] per-file markup
+[X] per-file markup
    [X] edit the .../files endpoint
-   [ ] save individual comments
+   [X] save individual comments
 [X] automated graders
    [X] junit
    [X] java-style
@@ -50,4 +50,5 @@
    [X] in course registration
    [X] in bulk registration
    [X] in export
+   [X] in course creation
 [ ] sub-assignments (i.e. assignments in parts)

@@ -1,0 +1,19 @@
+<% @page_title = @questionaire.name %>
+<h1><%= @questionaire.name %></h1>
+<% if @questionaire.assignment %>
+<h3>Related assignment:
+  <%= link_to @questionaire.assignment.name,
+      course_assignment_path(@course, @questionaire.assignment) %></h3>
+<% end %>
+<ol>
+  <% @questionaire.questions.each do |q| %>
+  <li>
+      <p><large><%= q.prompt %></large><small>(<%= q.weight %> points)</small></p>
+      <%= begin
+            render "show_#{q.type}", q: q
+          rescue => e
+            render "show_UnknownType", q: q
+          end %>
+  </li>
+  <% end %>
+</ol>

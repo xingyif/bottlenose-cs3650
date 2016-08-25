@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160825030528) do
+ActiveRecord::Schema.define(version: 20160825174023) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -131,6 +131,35 @@ ActiveRecord::Schema.define(version: 20160825030528) do
     t.integer "frequency"
     t.integer "max_penalty"
   end
+
+  create_table "questionaires", force: :cascade do |t|
+    t.string   "name",               null: false
+    t.datetime "due_date",           null: false
+    t.datetime "available"
+    t.integer  "course_id",          null: false
+    t.integer  "assignment_id"
+    t.integer  "lateness_config_id", null: false
+    t.integer  "blame_id",           null: false
+    t.float    "points_available",   null: false
+    t.integer  "max_attempts"
+    t.boolean  "team_subs"
+    t.datetime "created_at",         null: false
+    t.datetime "updated_at",         null: false
+  end
+
+  add_index "questionaires", ["assignment_id"], name: "index_questionaires_on_assignment_id", using: :btree
+
+  create_table "questions", force: :cascade do |t|
+    t.integer  "questionaire_id", null: false
+    t.string   "type",            null: false
+    t.string   "prompt",          null: false
+    t.string   "options"
+    t.float    "weight",          null: false
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "questions", ["questionaire_id"], name: "index_questions_on_questionaire_id", using: :btree
 
   create_table "reg_requests", force: :cascade do |t|
     t.integer  "course_id"

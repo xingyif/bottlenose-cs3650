@@ -55,6 +55,8 @@ Bottlenose::Application.routes.draw do
         end
       end
     end
+    resources :questionaires do
+    end
     resources :teams do
       member do
         patch :disolve

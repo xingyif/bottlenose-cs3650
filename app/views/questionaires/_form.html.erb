@@ -1,0 +1,36 @@
+<%= form_for [@course, @questionaire] do |f| %>
+<% if @questionaire.errors.any? %>
+<div id="error_explanation" class="alert alert-danger">
+  <h2><%= pluralize(@questionaire.errors.count, "error") %> prohibited this
+    questionaire from being saved:</h2>
+
+  <ul>
+    <% @questionaire.errors.full_messages.each do |msg| %>
+    <li><%= msg %></li>
+    <% end %>
+  </ul>
+</div>
+<% end %>
+<p>
+  <%= f.label :name %><br />
+  <%= f.text_field :name %>
+</p>
+<ol>
+  <% f.fields_for :questions do |builder| %>
+  <li>
+    <p class="form-inline">
+      <%= builder.label :prompt, "Question" %><%= builder.text_area :prompt, :rows => 3 %>
+    </p>
+    <p class="form-inline">
+      <%= builder.label :weight, "Weight" %>
+      <%= builder.text_field :weight, class: 'form-input numeric' %>
+    </p>
+    <p class="form-inline">
+      <%= builder.label :type, "Question type" %>
+      <%= builder.select :type, Question.question_types.to_a.map { |w| [w[0].humanize, w[0]] } %>
+    </p>
+  </li>
+  <% end %>
+</ol>
+<p><%= f.submit "Submit", class: 'btn btn-primary' %></p>
+<% end %>
