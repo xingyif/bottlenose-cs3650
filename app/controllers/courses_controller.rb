@@ -18,7 +18,14 @@ class CoursesController < ApplicationController
   end
 
   def new
+    new_with_errors nil
+  end
+
+  def new_with_errors(errs)
     @course = Course.new
+    if errs
+      merge_errors @course.errors, errs
+    end
     prep_sections
     # We can't use the course layout if we don't have a @course.
     render :new, layout: 'application'
@@ -40,43 +47,78 @@ class CoursesController < ApplicationController
       return
     end
 
-    unless course_section_params.count > 0
-      debugger
-      flash[:alert] = "Need to create at least one section"
-      new
-      return
-    end
-      
-    
+              
     @course = Course.new(course_params)
 
-    set_default_lateness_config
 
-    sections = create_sections
+    unless course_section_params.count > 0
+      @course.errors[:base] << "Need to create at least one section"
+      new_with_errors @course.errors
+      return
+    end
+
+    if set_default_lateness_config and @course.save and create_sections
+      redirect_to course_path(@course), notice: 'Course was successfully created.'
+    else
+      @course.destroy unless @course.new_record?
+      new_with_errors @course.errors
+      return
+    end
+  end
+
+
+  def create_sections
+    sections = course_section_params.map do |sp|
+      sec = nil
+      if sp[:id]
+        sec = CourseSection.find_by(id: sp[:id])
+      end
+      if sec.nil?
+        sec = CourseSection.new
+      end
+      errs = false
+      instructor = User.find_by(username: sp[:instructor])
+      if instructor.nil?
+        @course.errors[:Section] << "instructor could not be found with username #{sp[:instructor]}"
+        errs = true
+      end
+      if sp[:crn].nil? or sp[:crn].empty?
+        @course.errors[:Section] << "CRN must be present"
+        errs = true
+      else
+        print "CRN: #{sp[:crn]}\n"
+      end
+      if sp[:meeting_time].nil? or sp[:meeting_time].length < 3
+        @course.errors[:Section] << "meeting time is missing or too short"
+        errs = true
+      end
+      return if errs
+      sec.assign_attributes(instructor: instructor,
+                            crn: sp[:crn],
+                            meeting_time: sp[:meeting_time],
+                            course: @course)
+      if sec.save
+        sec
+      else
+        merge_errors @course.errors, sec.errors
+        return
+      end
+    end
 
     sections.each do |s|
       reg = Registration.find_or_create_by(user: s.instructor,
                                            course: @course,
                                            section: s)
       if reg.nil?
-        flash[:alert] = "Error creating course: #{@course.errors.full_messages.join('; ')}"
-        new
-        return
+        @course.errors[:base] << reg.errors
+        return false
       else
         reg.update_attributes(role: :professor,
                               show_in_lists: false)
       end
     end
-    
-    if @course.save
-      redirect_to course_path(@course), notice: 'Course was successfully created.'
-    else
-      flash[:alert] = "Error creating course: #{@course.errors.full_messages.join('; ')}"
-      new
-      return
-    end
+    return true
   end
-
     
 
   def update
@@ -87,11 +129,10 @@ class CoursesController < ApplicationController
 
     @course.assign_attributes(course_params)
 
-    set_default_lateness_config
-
-    if @course.save
+    if set_default_lateness_config and create_sections and @course.save
       redirect_to course_path(@course), notice: 'Course was successfully updated.'
     else
+      prep_sections
       render :edit, layout: 'application'
     end
   end
@@ -99,13 +140,13 @@ class CoursesController < ApplicationController
   def set_default_lateness_config
     lateness = params[:lateness]
     if lateness.nil?
-      @assignment.errors.add(:lateness, "Lateness parameter is missing")
+      @course.errors.add(:lateness, "Lateness parameter is missing")
       return false
     end
       
     type = lateness[:type]
     if type.nil?
-      @assignment.errors.add(:lateness, "Lateness type is missing")
+      @course.errors.add(:lateness, "Lateness type is missing")
       return false
     end
     type = type.split("_")[1]
@@ -218,7 +259,12 @@ class CoursesController < ApplicationController
   end
 
   def course_section_params
-    params[:course][:course_section].values
+    cs = params[:course][:course_section]
+    if cs
+      cs.values
+    else
+      {}
+    end    
   end
 
 
@@ -230,6 +276,14 @@ class CoursesController < ApplicationController
       "#{n} #{pl}"
     else
       "#{n} #{sing}s"
+    end
+  end
+
+  def merge_errors(dest, src)
+    src.messages.each do |type, msgs|
+      msgs.each do |msg|
+        dest[type] << msg
+      end
     end
   end
 end

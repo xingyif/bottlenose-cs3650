@@ -28,7 +28,7 @@
     </div>
     <div class="form-group">
       <%= f.label "Sections" %>
-      <table class="table">
+      <table id="sections" class="table">
         <tr class='row'>
           <th class="col-sm-2">CRN</th>
           <th class="col-sm-4">Instructor CCS Username</th>
@@ -37,25 +37,21 @@
         </tr>
         <% @sections.each_with_index do |s, i| %>
         <tr class="form-inline row">
-          <%= f.fields_for s, :index => i do |f_s| %>
-          <td><%= f_s.text_field :crn, class: 'form-control numeric' %></td>
-          <td><%= f_s.text_field :instructor, value: s.instructor.username %>
-            <span class="findUser pull-right"> (<%= s.instructor.name %>)</span></td>
-          <td><%= f_s.text_field :meeting_time, class: 'col-sm-6' %></td>
-          <td><% if (i > 0) %>
-            <span class='btn btn-danger disabled'>Merge section</span>
-            <% end %>
-          </td>
-          <% end %>
+          <%= render "courses/section", f: f, section: s, index: i %>
         </tr>
         <% end %>
       </table>
-      <span class='btn btn-default'>Add section</span>
+      <% section_text = render "courses/section", f: f, section: CourseSection.new, index: "new_section" %>
+      <%= content_tag :span, "Add section", class: 'btn btn-default',
+                      id: "add-section",
+                      data: {on: :click, call: "add_section", args: ["#{section_text}"]} %>
     </div>
     <div class="form-group">
       <p><strong>Late Penalty</strong></p>
       <%= fields_for "lateness" do |late| %>
-      <%= render 'lateness/picker', :within_course => false, :f_late => late, :f_course => f %>
+      <tr class="form-inline row">
+        <%= render 'lateness/picker', :within_course => false, :f_late => late, :f_course => f %>
+      </tr>
       <% end %>
     </div>
     <div>
@@ -83,9 +79,19 @@
   </div>
 <% end %>
 <script>
-  $("span.findUser").each(function(i) {
-    var username = $(this).prev();
-    var foundIt = $(this);
+  $(function() { enableReflectiveCalls(); });
+  function add_section(content) {
+    var new_id = new Date().getTime();
+    var regexp = new RegExp("new_section", "g");
+    var newrow = $("<tr class='form-inline row'>").html(content.replace(regexp, new_id));
+    $("#sections").append(newrow);
+    newrow.find("span.findUser").each(function(i) { enableLookupUser($(this)); });
+    newrow.find("input.numeric").on("keypress", validateNumericInput);
+    enableReflectiveCalls();
+  }
+  $("span.findUser").each(function(i) { enableLookupUser($(this)); });
+  function enableLookupUser(foundIt) {
+    var username = foundIt.prev();
     username.on("blur", function() {
       $.ajax({
         type: "GET",
@@ -100,5 +106,5 @@
         }
       });
     });
-  });
+  }
 </script>
