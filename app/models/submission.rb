@@ -108,12 +108,12 @@ class Submission < ActiveRecord::Base
     end
   end
 
-  def grader_line_comments
-    config_types = GraderConfig.pluck(:id, :type).to_h
+  def grader_line_comments(comment_author_user)
+    config_types = Grader.where(submission_id: self.id).joins(:grader_config).pluck(:id, :type).to_h
     self.inline_comments.group_by(&:filename).map do |filename, byfile|
-      [Upload.upload_path_for(filename), byfile.group_by(&:line).map do |line, byline|
-         [line, byline.group_by(&:grader_config_id).map do |config, bytype|
-            [config_types[config], bytype.map(&:to_json)]
+      [Upload.upload_path_for(filename), byfile.group_by(&:grader_id).map do |grader, bygrader|
+         [config_types[grader], bygrader.group_by(&:line).map do |line, byline|
+            [line, byline.map{|c| c.to_editable_json(comment_author_user)}]
           end.to_h]
        end.to_h]
     end.to_h

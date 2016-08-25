@@ -27,6 +27,19 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
   end
 
+  def lookup
+    u = User.find_by(username: params[:username])
+    respond_to do |f|
+      f.json {
+        if u
+          render :json => {name: u.name}
+        else
+          render :json => {name: "no one found"}
+        end
+      }
+    end
+  end
+
   def update
     unless current_user_site_admin? || current_user_has_id?(params[:id].to_i)
       redirect_to root_path, alert: "You don't have sufficient information to update that information"

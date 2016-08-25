@@ -10,6 +10,7 @@ Bottlenose::Application.routes.draw do
   resources :users, except: [:destroy] do
     collection do
       post :stop_impersonating
+      get :lookup, to: 'users#lookup'
     end
     member do
       post :impersonate

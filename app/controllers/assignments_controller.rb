@@ -195,6 +195,9 @@ class AssignmentsController < CoursesController
           max_order += 1
         end
       end
+
+      # NOT SURE IF I WANT TO DO THIS IMMEDIATELY OR NOT
+      # do_recreate_graders @assignment
     end
 
     return no_problems
@@ -259,13 +262,8 @@ class AssignmentsController < CoursesController
   end
 
   def recreate_graders
-    @course = Course.find(params[:course_id])
     @assignment = Assignment.find(params[:id])
-    confs = @assignment.grader_configs.to_a
-    count = @assignment.used_submissions.reduce(0) do |sum, sub|
-      sum + sub.recreate_missing_graders(confs)
-    end
-
+    count = do_recreate_graders @assignment
     redirect_to :back, notice: "#{plural(count, 'grader')} created"
   end
     
@@ -274,6 +272,14 @@ class AssignmentsController < CoursesController
 
   protected
 
+  def do_recreate_graders(assignment)
+    confs = assignment.grader_configs.to_a
+    count = @assignment.used_submissions.reduce(0) do |sum, sub|
+      sum + sub.recreate_missing_graders(confs)
+    end
+    count
+  end
+  
   def assignment_params
     params[:assignment].permit(:name, :assignment, :due_date,
                                :points_available, :hide_grading, :blame_id,

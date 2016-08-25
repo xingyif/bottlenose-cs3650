@@ -19,30 +19,65 @@ class CoursesController < ApplicationController
 
   def new
     @course = Course.new
-
+    prep_sections
     # We can't use the course layout if we don't have a @course.
-    render layout: 'application'
+    render :new, layout: 'application'
   end
 
   def edit
+    prep_sections
+  end
+  def prep_sections
+    @sections = CourseSection.where(course: @course).to_a
+    if @sections.count == 0
+      @sections = [CourseSection.new(course: @course, instructor: current_user)]
+    end
   end
 
   def create
-    unless current_user_site_admin?
-      redirect_to(root_path, alert: 'Must be an admin to update a course.')
+    unless current_user_site_admin? || current_user_prof_ever?
+      redirect_to(root_path, alert: 'Must be an admin or professor to update a course.')
       return
     end
 
+    unless course_section_params.count > 0
+      debugger
+      flash[:alert] = "Need to create at least one section"
+      new
+      return
+    end
+      
+    
     @course = Course.new(course_params)
 
     set_default_lateness_config
+
+    sections = create_sections
+
+    sections.each do |s|
+      reg = Registration.find_or_create_by(user: s.instructor,
+                                           course: @course,
+                                           section: s)
+      if reg.nil?
+        flash[:alert] = "Error creating course: #{@course.errors.full_messages.join('; ')}"
+        new
+        return
+      else
+        reg.update_attributes(role: :professor,
+                              show_in_lists: false)
+      end
+    end
     
     if @course.save
       redirect_to course_path(@course), notice: 'Course was successfully created.'
     else
-      render :new, layout: 'application'
+      flash[:alert] = "Error creating course: #{@course.errors.full_messages.join('; ')}"
+      new
+      return
     end
   end
+
+    
 
   def update
     unless current_user_site_admin? || current_user_prof_for?(@course)
@@ -63,8 +98,19 @@ class CoursesController < ApplicationController
 
   def set_default_lateness_config
     lateness = params[:lateness]
+    if lateness.nil?
+      @assignment.errors.add(:lateness, "Lateness parameter is missing")
+      return false
+    end
+      
     type = lateness[:type]
-    lateness = lateness[type] unless lateness.nil? || type.nil?
+    if type.nil?
+      @assignment.errors.add(:lateness, "Lateness type is missing")
+      return false
+    end
+    type = type.split("_")[1]
+    
+    lateness = lateness[type]
     lateness[:type] = type
     if type != "reuse"
       late_config = LatenessConfig.new(lateness.permit(LatenessConfig.attribute_names - ["id"]))
@@ -167,8 +213,12 @@ class CoursesController < ApplicationController
   end
 
   def course_params
-    params[:course].permit(:name, :footer, :total_late_days, :private, :public,
+    params[:course].permit(:name, :footer, :total_late_days, :private, :public, :course_section,
                            :term_id, :sub_max_size)
+  end
+
+  def course_section_params
+    params[:course][:course_section].values
   end
 
 

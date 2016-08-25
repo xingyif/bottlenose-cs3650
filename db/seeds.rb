@@ -61,12 +61,12 @@ when "development"
   fundies_sections = [
     CourseSection.create!(course: fundies1,
                           crn: 12345,
-                          instructor: "Lerner",
+                          instructor: ben,
                           meeting_time: "MWTh 3:30--4:50"
                            ),
     CourseSection.create!(course: fundies1,
                           crn: 87654,
-                          instructor: "Razzaq",
+                          instructor: amal,
                           meeting_time: "MWTh 10:30--11:45"
                          )
   ]

@@ -35,7 +35,7 @@
     <% requests.each do |request| %>
       <tr>
         <td><%= link_to request.user.name, user_path(request.user) %></td>
-        <td><%= request.role %></td>
+        <td><%= request.role.humanize %></td>
         <td><%= request.user.email %></td>
         <td><%= request.notes %></td>
         <td>

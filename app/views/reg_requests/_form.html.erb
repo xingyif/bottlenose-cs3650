@@ -22,7 +22,7 @@
 
   <div class="form-group">
     <%= f.label :role %><br />
-    <%= f.select :role, RegRequest.roles.to_a.map { |w| [w[0].humanize, w[0]] } %>
+    <%= f.select :role, RegRequest.roles.to_a.map { |role_name, role_val| [role_name.humanize, role_name] } %>
   </div>
 
   <div class="form-group">

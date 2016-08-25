@@ -23,11 +23,20 @@ $(function() {
   function updateScore() {
     var deductions = $(".deduction").map(function() { return parseFloat($(this).val()); })
         .get().reduce(function(a,b) { return a + b; }, 0.0);
-    $("#score").text(Math.max(maxScore - deductions, 0).toFixed(2));
+    var ans = Math.max(maxScore - deductions, 0).toFixed(2);
+    $("#score").text(ans);
+    $("input#finalScore").val(ans);
   }
+  window.updateScore = updateScore;
+
+  $("form").submit(function() {
+    $("#comments").val(JSON.stringify(commentObjs));
+  });
+
 
   var autosaveHandle = undefined;
   var commentObjs = [];
+  var commentsById = {};
   function autosave() {
     if (autosaveHandle === undefined) {
       autosaveHandle = window.setTimeout(function() {
@@ -41,10 +50,20 @@ $(function() {
             if (k === "saved") return undefined;
             return v;
           }),
-          success: function(msg) {
-            console.log("Success: " + msg);
-            commentObjs.forEach(function(c) { c.saved = true; });
+          success: function(data) {
+            console.log("Success: " + data);
+            for (var id in data) {
+              var c = commentsById[id];
+              delete commentsById[id];
+              c.id = data[id];
+              commentsById[c.id] = c;
+            }
             autosaveHandle = undefined;
+          },
+          error: function(xhr, status, error) {
+            console.error("XHR failed: " + status + ": " + error);
+            console.error(xhr.responseText);
+            autosaveHandle = false; // don't trigger more XHRs
           }
         });
       }, 1000);
@@ -53,13 +72,15 @@ $(function() {
 
   var commentID = 0;
   function insertComment(cm, line, comment) {
-    if (comment === undefined)
-      comment = {severity: "Error", deduction: 0, comment: ""};
+    if (comment === undefined) {
+      comment = {severity: "Error", deduction: 0, comment: "", id: Date.now()};
 
-    comment.line = line + 1;
-    comment.file = $(cm.getTextArea).data("source");
-    comment.category = "<%= current_user.name %>";
+      comment.line = line + 1;
+      comment.file = $(cm.getTextArea()).data("source");
+      comment.label = "<%= current_user.name %>";
+    }
     commentObjs.push(comment);
+    commentsById[comment.id] = comment;
     
     var i = commentID++;
     var widget = $("<div>").attr("id", "comment_" + i).addClass("ManualGrader Error form-group");
@@ -72,21 +93,26 @@ $(function() {
     row.append(td);
     var categoryInput =
         $("<select>").attr("id", "severity_" + i)
-        .append($("<option>").text("Error").attr("selected", "true"))
-        .append($("<option>").text("Warning"))
-        .append($("<option>").text("Suggestion"))
+        <% InlineComment.severities.each do |s_name, s_val| %>
+        .append($("<option>")
+                .text("<%= s_name.humanize %>").attr({value: "<%= s_name %>", name: "<%= s_name.humanize %>"}))
+        <% end %>;
     categoryInput.on("change", function() {
-      widget.removeClass(widget.data("severity")).data("severity", $(this).val()).addClass($(this).val());
+      widget.removeClass(widget.data("severity"))
+        .data("severity", $(this).find(":selected").first().attr("name"))
+        .addClass($(this).find(":selected").first().attr("name"));
       comment.severity = $(this).val();
       comment.saved = false;
     });
+    categoryInput.find("option[name='" + comment.severity + "']").first().prop("selected", true);
+    categoryInput.trigger("change");
     if (comment.severity)
       categoryInput.val(comment.severity).change();
-    
+
     td.append(
       $("<p>").append($("<label>").attr("for", "severity_" + i)
                       .text("Severity:")).append(categoryInput));
-    var deductionInput = makeSpinner({klass: "deduction", min: 0, delta: 0.1, precision: 2})
+    var deductionInput = makeSpinner({val: comment.deduction, klass: "deduction", min: 0, delta: 0.1, precision: 2})
         .attr("id", "deduction_" + i)
     td.append(
       $("<p>").append($("<label>").attr("for", "deduction_" + i).text("Deduction:"))
@@ -103,11 +129,12 @@ $(function() {
     row.append(td);
     var delComment = $("<span>").addClass("btn btn-alert pull-right")
         .append($("<span>").addClass("glyphicon glyphicon-remove"));
-    var commentText = $("<textarea>").attr("id", "message_" + i).addClass("form-control");
+    var commentText = $("<textarea>").attr("id", "message_" + i).addClass("form-control").val(comment.comment);
     td.append(
       $("<div>")
         .append(delComment)
         .append($("<label>").text("Comment:").attr("for", "message_" + i))
+        .append($("<span>").text(" (by " + comment.author + ")"))
         .append(commentText));
     commentText.on("change", function() {
       comment.comment = $(this).val();
@@ -122,9 +149,10 @@ $(function() {
     delComment.on("click", function() { deleteComment(ret); });
     return ret;
   }
-  function deleteComment(comment) {
-    comment.cmWidget.clear();
-    commentObjs.splice(commentObjs.indexOf(comment.comment), 1);
+  window.insertComment = insertComment;
+  function deleteComment(commData) {
+    commData.cmWidget.clear();
+    commData.comment.shouldDelete = true
     updateScore();
   }
   updateScore();
@@ -153,7 +181,7 @@ $(function() {
   filesTree.on("nodeSelected", function(e, data) {
     e.preventDefault();
     e.stopPropagation();
-    $("#files").treeview("uncheckNode", data);
+    filesTree.treeview("uncheckNode", data);
   });
   filesTree.treeview("selectNode", filesTree.treeview("getCollapsed")[0]);
   

@@ -42,12 +42,14 @@
 <h1>Manual Grading</h1>
 
 <h3>
-  <input id="finalScore" hidden />
-  <input id="comments" hidden />
   <span class="pull-right">Total score:
     <span id="score">??</span>&nbsp;/&nbsp;<%= to_fixed(@grader.out_of)%>
   </span>
-  <span id="completed" class="btn btn-success disabled">Give comments on all files below</span>
+  <%= form_for [@course, @assignment, @submission, @grader] do |f| %>
+  <%= hidden_field_tag :finalScore %>
+  <%= hidden_field_tag :comments %>
+  <%= f.submit "Give comments on all files below", id: "completed", class: "btn btn-success disabled" %>
+  <% end %>
 </h3>
 <% end %>
 
@@ -84,7 +86,31 @@
   var lineComments = <%= raw(JSON.pretty_generate(@submission_files.map{|s| s[:lineComments]})) %>;
   <%= render :partial => 'submissions/render_comments.js' %>
   <%= render :partial => 'graders/enter_comments.js' %>
-  $(function() { renderComments(lineComments); });
+  $(function() {
+    var manualComments = [];
+    for (var i = 0; i < lineComments.length; i++) {
+      manualComments[i] = lineComments[i].ManualGrader || {};
+      delete lineComments[i].ManualGrader;
+    }
+    renderComments(lineComments);
+    $(".CodeMirror").each(function(index) {
+      var cm = this.CodeMirror;
+      cm.operation(function() {
+        var theseComments = manualComments[index];
+        Object.keys(theseComments).forEach(function(line, _) {
+          var commentsOnLine = theseComments[line];
+          commentsOnLine.forEach(function(comment, _) {
+            // lines are off-by-one so they appear beneath the code they comment on
+            if (comment.editable || <%= cur_reg.professor? %>)
+              insertComment(cm, Number.parseInt(line) - 1, comment);
+            else
+              renderComment(cm, "ManualGrader", line, comment);
+          });
+        });
+      });
+    });
+    updateScore();
+  });
 </script>
 
 <% end %>

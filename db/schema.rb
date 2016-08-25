@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160822125135) do
+ActiveRecord::Schema.define(version: 20160825030528) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,10 +47,10 @@ ActiveRecord::Schema.define(version: 20160822125135) do
   end
 
   create_table "course_sections", force: :cascade do |t|
-    t.integer "course_id",    null: false
-    t.integer "crn",          null: false
-    t.string  "instructor",   null: false
+    t.integer "course_id",     null: false
+    t.integer "crn",           null: false
     t.string  "meeting_time"
+    t.integer "instructor_id", null: false
   end
 
   add_index "course_sections", ["crn"], name: "index_course_sections_on_crn", unique: true, using: :btree
@@ -106,20 +106,20 @@ ActiveRecord::Schema.define(version: 20160822125135) do
   add_index "graders", ["submission_id"], name: "index_graders_on_submission_id", using: :btree
 
   create_table "inline_comments", force: :cascade do |t|
-    t.integer  "submission_id",                    null: false
-    t.string   "title",                            null: false
-    t.string   "filename",                         null: false
-    t.integer  "line",                             null: false
-    t.integer  "grader_config_id",                 null: false
+    t.integer  "submission_id",                 null: false
+    t.string   "title",                         null: false
+    t.string   "filename",                      null: false
+    t.integer  "line",                          null: false
+    t.integer  "grader_id",                     null: false
     t.integer  "user_id"
-    t.string   "label",                            null: false
-    t.integer  "severity",                         null: false
-    t.string   "comment",          default: "",    null: false
-    t.float    "weight",                           null: false
-    t.boolean  "suppressed",       default: false, null: false
+    t.string   "label",                         null: false
+    t.integer  "severity",                      null: false
+    t.string   "comment",       default: "",    null: false
+    t.float    "weight",                        null: false
+    t.boolean  "suppressed",    default: false, null: false
     t.string   "info"
-    t.datetime "created_at",                       null: false
-    t.datetime "updated_at",                       null: false
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
   end
 
   add_index "inline_comments", ["filename"], name: "index_inline_comments_on_filename", using: :btree

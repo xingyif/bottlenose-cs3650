@@ -46,14 +46,15 @@ class JavaStyleGrader < GraderConfig
   end
   
   def upload_inline_comments(tap, sub)
-    InlineComment.where(submission: sub, grader_config: self).destroy_all
+    g = self.grader_for sub
+    InlineComment.where(submission: sub, grader: g).destroy_all
     ics = tap.tests.map do |t|
       InlineComment.new(
         submission: sub,
         title: t[:comment],
         filename: t[:info]["filename"],
         line: t[:info]["line"],
-        grader_config: self,
+        grader: g,
         user: nil,
         label: t[:info]["category"],
         severity: InlineComment::severities[t[:info]["severity"].humanize(:capitalize => false)],

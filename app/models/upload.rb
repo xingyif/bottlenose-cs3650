@@ -155,6 +155,10 @@ class Upload < ActiveRecord::Base
     p.to_s.gsub(Rails.root.join("public").to_s, "")
   end
 
+  def self.full_path_for(p)
+    Rails.root.join("public").to_s + self.upload_path_for(p)
+  end
+  
   def cleanup!
     Audit.log("Skip cleanup: #{file_name} for #{user.name} (#{user_id}) at #{secret_key}")
   end

@@ -52,8 +52,59 @@ class GradersController < ApplicationController
   end
   
   def update
+    @grader = Grader.find(params[:id])
+    @assignment = Assignment.find(params[:assignment_id])
+    @submission = Submission.find(params[:submission_id])
     respond_to do |f|
-      f.json { render :json => params[:comments][0].keys }
+      f.json { autosave_comments }
+      f.html { save_all_comments }
+    end
+  end
+
+  def autosave_comments
+    cp = comments_params
+    comments = cp.map do |c| comment_to_inlinecomment c end
+    data = cp.zip(comments).map do |c, comm| [c["id"], comm.id] end.to_h
+    render :json => data
+  end
+
+  def save_all_comments
+    cp = comments_params
+    # delete the ones marked for deletion
+    to_delete = InlineComment.where(user: current_user, submission_id: params[:submission_id])
+                .where(id: cp.select{|c| c["shouldDelete"]}.map{|c| c["id"].to_i})
+    to_delete.destroy_all
+    # create the others
+    comments = cp.map do |c| comment_to_inlinecomment c end
+    data = cp.zip(comments).map do |c, comm| [c["id"], comm.id] end.to_h
+    @grader.grader_config.grade(@assignment, @submission)
+    @submission.compute_grade! if @submission.grade_complete?
+    redirect_to :back, message: "Comments saved; grading completed"
+  end
+
+  def comment_to_inlinecomment(c)
+    if c["id"]
+      comment = InlineComment.find_by(id: c["id"].to_i)
+    end
+    if comment.nil?
+      comment = InlineComment.new
+    end
+    if c["shouldDelete"]
+      comment
+    else
+      comment.update(submission_id: params[:submission_id],
+                     label: c["label"],
+                     filename: Upload.full_path_for(c["file"]),
+                     line: c["line"],
+                     grader_id: @grader.id,
+                     user_id: current_user.id,
+                     severity: c["severity"],
+                     comment: c["comment"],
+                     weight: c["deduction"],
+                     suppressed: false,
+                     title: "",
+                     info: nil)
+      comment
     end
   end
   
@@ -128,7 +179,7 @@ class GradersController < ApplicationController
 
   def ManualGrader(edit)
     if edit
-      @lineCommentsByFile = @submission.grader_line_comments
+      @lineCommentsByFile = @submission.grader_line_comments(current_user)
       # @lineCommentsByFile.each do |file, cBF|
       #   cBF.each do |type, byType|
       #     byType.each do |line, byLine|
@@ -179,6 +230,15 @@ class GradersController < ApplicationController
       render "edit_#{@grader.grader_config.type}"
     else
       redirect_to files_course_assignment_submission_path(@course, @assignment, @submission)
+    end
+  end
+
+  protected 
+  def comments_params
+    if params[:comments].is_a? String
+      JSON.parse(params[:comments])
+    else
+      params[:comments]
     end
   end
 end

@@ -12,7 +12,7 @@ class RegistrationsController < CoursesController
 
     @students = @course.students
     @staff = @course.staff
-    @requests = @course.reg_requests
+    @requests = @course.reg_requests.joins(:user).order('role desc', 'name').includes(:user)
   end
 
   def show

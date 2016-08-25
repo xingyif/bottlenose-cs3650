@@ -43,6 +43,9 @@ class ApplicationController < ActionController::Base
   def current_user_site_admin?
     current_user && current_user.site_admin?
   end
+  def current_user_prof_ever?
+    current_user && current_user.professor_ever?
+  end
   def current_user_prof_for?(course)
     current_user && (current_user.site_admin? || current_user.registration_for(course).professor?)
   end

@@ -53,7 +53,7 @@ class RegRequestsController < CoursesController
       reg = Registration.find_or_create_by(user: request.user,
                                            course: request.course,
                                            role: request.role,
-                                           section: request.section.crn)
+                                           section: request.section)
       if reg
         reg.show_in_lists = (request.role == :student)
         reg.dropped_date = nil
@@ -62,7 +62,6 @@ class RegRequestsController < CoursesController
       end
       nil
     rescue Exception => err
-      debugger
       err.record.errors
     end
   end

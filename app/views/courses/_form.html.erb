@@ -27,8 +27,36 @@
       ), class: 'form-control') %>
     </div>
     <div class="form-group">
+      <%= f.label "Sections" %>
+      <table class="table">
+        <tr class='row'>
+          <th class="col-sm-2">CRN</th>
+          <th class="col-sm-4">Instructor CCS Username</th>
+          <th class="col-sm-6">Meeting time</th>
+          <th></th>
+        </tr>
+        <% @sections.each_with_index do |s, i| %>
+        <tr class="form-inline row">
+          <%= f.fields_for s, :index => i do |f_s| %>
+          <td><%= f_s.text_field :crn, class: 'form-control numeric' %></td>
+          <td><%= f_s.text_field :instructor, value: s.instructor.username %>
+            <span class="findUser pull-right"> (<%= s.instructor.name %>)</span></td>
+          <td><%= f_s.text_field :meeting_time, class: 'col-sm-6' %></td>
+          <td><% if (i > 0) %>
+            <span class='btn btn-danger disabled'>Merge section</span>
+            <% end %>
+          </td>
+          <% end %>
+        </tr>
+        <% end %>
+      </table>
+      <span class='btn btn-default'>Add section</span>
+    </div>
+    <div class="form-group">
       <p><strong>Late Penalty</strong></p>
-      <%= render 'lateness/picker', :within_course => false %>
+      <%= fields_for "lateness" do |late| %>
+      <%= render 'lateness/picker', :within_course => false, :f_late => late, :f_course => f %>
+      <% end %>
     </div>
     <div>
       <%= f.label :footer, "Course-Wide Footer" %> (HTML Allowed)
@@ -54,3 +82,23 @@
     </div>
   </div>
 <% end %>
+<script>
+  $("span.findUser").each(function(i) {
+    var username = $(this).prev();
+    var foundIt = $(this);
+    username.on("blur", function() {
+      $.ajax({
+        type: "GET",
+        url: "<%= lookup_users_path %>",
+        contentType: 'application/json; charset=UTF-8',
+        data: {username: username.val()},
+        success: function(data) {
+          foundIt.text(" (" + data.name + ")");
+        },
+        error: function(xkr, status, error) {
+          foundIt.text(" (error looking up username)");
+        }
+      });
+    });
+  });
+</script>
