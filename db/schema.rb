@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160825174023) do
+ActiveRecord::Schema.define(version: 20160825212757) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -43,7 +43,7 @@ ActiveRecord::Schema.define(version: 20160825174023) do
     t.integer  "rate_per_hour"
     t.float    "points_available"
     t.integer  "lateness_config_id"
-    t.datetime "available"
+    t.datetime "available",                            null: false
   end
 
   create_table "course_sections", force: :cascade do |t|

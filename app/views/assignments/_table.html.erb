@@ -18,9 +18,10 @@
       <% if show_all then
            assns = assignments
          else
-           assns = assignments.where("available <= ?", DateTime.current) 
+           assns = assignments.where("available <= ?", DateTime.current)
+                              .order(due_date: :desc, available: :desc)
          end %>
-      <% assns.sort_by(&:due_date).reverse!.each do |assignment| %>
+      <% assns.each do |assignment| %>
         <%
           submissions = for_user.submissions_for(assignment)
           used = assignment.used_sub_for(for_user)

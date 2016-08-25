@@ -19,7 +19,10 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.new
     @assignment.course_id = @course.id
     @assignment.due_date = (Time.now + 1.week).end_of_day.strftime("%Y/%m/%d %H:%M")
-    @assignment.points_available = @course.assignments.order(created_at: :desc).first.points_available
+    last_assn = @course.assignments.order(created_at: :desc).first
+    if last_assn
+      @assignment.points_available = last_assn.points_available
+    end
   end
 
   def edit
@@ -53,12 +56,8 @@ class AssignmentsController < CoursesController
     @assignment = Assignment.new(assignment_params)
     @assignment.course_id = @course.id
     @assignment.blame_id = current_user.id
-    unless set_lateness_config and set_grader_configs
-      render action: "new"
-      return
-    end
 
-    if @assignment.save
+    if set_lateness_config and @assignment.save and set_grader_configs
       @assignment.save_uploads!
       redirect_to course_assignment_path(@course, @assignment), notice: 'Assignment was successfully created.'
     else
@@ -281,7 +280,7 @@ class AssignmentsController < CoursesController
   end
   
   def assignment_params
-    params[:assignment].permit(:name, :assignment, :due_date,
+    params[:assignment].permit(:name, :assignment, :due_date, :available,
                                :points_available, :hide_grading, :blame_id,
                                :assignment_file, 
                                :course_id, :team_subs)

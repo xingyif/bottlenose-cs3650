@@ -73,16 +73,35 @@
     <br>(Can only submit as a member of a team.)
   </div>
   <div class="form-group">
-    <%= f.label :due_date %>
-    <div class="row"><p class="col-sm-12">(Assignment should not be
-    submitted after this time. Default: one week from today.)</p></div>
     <div class="row">
       <div class="col-sm-6">
-        <%= f.text_field :due_date, value: (@assignment.nil? ? nil : @assignment.due_date.strftime("%Y-%m-%d %H:%M")),
-            class: 'form-control' %>
+        <%= f.label :due_date %>
+        <p>(Assignment should not be submitted after this time. Default: one week from today.)</p>
+        <div>
+          <%= f.text_field :due_date,
+              class: 'form-control' %>
+        </div>
+      </div>
+      <div class="col-sm-6">
+        <%= f.label :available_date %>
+        <p>(Assignment will not be visible until this time. Default: today.)</p>
+        <div>
+          <%= f.text_field :available,
+              class: 'form-control' %>
+        </div>
       </div>
       <script type="text/javascript">
         $(function () {
+          $('#assignment_available').datetimepicker({
+            sideBySide: true,
+            format: "YYYY/MM/DD h:mm A",
+            minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
+            <% if @assignment.available.nil? %>
+            defaultDate: "<%= DateTime.current.beginning_of_day.strftime("%Y-%m-%d %H:%M") %>"
+            <% else %>
+            defaultDate: "<%= @assignment.available.strftime("%Y-%m-%d %H:%M") %>"
+            <% end %>
+          });
           $('#assignment_due_date').datetimepicker({
             sideBySide: true,
             format: "YYYY/MM/DD h:mm A",

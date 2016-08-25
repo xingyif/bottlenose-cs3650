@@ -18,6 +18,7 @@ class Assignment < ActiveRecord::Base
   validates :name,      :presence => true
   validates :course_id, :presence => true
   validates :due_date,  :presence => true
+  validates :available, :presence => true
   validates :blame_id,  :presence => true
   validates :points_available, :numericality => true
   validates :lateness_config, :presence => true
