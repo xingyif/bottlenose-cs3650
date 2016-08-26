@@ -36,7 +36,7 @@
           <th></th>
         </tr>
         <% @sections.each_with_index do |s, i| %>
-        <tr class="form-inline row">
+        <tr class="form-group row">
           <%= render "courses/section", f: f, section: s, index: i %>
         </tr>
         <% end %>
