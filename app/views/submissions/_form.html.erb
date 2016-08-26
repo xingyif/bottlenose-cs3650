@@ -29,6 +29,7 @@
 
   <div class="col-md-12">
   <% allowed = @assignment.sub_allow_submission?(@submission)
+     rate_limit = @assignment.rate_limit?(@submission)
      staff_override = true_user.course_staff?(@course)
      %>
   <% if @team.nil? && @assignment.team_subs? %>
@@ -49,6 +50,17 @@
       <p>It's too late to submit to this assignment: you either have
         too few late days remaining, or it's too long after the
         assignment is due.</p>
+    </div> 
+  <% elsif rate_limit == "permanent" && !staff_override %>
+    <div class="alert alert-danger">
+      <p>You cannot attempt more submissions for this assignment: you've
+        reached the maximum number of attempts allowed.</p>
+    </div> 
+  <% elsif rate_limit == "temporary" && !staff_override %>
+    <div class="alert alert-danger">
+      <p>You cannot submit to this assignment right now: you've tried
+        too many times in the past hour.  Please wait a while before
+        trying again.</p>
     </div> 
   <% else %>
     <% if !allowed && staff_override %>

@@ -48,6 +48,17 @@ class Assignment < ActiveRecord::Base
     self.lateness_config.allow_submission?(self, sub)
   end
 
+  def rate_limit?(sub)
+    if self.max_attempts.to_i > 0 and self.submissions.count >= self.max_attempts.to_i
+      "permanent"
+    elsif self.rate_per_hour.to_i > 0 and
+         self.submission.where('created_at >= ?', DateTime.now - 1.hour).count > self.rate_per_hour.to_i
+      "temporary"
+    else
+      false
+    end
+  end
+
   def assignment_upload
     Upload.find_by_id(assignment_upload_id)
   end
