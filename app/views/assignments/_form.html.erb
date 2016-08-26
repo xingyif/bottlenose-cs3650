@@ -79,6 +79,8 @@
         <p>(Assignment should not be submitted after this time. Default: one week from today.)</p>
         <div>
           <%= f.text_field :due_date,
+              value: ((@assignment and @assignment.due_date) or (DateTime.current.end_of_day + 1.week))
+                      .strftime("%Y-%m-%d %H:%M %Z"),
               class: 'form-control' %>
         </div>
       </div>
@@ -87,6 +89,8 @@
         <p>(Assignment will not be visible until this time. Default: today.)</p>
         <div>
           <%= f.text_field :available,
+              value: ((@assignment and @assignment.available) or DateTime.current.beginning_of_day)
+                      .strftime("%Y-%m-%d %H:%M %Z"),
               class: 'form-control' %>
         </div>
       </div>
@@ -97,9 +101,9 @@
             format: "YYYY/MM/DD h:mm A",
             minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
             <% if @assignment.available.nil? %>
-            defaultDate: "<%= DateTime.current.beginning_of_day.strftime("%Y-%m-%d %H:%M") %>"
+            defaultDate: "<%= DateTime.current.beginning_of_day.strftime("%Y-%m-%d %H:%M %Z") %>"
             <% else %>
-            defaultDate: "<%= @assignment.available.strftime("%Y-%m-%d %H:%M") %>"
+            defaultDate: "<%= @assignment.available.strftime("%Y-%m-%d %H:%M %Z") %>"
             <% end %>
           });
           $('#assignment_due_date').datetimepicker({
@@ -107,9 +111,9 @@
             format: "YYYY/MM/DD h:mm A",
             minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
             <% if @assignment.due_date.nil? %>
-            defaultDate: "<%= (DateTime.current.end_of_day + 1.week).strftime("%Y-%m-%d %H:%M") %>"
+            defaultDate: "<%= (DateTime.current.end_of_day + 1.week).strftime("%Y-%m-%d %H:%M %Z") %>"
             <% else %>
-            defaultDate: "<%= @assignment.due_date.strftime("%Y-%m-%d %H:%M") %>"
+            defaultDate: "<%= @assignment.due_date.strftime("%Y-%m-%d %H:%M %Z") %>"
             <% end %>
           });
         });
