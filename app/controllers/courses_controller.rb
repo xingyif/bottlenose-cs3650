@@ -114,11 +114,6 @@ class CoursesController < ApplicationController
   end
 
   def gradesheet
-    # @course = Course.find_by(id: params[:id])
-    # unless @course and (current_user_site_admin? || current_user_prof_for?(@course))
-    #   redirect_to course_path(@course), alert: 'Must be an admin or professor to view that information.'
-    #   return
-    # end
     @all_course_info = all_course_info
     respond_to do |format|
       #      format.csv { send_data @all_course_info.to_csv(col_sep: "\t") }
@@ -153,12 +148,12 @@ class CoursesController < ApplicationController
 
     @course = Course.find_by(id: params[:course_id] || params[:id])
 
-    if current_user_site_admin?
+    if @course.nil?
+      redirect_to courses_url, alert: "No such course"
       return
     end
 
-    if @course.nil?
-      redirect_to courses_url, alert: "No such course"
+    if current_user_site_admin?
       return
     end
 
