@@ -1,15 +1,10 @@
 require 'csv'
 
 class RegistrationsController < CoursesController
-  prepend_before_filter :find_registration,
-                        except: [:index, :new, :create, :bulk]
-
+  prepend_before_action :find_registration, except: [:index, :new, :create, :bulk]
+  before_action :require_admin_or_staff, only: [:index, :create, :bulk, :destroy]
+  
   def index
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
     @students = @course.students
     @staff = @course.staff
     @requests = @course.reg_requests.joins(:user).order('role desc', 'name').includes(:user)
@@ -29,11 +24,6 @@ class RegistrationsController < CoursesController
   end
 
   def create
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
     # Create @registration object for errors.
     @registration = Registration.new(registration_params)
 
@@ -56,11 +46,6 @@ class RegistrationsController < CoursesController
   end
 
   def bulk
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
     @course = Course.find(params[:course_id])
     num_added = 0
 
@@ -75,11 +60,6 @@ class RegistrationsController < CoursesController
   end
 
   def destroy
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
     @registration.destroy
 
     redirect_to course_registrations_path(@course)
@@ -96,7 +76,7 @@ class RegistrationsController < CoursesController
 
     @show = @registration.show_in_lists? ? "Yes" : "No"
 
-    redirect_to :back
+    redirect_to back_or_else(course_registrations_path(@course))
   end
 
   private
@@ -110,5 +90,12 @@ class RegistrationsController < CoursesController
   def registration_params
     params.require(:registration)
           .permit(:course_id, :role, :user_id, :show_in_lists, :tags)
+  end
+
+  def require_admin_or_staff
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      redirect_to back_or_else(root_path), alert: "Must be an admin or staff."
+      return
+    end
   end
 end

@@ -1,19 +1,13 @@
 require 'tap_parser'
 
 class GradersController < ApplicationController
+  prepend_before_action :find_grader
+  prepend_before_action :find_course_assignment_submission
+  before_action :require_admin_or_staff, except: [:show, :update]
   def edit
-    @grader = Grader.find(params[:id])
-    @course = Course.find(params[:course_id])
-    @assignment = Assignment.find(params[:assignment_id])
-    @submission = Submission.find(params[:submission_id])
-
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to :back, alert: "Must be an admin or staff."
-      return
-    end
-    
     if @grader.grader_config.autograde?
-      redirect_to :back, alert: "That grader is automatic; there is nothing to edit"
+      redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
+                  alert: "That grader is automatic; there is nothing to edit"
       return
     end
 
@@ -21,11 +15,6 @@ class GradersController < ApplicationController
   end
 
   def show
-    @grader = Grader.find(params[:id])
-    @course = Course.find(params[:course_id])
-    @assignment = Assignment.find(params[:assignment_id])
-    @submission = Submission.find(params[:submission_id])
-
     if @grader.grading_output
       @grading_output = File.read(@grader.grading_output)
       begin
@@ -35,29 +24,68 @@ class GradersController < ApplicationController
       end
     end
 
-    self.send(@grader.grader_config.type, false) if self.respond_to?(@grader.grader_config.type)
+    self.send(@grader.grader_config.type, false) if self.respond_to?(@grader.grader_config.type, true)
   end
 
   def regrade
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to :back, alert: "Must be an admin or staff."
-      return
-    end
-    @grader = Grader.find(params[:id])
-    @assignment = Assignment.find(params[:assignment_id])
-    @submission = Submission.find(params[:submission_id])
     @grader.grader_config.grade(@assignment, @submission)
     @submission.compute_grade! if @submission.grade_complete?
-    redirect_to :back
+    redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission))
   end
   
   def update
-    @grader = Grader.find(params[:id])
-    @assignment = Assignment.find(params[:assignment_id])
-    @submission = Submission.find(params[:submission_id])
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      respond_to do |f|
+        f.json { render :json => {unauthorized: "Must be an admin or staff"} }
+        f.html { 
+          redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
+                      alert: "Must be an admin or staff."
+          return
+        }
+      end
+    end
     respond_to do |f|
       f.json { autosave_comments }
       f.html { save_all_comments }
+    end
+  end
+
+
+  protected 
+  def comments_params
+    if params[:comments].is_a? String
+      JSON.parse(params[:comments])
+    else
+      params[:comments]
+    end
+  end
+
+  def require_admin_or_staff
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
+                  alert: "Must be an admin or staff."
+      return
+    end
+  end
+
+  def find_course_assignment_submission
+    @course = Course.find_by(id: params[:course_id])
+    @assignment = Assignment.find_by(id: params[:assignment_id])
+    @submission = Submission.find_by(id: params[:submission_id])
+    if @course.nil? or @assignment.nil? or @submission.nil?
+      redirect_to back_or_else(root_path), alert: "No such course, assignment or submission"
+      return
+    end
+  end
+  
+  def find_grader
+    @grader = Grader.find_by(id: params[:id])
+    if @grader.nil?
+      redirect_to back_or_else(course_assignment_submission_path(params[:course_id],
+                                                                 params[:assignment_id],
+                                                                 params[:submission_id])),
+                  alert: "No such grader"
+      return
     end
   end
 
@@ -79,7 +107,8 @@ class GradersController < ApplicationController
     data = cp.zip(comments).map do |c, comm| [c["id"], comm.id] end.to_h
     @grader.grader_config.grade(@assignment, @submission)
     @submission.compute_grade! if @submission.grade_complete?
-    redirect_to :back, message: "Comments saved; grading completed"
+    redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
+                message: "Comments saved; grading completed"
   end
 
   def comment_to_inlinecomment(c)
@@ -107,6 +136,9 @@ class GradersController < ApplicationController
       comment
     end
   end
+
+  ###################################
+  # Grader responses
   
   def JavaStyleGrader(edit)
     redirect_to files_course_assignment_submission_path(@course, @assignment, @submission)
@@ -233,12 +265,4 @@ class GradersController < ApplicationController
     end
   end
 
-  protected 
-  def comments_params
-    if params[:comments].is_a? String
-      JSON.parse(params[:comments])
-    else
-      params[:comments]
-    end
-  end
 end

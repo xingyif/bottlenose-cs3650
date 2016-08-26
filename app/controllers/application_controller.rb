@@ -6,14 +6,8 @@ class ApplicationController < ActionController::Base
   end
   protect_from_forgery
 
-  before_filter :set_mailer_host
-  before_filter :configure_permitted_parameters, if: :devise_controller?
-
-  # # Ensure we have a `current_user` for all actions by default. Controllers
-  # # must manually opt out of this if they wish to be public.
-  # before_filter :require_current_user
-  # # Allow devise actions for users without active sessions.
-  # skip_before_filter :require_current_user, if: :devise_controller?
+  before_action :set_mailer_host
+  before_action :configure_permitted_parameters, if: :devise_controller?
 
   protected
 
@@ -65,6 +59,15 @@ class ApplicationController < ActionController::Base
   def configure_permitted_parameters
     devise_parameter_sanitizer.for(:sign_up) do |user|
       user.permit(:name, :email, :username, :password, :password_confirmation)
+    end
+  end
+
+
+  def back_or_else(target)
+    if request.env["HTTP_REFERER"].present? and request.env["HTTP_REFERER"] != request.env["REQUEST_URI"]
+      :back
+    else
+      target
     end
   end
 end

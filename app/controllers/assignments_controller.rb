@@ -1,9 +1,18 @@
 class AssignmentsController < CoursesController
+  before_action :require_valid_course
+  before_action :require_admin_or_prof, only: [:edit, :edit_weights, :update, :update_weights,
+                                               :new, :create, :destroy,
+                                               :recreate_graders]
+  before_action :require_admin_or_staff, only: [:tarball, :publish]
+  
   def show
-    assignment = Assignment.find(params[:id])
+    assignment = Assignment.find_by(id: params[:id])
 
     if current_user_site_admin? || current_user_staff_for?(@course)
       submissions = assignment.used_submissions.includes(:user).order(created_at: :desc).to_a
+    elsif assignment.nil? or assignment.available > DateTime.now
+      redirect_to back_or_else(course_assignments_path), alert: "No such assignment exists or is available"
+      return
     else
       submissions = current_user.submissions_for(assignment).includes(:user).order(created_at: :desc).to_a
     end
@@ -14,8 +23,6 @@ class AssignmentsController < CoursesController
   end
 
   def new
-    @course = Course.find(params[:course_id])
-
     @assignment = Assignment.new
     @assignment.course_id = @course.id
     @assignment.due_date = (Time.now + 1.week).end_of_day.strftime("%Y/%m/%d %H:%M")
@@ -26,21 +33,17 @@ class AssignmentsController < CoursesController
   end
 
   def edit
-    @assignment = Assignment.find(params[:id])
+    @assignment = Assignment.find_by(id: params[:id])
+    if @assignment.nil?
+      redirect_to back_or_else(courses_assignments_path), alert: "No such assignment"
+      return
+    end
   end
 
   def edit_weights
-    unless current_user_site_admin? || current_user_prof_for?(@course)
-      redirect_to :back, alert: "Must be an admin or professor."
-      return
-    end
   end
 
   def update_weights
-    unless current_user_site_admin? || current_user_prof_for?(@course)
-      redirect_to :back, alert: "Must be an admin or professor."
-      return
-    end
     params[:weight].each do |kv|
       Assignment.find(kv[0]).update_attribute(:points_available, kv[1])
     end
@@ -48,11 +51,6 @@ class AssignmentsController < CoursesController
   end
   
   def create
-    unless current_user_site_admin? || current_user_prof_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or professor."
-      return
-    end
-
     @assignment = Assignment.new(assignment_params)
     @assignment.course_id = @course.id
     @assignment.blame_id = current_user.id
@@ -66,11 +64,6 @@ class AssignmentsController < CoursesController
   end
 
   def update
-    unless current_user_site_admin? || current_user_prof_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or professor."
-      return
-    end
-
     @assignment = Assignment.find(params[:id])
     unless set_lateness_config and set_grader_configs
       render action: "edit"
@@ -84,6 +77,63 @@ class AssignmentsController < CoursesController
       render action: "edit"
     end
   end
+  
+  def destroy
+    @assignment = Assignment.find(params[:id])
+
+    @assignment.destroy
+    redirect_to @course, notice: "Assignment #{params[:id]} has been deleted."
+  end
+
+  def show_user
+    if !current_user
+      redirect_to back_or_else(root_path), alert: "Must be logged in"
+      return
+    elsif current_user_site_admin? || current_user_prof_for?(@course)
+      # nothing
+    elsif current_user.id != params[:user_id]
+      redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                  alert: "Not permitted to see submissions for other students"
+    end
+    
+    @course = Course.find(params[:course_id])
+    assignment = Assignment.find(params[:id])
+    @user = User.find(params[:user_id])
+    subs = @user.submissions_for(assignment)
+    submissions = subs.select("submissions.*").includes(:users).order(created_at: :desc).to_a
+    @gradesheet = Gradesheet.new(assignment, submissions)
+  end
+
+  def tarball
+    tb = SubTarball.new(params[:id])
+    tb.update!
+    redirect_to tb.path
+  end
+
+  def publish
+    assignment = Assignment.find(params[:id])
+    used = assignment.used_submissions
+    used.each do |u|
+      u.graders.where(score: nil).each do |g| g.grader_config.grade(assignment, u) end
+      u.graders.update_all(:available => true)
+      u.compute_grade!
+    end
+
+    redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                notice: 'Grades successfully published'
+  end
+
+  def recreate_graders
+    @assignment = Assignment.find(params[:id])
+    count = do_recreate_graders @assignment
+    redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                notice: "#{plural(count, 'grader')} created"
+  end
+    
+
+  
+
+  protected
 
   def set_lateness_config
     lateness = params[:lateness]
@@ -201,75 +251,6 @@ class AssignmentsController < CoursesController
 
     return no_problems
   end
-  
-  def destroy
-    unless current_user_site_admin? || current_user_prof_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or professor."
-      return
-    end
-
-    @assignment = Assignment.find(params[:id])
-
-    @assignment.destroy
-    redirect_to @course, notice: "Assignment #{params[:id]} has been deleted."
-  end
-
-  def show_user
-    if !current_user
-      redirect_to :back, alert: "Must be logged in"
-      return
-    elsif current_user_site_admin? || current_user_prof_for?(@course)
-      # nothing
-    elsif current_user.id != params[:user_id]
-      redirect_to :back, alert: "Not permitted to see submissions for other students"
-    end
-    
-    @course = Course.find(params[:course_id])
-    assignment = Assignment.find(params[:id])
-    @user = User.find(params[:user_id])
-    subs = @user.submissions_for(assignment)
-    submissions = subs.select("submissions.*").includes(:users).order(created_at: :desc).to_a
-    @gradesheet = Gradesheet.new(assignment, submissions)
-  end
-
-  def tarball
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
-    tb = SubTarball.new(params[:id])
-    tb.update!
-    redirect_to tb.path
-  end
-
-  def publish
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
-    assignment = Assignment.find(params[:id])
-    used = assignment.used_submissions
-    used.each do |u|
-      u.graders.where(score: nil).each do |g| g.grader_config.grade(assignment, u) end
-      u.graders.update_all(:available => true)
-      u.compute_grade!
-    end
-
-    redirect_to :back, notice: 'Grades successfully published'
-  end
-
-  def recreate_graders
-    @assignment = Assignment.find(params[:id])
-    count = do_recreate_graders @assignment
-    redirect_to :back, notice: "#{plural(count, 'grader')} created"
-  end
-    
-
-  
-
-  protected
 
   def do_recreate_graders(assignment)
     confs = assignment.grader_configs.to_a
@@ -297,6 +278,25 @@ class AssignmentsController < CoursesController
                       :JunitGrader => [:avail_score, :upload_file, :params, :type],
                     :ManualGrader => [:avail_score, :upload_file, :params, :type]])]
       end.to_h
+    end
+  end
+
+  def require_valid_course
+    if @course.nil?
+      redirect_to back_or_else(courses_path), alert: "No such course"
+      return
+    end
+  end
+  def require_admin_or_prof
+    unless current_user_site_admin? || current_user_prof_for?(@course)
+      redirect_to back_or_else(course_assignments_path), alert: "Must be an admin or professor."
+      return
+    end
+  end
+  def require_admin_or_staff
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
     end
   end
 end

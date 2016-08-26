@@ -1,14 +1,9 @@
 class SubmissionsController < CoursesController
-  # before_filter :require_student
-
+  prepend_before_action :find_submission, except: [:index, :new, :create]
+  prepend_before_action :find_course_assignment
+  before_action :require_current_user, only: [:show, :files, :new, :create]
+  before_action :require_admin_or_staff, only: [:recreate_grader, :use_for_grading, :publish]
   def show
-    unless current_user
-      redirect_to :back, alert: "Must be logged in to view submissions"
-      return
-    end
-    @submission = Submission.find(params[:id])
-    @assignment = @submission.assignment
-
     unless @submission.visible_to?(current_user)
       redirect_to course_assignment_path(@course, @assignment), alert: "That's not your submission."
       return
@@ -17,14 +12,11 @@ class SubmissionsController < CoursesController
     @gradesheet = Gradesheet.new(@assignment, [@submission])
   end
 
-  def files
-    unless current_user
-      redirect_to :back, alert: "Must be logged in to view submissions"
-      return
-    end
-    @submission = Submission.find(params[:id])
-    @assignment = @submission.assignment
+  def index
+    redirect_to course_assignment_path(@course, @assignment)
+  end
 
+  def files
     unless @submission.visible_to?(current_user)
       redirect_to course_assignment_path(@course, @assignment), alert: "That's not your submission."
       return
@@ -81,11 +73,6 @@ class SubmissionsController < CoursesController
   end
 
   def new
-    unless current_user
-      redirect_to :back, alert: "Must be logged in to create a new submission"
-      return
-    end
-    @assignment = Assignment.find(params[:assignment_id])
     @submission = Submission.new
     @submission.assignment_id = @assignment.id
     @submission.user_id = current_user.id
@@ -97,11 +84,6 @@ class SubmissionsController < CoursesController
   end
 
   def create
-    unless current_user
-      redirect_to :back, alert: "Must be logged in to create a submission"
-      return
-    end
-    @assignment = Assignment.find(params[:assignment_id])
     @submission = Submission.new(submission_params)
     @submission.assignment_id = @assignment.id
     if @assignment.team_subs?
@@ -134,40 +116,25 @@ class SubmissionsController < CoursesController
   end
 
   def recreate_grader
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to :back, alert: "Must be an admin or staff."
-      return
-    end
-    @grader_config = GraderConfig.find(params[:grader_config_id])
-    @submission = Submission.find(params[:id])
     if @submission.recreate_missing_grader(@grader_config)
       @submission.compute_grade! if @submission.grade_complete?
-      redirect_to :back
+      redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission))
     else
-      redirect_to :back, alert: "Grader already exists; use Regrade to modify it instead"
+      redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
+                  alert: "Grader already exists; use Regrade to modify it instead"
     end
   end
 
   def use_for_grading
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-    @submission = Submission.find(params[:id])
     @submission.set_used_sub!
-    redirect_to :back
+    redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission))
   end
 
   def publish
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-    @submission = Submission.find(params[:id])
     @submission.graders.where(score: nil).each do |g| g.grade(assignment, used) end
     @submission.graders.update_all(:available => true)
     @submission.compute_grade!
-    redirect_to :back
+    redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission))
   end
   
   private
@@ -183,6 +150,32 @@ class SubmissionsController < CoursesController
     else
       params[:submission].permit(:assignment_id, :user_id, :student_notes,
                                  :upload, :upload_file)
+    end
+  end
+
+  def require_admin_or_staff
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
+                  alert: "Must be an admin or staff."
+      return
+    end
+  end
+
+  def find_course_assignment
+    @course = Course.find_by(id: params[:course_id])
+    @assignment = Assignment.find_by(id: params[:assignment_id])
+    if @course.nil? or @assignment.nil?
+      redirect_to back_or_else(root_path), alert: "No such course or assignment"
+      return
+    end
+  end
+  
+  def find_submission
+    @submission = Submission.find_by(id: params[:id])
+    if @submission.nil?
+      redirect_to back_or_else(course_assignment_path(params[:course_id], params[:assignment_id])),
+                  alert: "No such submission"
+      return
     end
   end
 end

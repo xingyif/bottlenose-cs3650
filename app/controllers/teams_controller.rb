@@ -1,4 +1,5 @@
 class TeamsController < CoursesController
+  before_action :require_admin_or_staff, only: [:new, :create, :disolve, :disolve_all, :randomize]
   # GET /staff/courses/:course_id/teams
   def index
     @course = Course.find(params[:course_id])
@@ -13,10 +14,6 @@ class TeamsController < CoursesController
 
   # GET /staff/course/:course_id/teams/new
   def new
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to course_teams_path, alert: "Must be an admin or staff."
-      return
-    end
     @course = Course.find(params[:course_id])
     @team = Team.new
     @team.course_id = @course.id
@@ -26,11 +23,6 @@ class TeamsController < CoursesController
 
   # POST /staff/course/:course_id/teams
   def create
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to course_teams_path, alert: "Must be an admin or staff."
-      return
-    end
-
     @course = Course.find(params[:course_id])
     @team = Team.new(team_params)
 
@@ -58,34 +50,19 @@ class TeamsController < CoursesController
   end
 
   def disolve
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
     @team = Team.find(params[:id])
     @team.disolve(Date.current)
-    redirect_to :back
+    redirect_to back_or_else(course_teams_path(@course))
   end
 
 
   def disolve_all
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
     teams = Team.where(course: @course, end_date: nil)
     teams.each do |t| t.disolve(Date.current) end
-    redirect_to :back, notice: "#{plural(teams.count, 'team')} disolved"
+    redirect_to back_or_else(course_teams_path(@course)), notice: "#{plural(teams.count, 'team')} disolved"
   end
 
   def randomize
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
     count = 0
     students_without_active_team.to_a.shuffle.each_slice(params[:random][:size].to_i).each do |t|
       @team = Team.new(course: @course, start_date: params[:random][:start_date], end_date: params[:random][:end_date])
@@ -95,7 +72,7 @@ class TeamsController < CoursesController
         count += 1
       end
     end
-    redirect_to :back, notice: "#{plural(count, 'random team')} created"
+    redirect_to back_or_else(course_teams_path(@course)), notice: "#{plural(count, 'random team')} created"
   end
 
   private
@@ -110,4 +87,11 @@ class TeamsController < CoursesController
   def team_params
     params.require(:team).permit(:course_id, :start_date, :end_date)
   end
+
+  def require_admin_or_staff
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      redirect_to course_teams_path, alert: "Must be an admin or staff."
+      return
+    end
+  end    
 end
