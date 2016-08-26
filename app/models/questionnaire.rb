@@ -1,4 +1,4 @@
-class Questionaire < ActiveRecord::Base
+class Questionnaire < ActiveRecord::Base
   belongs_to :blame, :class_name => "User", :foreign_key => "blame_id"
   belongs_to :assignment
   belongs_to :course

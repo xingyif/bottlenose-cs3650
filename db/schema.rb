@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160825212757) do
+ActiveRecord::Schema.define(version: 20160826132729) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -132,7 +132,7 @@ ActiveRecord::Schema.define(version: 20160825212757) do
     t.integer "max_penalty"
   end
 
-  create_table "questionaires", force: :cascade do |t|
+  create_table "questionnaires", force: :cascade do |t|
     t.string   "name",               null: false
     t.datetime "due_date",           null: false
     t.datetime "available"
@@ -147,19 +147,19 @@ ActiveRecord::Schema.define(version: 20160825212757) do
     t.datetime "updated_at",         null: false
   end
 
-  add_index "questionaires", ["assignment_id"], name: "index_questionaires_on_assignment_id", using: :btree
+  add_index "questionnaires", ["assignment_id"], name: "index_questionnaires_on_assignment_id", using: :btree
 
   create_table "questions", force: :cascade do |t|
-    t.integer  "questionaire_id", null: false
-    t.string   "type",            null: false
-    t.string   "prompt",          null: false
+    t.integer  "questionnaire_id", null: false
+    t.string   "type",             null: false
+    t.string   "prompt",           null: false
     t.string   "options"
-    t.float    "weight",          null: false
-    t.datetime "created_at",      null: false
-    t.datetime "updated_at",      null: false
+    t.float    "weight",           null: false
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
   end
 
-  add_index "questions", ["questionaire_id"], name: "index_questions_on_questionaire_id", using: :btree
+  add_index "questions", ["questionnaire_id"], name: "index_questions_on_questionnaire_id", using: :btree
 
   create_table "reg_requests", force: :cascade do |t|
     t.integer  "course_id"

@@ -112,16 +112,16 @@ when "development"
     AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: manual.id, order: 3)
   end
 
-  questionaire = Questionaire.create!(name: "Self-eval for #{Assignment.first.name}",
-                                      assignment: Assignment.first,
-                                      available_date: Assignment.first.due_date,
-                                      due_date: Assignemnt.first.due_date + 1.day,
-                                      course: fundies1,
-                                      lateness_config: fundies1.lateness_config,
-                                      blame: ben,
-                                      points_available: 10,
-                                      max_attempts: 3,
-                                      team_subs: Assignment.first.team_subs)
+  questionnaire = Questionnaire.create!(name: "Self-eval for #{Assignment.first.name}",
+                                        assignment: Assignment.first,
+                                        available_date: Assignment.first.due_date,
+                                        due_date: Assignemnt.first.due_date + 1.day,
+                                        course: fundies1,
+                                        lateness_config: fundies1.lateness_config,
+                                        blame: ben,
+                                        points_available: 10,
+                                        max_attempts: 3,
+                                        team_subs: Assignment.first.team_subs)
   qtypes = {
     "MultipleChoiceQuestion" => "yes/no/maybe/don't care",
     "NumericQuestion" => "0.0:1.5",
@@ -131,7 +131,7 @@ when "development"
     "CodeReferenceQuestion" => ""
   }
   qtypes.each_with_index do |qtype, options, i|
-    Question.create!(questionaire: questionaire,
+    Question.create!(questionnaire: questionnaire,
                      type: qtype,
                      prompt: "This is question #{i} -- what do you think?",
                      weight: i,

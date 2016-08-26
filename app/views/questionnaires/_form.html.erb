@@ -1,11 +1,11 @@
-<%= form_for [@course, @questionaire] do |f| %>
-<% if @questionaire.errors.any? %>
+<%= form_for [@course, @questionnaire] do |f| %>
+<% if @questionnaire.errors.any? %>
 <div id="error_explanation" class="alert alert-danger">
-  <h2><%= pluralize(@questionaire.errors.count, "error") %> prohibited this
-    questionaire from being saved:</h2>
+  <h2><%= pluralize(@questionnaire.errors.count, "error") %> prohibited this
+    questionnaire from being saved:</h2>
 
   <ul>
-    <% @questionaire.errors.full_messages.each do |msg| %>
+    <% @questionnaire.errors.full_messages.each do |msg| %>
     <li><%= msg %></li>
     <% end %>
   </ul>

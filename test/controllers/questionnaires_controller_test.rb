@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class QuestionairesControllerTest < ActionController::TestCase
+class QuestionnairesControllerTest < ActionController::TestCase
   test "should get show" do
     get :show
     assert_response :success

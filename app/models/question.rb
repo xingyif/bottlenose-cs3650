@@ -1,8 +1,8 @@
 class Question < ActiveRecord::Base
   enum question_type: [:multiple_choice, :yes_no, :true_false, :numeric, :free_text, :code_reference]
   
-  belongs_to :questionaire
-  validates :questionaire, presence: true
+  belongs_to :questionnaire
+  validates :questionnaire, presence: true
 end
 
 class MultipleChoiceQuestion < Question
