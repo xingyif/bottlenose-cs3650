@@ -6,17 +6,27 @@ class AssignmentsController < CoursesController
   before_action :require_admin_or_staff, only: [:tarball, :publish]
   
   def show
-    assignment = Assignment.find_by(id: params[:id])
+    @assignment = Assignment.find_by(id: params[:id])
 
-    if current_user_site_admin? || current_user_staff_for?(@course)
-      submissions = assignment.used_submissions.includes(:user).order(created_at: :desc).to_a
-    elsif assignment.nil? or assignment.available > DateTime.now
+    admin_view = current_user_site_admin? || current_user_staff_for?(@course)
+    if admin_view
+      submissions = @assignment.used_submissions.includes(:user).order(created_at: :desc).to_a
+    elsif @assignment.nil? or @assignment.available > DateTime.now
       redirect_to back_or_else(course_assignments_path), alert: "No such assignment exists or is available"
       return
     else
-      submissions = current_user.submissions_for(assignment).includes(:user).order(created_at: :desc).to_a
+      submissions = current_user.submissions_for(@assignment).includes(:user).order(created_at: :desc).to_a
     end
-    @gradesheet = Gradesheet.new(assignment, submissions)
+    @gradesheet = Gradesheet.new(@assignment, submissions)
+
+
+    self.send(@assignment.type, false) if self.respond_to?(@assignment.type, true)
+    if admin_view
+      render "show_#{@assignment.type.underscore}"
+    else
+      @user = current_user
+      render "show_user"
+    end
   end
 
   def index
@@ -86,18 +96,17 @@ class AssignmentsController < CoursesController
   end
 
   def show_user
+    assignment = Assignment.find(params[:id])
     if !current_user
       redirect_to back_or_else(root_path), alert: "Must be logged in"
       return
     elsif current_user_site_admin? || current_user_prof_for?(@course)
       # nothing
-    elsif current_user.id != params[:user_id]
-      redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+    elsif current_user.id != params[:user_id].to_i
+      redirect_to back_or_else(course_assignment_path(@course, assignment)),
                   alert: "Not permitted to see submissions for other students"
     end
     
-    @course = Course.find(params[:course_id])
-    assignment = Assignment.find(params[:id])
     @user = User.find(params[:user_id])
     subs = @user.submissions_for(assignment)
     submissions = subs.select("submissions.*").includes(:users).order(created_at: :desc).to_a
@@ -293,4 +302,12 @@ class AssignmentsController < CoursesController
       return
     end
   end
+
+
+  ####################
+  # Assignment types
+  def Questions(edit)
+    @questions = YAML.load(File.read(@assignment.assignment_upload.submission_path))
+  end
+
 end

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160826132729) do
+ActiveRecord::Schema.define(version: 20160827150550) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,8 +26,8 @@ ActiveRecord::Schema.define(version: 20160826132729) do
   add_index "assignment_graders", ["assignment_id"], name: "index_assignment_graders_on_assignment_id", using: :btree
 
   create_table "assignments", force: :cascade do |t|
-    t.string   "name",                                 null: false
-    t.datetime "due_date",                             null: false
+    t.string   "name",                                   null: false
+    t.datetime "due_date",                               null: false
     t.string   "assignment_file_name"
     t.text     "assignment"
     t.datetime "created_at"
@@ -37,13 +37,14 @@ ActiveRecord::Schema.define(version: 20160826132729) do
     t.integer  "assignment_upload_id"
     t.integer  "blame_id"
     t.string   "tar_key"
-    t.integer  "course_id",                            null: false
+    t.integer  "course_id",                              null: false
     t.boolean  "team_subs"
     t.integer  "max_attempts"
     t.integer  "rate_per_hour"
     t.float    "points_available"
     t.integer  "lateness_config_id"
-    t.datetime "available",                            null: false
+    t.datetime "available",                              null: false
+    t.string   "type",                 default: "Files", null: false
   end
 
   create_table "course_sections", force: :cascade do |t|
@@ -132,35 +133,6 @@ ActiveRecord::Schema.define(version: 20160826132729) do
     t.integer "max_penalty"
   end
 
-  create_table "questionnaires", force: :cascade do |t|
-    t.string   "name",               null: false
-    t.datetime "due_date",           null: false
-    t.datetime "available"
-    t.integer  "course_id",          null: false
-    t.integer  "assignment_id"
-    t.integer  "lateness_config_id", null: false
-    t.integer  "blame_id",           null: false
-    t.float    "points_available",   null: false
-    t.integer  "max_attempts"
-    t.boolean  "team_subs"
-    t.datetime "created_at",         null: false
-    t.datetime "updated_at",         null: false
-  end
-
-  add_index "questionnaires", ["assignment_id"], name: "index_questionnaires_on_assignment_id", using: :btree
-
-  create_table "questions", force: :cascade do |t|
-    t.integer  "questionnaire_id", null: false
-    t.string   "type",             null: false
-    t.string   "prompt",           null: false
-    t.string   "options"
-    t.float    "weight",           null: false
-    t.datetime "created_at",       null: false
-    t.datetime "updated_at",       null: false
-  end
-
-  add_index "questions", ["questionnaire_id"], name: "index_questions_on_questionnaire_id", using: :btree
-
   create_table "reg_requests", force: :cascade do |t|
     t.integer  "course_id"
     t.text     "notes"
@@ -187,8 +159,8 @@ ActiveRecord::Schema.define(version: 20160826132729) do
   add_index "registrations", ["user_id"], name: "index_registrations_on_user_id", using: :btree
 
   create_table "submissions", force: :cascade do |t|
-    t.integer  "assignment_id",                       null: false
-    t.integer  "user_id",                             null: false
+    t.integer  "assignment_id",                         null: false
+    t.integer  "user_id",                               null: false
     t.string   "secret_dir"
     t.string   "file_name"
     t.text     "student_notes"
@@ -196,11 +168,12 @@ ActiveRecord::Schema.define(version: 20160826132729) do
     t.datetime "updated_at"
     t.boolean  "ignore_late_penalty", default: false
     t.integer  "upload_id"
-    t.integer  "upload_size",         default: 0,     null: false
+    t.integer  "upload_size",         default: 0,       null: false
     t.integer  "team_id"
     t.integer  "comments_upload_id"
     t.boolean  "stale_team"
     t.float    "score"
+    t.string   "type",                default: "Files", null: false
   end
 
   add_index "submissions", ["assignment_id"], name: "index_submissions_on_assignment_id", using: :btree

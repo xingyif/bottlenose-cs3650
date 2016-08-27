@@ -2,6 +2,9 @@ require 'securerandom'
 require 'audit'
 
 class Submission < ActiveRecord::Base
+  def self.inheritance_column
+    nil
+  end
   belongs_to :assignment
   belongs_to :user
   belongs_to :team

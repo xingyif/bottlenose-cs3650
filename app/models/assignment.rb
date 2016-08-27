@@ -2,6 +2,9 @@ require 'securerandom'
 require 'audit'
 
 class Assignment < ActiveRecord::Base
+  def self.inheritance_column
+    nil
+  end
   belongs_to :blame, :class_name => "User", :foreign_key => "blame_id"
 
   belongs_to :course

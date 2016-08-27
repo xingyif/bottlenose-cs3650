@@ -1,0 +1,13 @@
+<% @page_title = "#{@course.name} / #{@gradesheet.assignment.name}" %>
+
+<% cur_reg = current_user.registration_for(@course) %>
+<% if cur_reg.student? then debugger end %>
+<% if cur_reg.professor? %>
+<p class="pull-right">
+  <%= link_to "Edit Assignment", 
+      edit_course_assignment_path(@course, @gradesheet.assignment), class: "btn btn-default" %>
+</p>
+<% end %>
+
+<%= render 'assignment_files_info', gradesheet: @gradesheet %>
+<%= render 'admin_subs' %>
