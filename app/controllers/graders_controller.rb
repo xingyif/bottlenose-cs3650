@@ -11,7 +11,7 @@ class GradersController < ApplicationController
       return
     end
 
-    self.send(@grader.grader_config.type, true) if self.respond_to?(@grader.grader_config.type)
+    self.send(@grader.grader_config.type, true) if self.respond_to?(@grader.grader_config.type, true)
   end
 
   def show

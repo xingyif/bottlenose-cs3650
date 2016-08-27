@@ -23,7 +23,7 @@ class SubmissionsController < CoursesController
       return
     end
 
-    @lineCommentsByFile = @submission.grader_line_comments
+    @lineCommentsByFile = @submission.grader_line_comments(nil)
     
     @submission_files = []
     def with_extracted(item)
