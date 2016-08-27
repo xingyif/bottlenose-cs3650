@@ -34,19 +34,19 @@ class GradersController < ApplicationController
   end
   
   def update
-    unless current_user_site_admin? || current_user_staff_for?(@course)
+    if current_user_site_admin? || current_user_staff_for?(@course)
+      respond_to do |f|
+        f.json { autosave_comments }
+        f.html { save_all_comments }
+      end
+    else
       respond_to do |f|
         f.json { render :json => {unauthorized: "Must be an admin or staff"} }
         f.html { 
           redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
                       alert: "Must be an admin or staff."
-          return
         }
       end
-    end
-    respond_to do |f|
-      f.json { autosave_comments }
-      f.html { save_all_comments }
     end
   end
 
@@ -72,8 +72,17 @@ class GradersController < ApplicationController
     @course = Course.find_by(id: params[:course_id])
     @assignment = Assignment.find_by(id: params[:assignment_id])
     @submission = Submission.find_by(id: params[:submission_id])
-    if @course.nil? or @assignment.nil? or @submission.nil?
-      redirect_to back_or_else(root_path), alert: "No such course, assignment or submission"
+    if @course.nil?
+      redirect_to back_or_else(root_path), alert: "No such course"
+      return
+    end
+    if @assignment.nil? or @assignment.course_id != @course.id
+      redirect_to back_or_else(course_path(@course)), alert: "No such assignment for this course"
+      return
+    end
+    if @submission.nil? or @submission.assignment_id != @assignment.id
+      redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                  alert: "No such submission for this assignment"
       return
     end
   end

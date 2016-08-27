@@ -33,6 +33,12 @@ class ApplicationController < ActionController::Base
       return
     end
   end
+  def require_valid_course
+    if @course.nil?
+      redirect_to back_or_else(courses_path), alert: "No such course"
+      return
+    end
+  end
 
   def current_user_site_admin?
     current_user && current_user.site_admin?

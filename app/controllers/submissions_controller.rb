@@ -164,8 +164,12 @@ class SubmissionsController < CoursesController
   def find_course_assignment
     @course = Course.find_by(id: params[:course_id])
     @assignment = Assignment.find_by(id: params[:assignment_id])
-    if @course.nil? or @assignment.nil?
-      redirect_to back_or_else(root_path), alert: "No such course or assignment"
+    if @course.nil?
+      redirect_to back_or_else(root_path), alert: "No such course"
+      return
+    end
+    if @assignment.nil? or @assignment.course_id != @course.id
+      redirect_to back_or_else(course_path(@course)), alert: "No such assignment for this course"
       return
     end
   end
