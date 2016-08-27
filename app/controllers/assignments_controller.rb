@@ -25,7 +25,7 @@ class AssignmentsController < CoursesController
       render "show_#{@assignment.type.underscore}"
     else
       @user = current_user
-      render "show_user"
+      render "show_user_#{@assignment.type.underscore}"
     end
   end
 

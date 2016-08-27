@@ -10,6 +10,7 @@ class SubmissionsController < CoursesController
     end
 
     @gradesheet = Gradesheet.new(@assignment, [@submission])
+    render "show_#{@assignment.type.underscore}"
   end
 
   def index
@@ -23,17 +24,6 @@ class SubmissionsController < CoursesController
     end
 
     @lineCommentsByFile = @submission.grader_line_comments
-    # @lineCommentsByFile.each do |file, cBF|
-    #   cBF.each do |type, byType|
-    #     byType.each do |line, byLine|
-    #       byLine.each do |comment|
-    #         if comment[:info] and comment[:info]["filename"]
-    #           comment[:info]["filename"] = Upload.upload_path_for(comment[:info]["filename"])
-    #         end
-    #       end
-    #     end
-    #   end
-    # end
     
     @submission_files = []
     def with_extracted(item)
@@ -81,6 +71,7 @@ class SubmissionsController < CoursesController
       @team = current_user.active_team_for(@course)
       @submission.team = @team
     end
+    # TODO: Render by assignment type
   end
 
   def create
@@ -104,6 +95,8 @@ class SubmissionsController < CoursesController
       @submission.ignore_late_penalty = false
     end
 
+    # TODO: per-assignment-type processing, to save question answers as upload
+    
     if @submission.save_upload and @submission.save
       @submission.set_used_sub!
       @submission.autograde!

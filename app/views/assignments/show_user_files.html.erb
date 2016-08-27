@@ -8,7 +8,7 @@
   <% else %>
   (<%= @gradesheet.submissions.count %>)
   <% end %>
-  <% if @user.id == @current_user.id && @gradesheet.assignment.due_date > DateTime.now %>
+  <% if @user.id == @current_user.id %>
   <%= link_to "New Submission",
          new_course_assignment_submission_path(@course, @gradesheet.assignment), class: "btn btn-success" %>
      <% end %>

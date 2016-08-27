@@ -35,7 +35,7 @@
           <% if part["codeTag"] %>
           <p>(CodeTag) <%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
           <% elsif part["codeTags"] %>
-          <p>(Multiple CodeTags) <%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
+          <p>(Multiple CodeTags) <%= sanitize(part["codeTags"], tags: %w(b strong i em)) %></p>
           <% elsif part["text"] %>
           <p>(Text) <%= sanitize(part["text"], tags: %w(b strong i em)) %></p>
           <% end %>
