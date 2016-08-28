@@ -3,14 +3,19 @@ require 'audit'
 
 class Assignment < ActiveRecord::Base
   def self.inheritance_column
-    nil
+    nil # TODO: For now; I might want to subclass this after all
   end
+  enum assignment_kind: [:files, :questions]
+  enum question_kind: [:yes_no, :true_false, :multiple_choice, :numeric, :text]
+  
   belongs_to :blame, :class_name => "User", :foreign_key => "blame_id"
 
   belongs_to :course
 
   belongs_to :lateness_config
 
+  belongs_to :related_assignment, :class_name => "Assignment", :foreign_key => "related_assignment_id"
+  
   has_many :submissions, :dependent => :restrict_with_error
   has_many :subs_for_gradings, :dependent => :destroy
 
@@ -96,7 +101,9 @@ class Assignment < ActiveRecord::Base
   def save_uploads!
     user = User.find(blame_id)
 
-    unless @assignment_file_data.nil?
+    if @assignment_file_data.nil?
+      debugger
+    else
       unless assignment_upload_id.nil?
         Audit.log("Assn #{id}: Orphaning assignment upload " +
                   "#{assignment_upload_id} (#{assignment_upload.secret_key})")

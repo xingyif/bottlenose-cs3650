@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160827150550) do
+ActiveRecord::Schema.define(version: 20160827221358) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,26 +26,29 @@ ActiveRecord::Schema.define(version: 20160827150550) do
   add_index "assignment_graders", ["assignment_id"], name: "index_assignment_graders_on_assignment_id", using: :btree
 
   create_table "assignments", force: :cascade do |t|
-    t.string   "name",                                   null: false
-    t.datetime "due_date",                               null: false
+    t.string   "name",                                    null: false
+    t.datetime "due_date",                                null: false
     t.string   "assignment_file_name"
     t.text     "assignment"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "secret_dir"
-    t.boolean  "hide_grading",         default: false
+    t.boolean  "hide_grading",          default: false
     t.integer  "assignment_upload_id"
     t.integer  "blame_id"
     t.string   "tar_key"
-    t.integer  "course_id",                              null: false
+    t.integer  "course_id",                               null: false
     t.boolean  "team_subs"
     t.integer  "max_attempts"
     t.integer  "rate_per_hour"
     t.float    "points_available"
     t.integer  "lateness_config_id"
-    t.datetime "available",                              null: false
-    t.string   "type",                 default: "Files", null: false
+    t.datetime "available",                               null: false
+    t.string   "type",                  default: "files", null: false
+    t.integer  "related_assignment_id"
   end
+
+  add_index "assignments", ["course_id"], name: "index_assignments_on_course_id", using: :btree
 
   create_table "course_sections", force: :cascade do |t|
     t.integer "course_id",     null: false

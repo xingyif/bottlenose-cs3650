@@ -23,54 +23,173 @@
       a link to the assignment itself.  HTML markup is allowed here.</p>
     <%= f.text_area :assignment, class: "form-control rich-text" %>
   </div>
-  <div class="form-group">
-    <%= f.label :assignment_file %>
-    <%= f.file_field :assignment_file %>
+  <div id="choose-type" class="form-group">
+    <%= f.label :type, "Assignment Type" %>
+    <p>Choose what form of assignment this is.  Your choice will
+      affect the configuration options below.</p>
+    <%= f.select :type, Assignment.assignment_kinds.to_a.map { |type_name, type_val| [type_name.humanize, type_name] } %>
   </div>
-  <div class="form-group">
-    <%= f.label :points_available %>
-    <br>(This is the percentage of the final grade that this
-    assignment is worth.  Default: same as previous assignment)
-    <%= f.text_field :points_available, size: 10, class: 'form-control numeric' %>
+  <div class="for-type row">
+    <div class="form-group col-sm-6">
+      <p>
+      <%= f.label :assignment_file, "Assignment starter files", class: "files-type" %>
+      <%= f.label :assignment_file, "Assignment questions", class:
+          "questions-type" %>
+      </p>
+      <p class="files-type">This file will be available for students
+        to download as starter code for this assignment.</p>
+      <p class="questions-type">This file contains the questions for
+        this assignment, in YAML format.
+        <span class="btn btn-info btn-sm" data-toggle="collapse"
+              data-target="#questions-schema">See schema</span>
+      </p>
+      <p class="form-inline">
+        <label class="btn btn-default btn-file">
+          Browse <%= f.file_field :assignment_file, id:
+                     "questions-file", style: "display: none;" %>
+        </label>
+        <span id="current_file" class="btn">Current file:
+          <%= @assignment.assignment_file.empty? ? "nothing" : @assignment.assignment_file %></span>
+        <script>
+          $("#questions-file").change(function() {
+            var label = $(this).val().replace(/\\/g, '/').replace(/.*\//, '');
+            $("#current_file").text("New file: " + label);
+          });
+        </script>
+      </p>
+    </div>
+    <div class="questions-type form-group col-sm-6">
+      <%= f.label :related_assignment_id %>
+      <p>If this assignment is a reflection on a previous one, please
+        select it</p>
+      <%= f.select :related_assignment_id,
+          [["<none>", nil]] + (@course.assignments.where.not(id: @assignment.id).to_a.map do |a|
+            [a.name, a.id]
+          end) %>
+      Skipped <%= @assignment.id %>
+    </div>
   </div>
-  <div class="form-group">
-    <%= f.label :hide_grading, "Hide Grading?" %>
-    <%= f.check_box :hide_grading, checked: @assignment.hide_grading %>
-    <br>(Assignment scores and teacher notes are hidden.)
+  
+  <div class="for-type row">
+    <div class="questions-type">
+      <div id="questions-schema" class="well-sm collapse">
+        <h5>YAML Question schema:</h5>
+        <ul>
+          <li>A question file contains a list of sections.</li>
+          <li>A section has a name and a list of questions.</li>
+          <li>A question has a <code>type</code> that is one of <code>YesNo</code>,
+            <code>TrueFalse</code>, <code>MultipleChoice</code>,
+            <code>Numeric</code>,
+            or <code>Text</code>.  Every question has
+            a <code>weight</code>, a <code>correctAnswer</code>, and
+            a <code>prompt</code>.  A question may also
+            contain <code>parts</code>.
+            <ul>
+              <li><code>Numeric</code> questions also
+                contain <code>min</code> and <code>max</code> values.</li>
+              <li><code>MultipleChoice</code> questions also
+                contain <code>options</code>, which contains a list of strings.
+                The special string <code>"other"</code> is used to allow
+                for open-ended answers.
+                The <code>correctAnswer</code> for a multiple-choice
+                question is the 0-based index of the intended answer.</li>
+            </ul>
+          </li>
+          <li>Question parts are optional, derivative parts of the
+            question that might elaborate on the answer or help
+            scaffold the response.  They may
+            be <code>codeTag</code>, <code>codeTags</code>,
+            or <code>text</code>.
+            <ul>
+              <li><code>codeTag</code> suggests students supply a
+                single reference to a line of code in their submission</li>
+              <li><code>codeTags</code> suggests students supply
+                one or more references to lines of code in their
+                submission</li>
+              <li><code>text</code> requests a free-response answer.</li>
+            </ul>
+          </li>
+        </ul>
+        <p>Here is a short example question file:</p>
+        <pre>
+---
+- Design:
+  - YesNo:
+      weight: 1
+      prompt: >-
+        Does your code make a distinction between public interfaces and private implementation?
+      correctAnswer: Yes
+      parts:
+        - codeTag: "Tag the line defining the interface"
+        - codeTag: "Tag the line implementing that interface."
+  - Numeric:
+      weight: 3
+      correctAnswer: 1
+      prompt: >-
+        On a scale of 0 (worst) to 1 (best), how well do you think your
+        model is designed?  This question is where the TAs will assess
+        your overall design.
+      min: 0
+      max: 1
+      parts:
+        - text: Describe what you might change in the future.
+  - MultipleChoice:
+      weight: 1
+      correctAnswer: 0
+      prompt: >-
+        Eventually, views will need to process all the data in your
+        model.  Some views will care about all the data; others will
+        need just some portion of it.  How easy is it to
+        retrieve data from your model?
+      options:
+        - >-
+          Easy: there is a single method a client can use to retrieve
+          exactly the data it wishes.
+        - >-
+          Medium: there is a method a client can use to retrieve all
+          data, and the client can then select what it needs.
+        - "Impossible: clients cannot retrieve the data at all"
+        - other
+      parts:
+        - codeTags: >-
+            Tag the lines in the interface that declare the methods that
+            accomplish this.
+- Testing:
+  - YesNo:
+      weight: 1
+      correctAnswer: Yes
+      prompt: Do you have a test for the empty model?
+      parts:
+        - codeTag: Tag it.          
+        </pre>
+      </div>
+    </div>
+
   </div>
-  <div class="form-group">
-    <p><strong>Late Penalty</strong></p>
-    <%= fields_for "lateness" do |late| %>
-    <%= render 'lateness/picker', :within_course => true, :f_late => late, :f_course => f %>
-    <% end %>
-  </div>
-  <div class="form-group">
-    <p><strong>Graders</strong></p>
-    <%= fields_for "graders[]", GraderConfig.new do |graders| %>
-      <ol id="grader-defns">
-      <% unique_configs = GraderConfig.unique %>
-      <% usage_counts = Grader.group(:grader_config_id).count %>
-      <% @assignment.grader_configs.each do |conf| %>
-        <li class="grader"><%= graders.fields_for "", conf do |g| %>
-          <%= render("graders/picker", f_grader: g, 
-                     target: conf, new_grader: "graderconf#{conf.id}",
-                     unique_configs: unique_configs, usage_counts: usage_counts) %>
-        <% end %></li>
-      <% end %>
-      </ol>
-      <% grader_text = fields_for("graders", GraderConfig.new, :index => "new_grader") do |g|
-      render "graders/picker",
-             f_grader: g, target: g.object, unique_configs: unique_configs, usage_counts: usage_counts
-      end %>
-      <%= content_tag :span, "Add assignment grader", class: "btn btn-default",
-                  id: "add-grader",
-                  data: {on: :click, call: "add_grader", args: ["#{grader_text}"]} %>
-    <% end %>
-  </div>
-  <div class="form-group">
-    <%= f.label :team_subs, "Team Submissions?" %>
-    <%= f.check_box :team_subs %>
-    <br>(Can only submit as a member of a team.)
+  <script>
+    $(function() {
+      $("#assignment_type").change(function(e) {
+        var values = $(this).find("option").map(function() { return this.value + "-type"; }).get();
+        $(".for-type").removeClass(values.join(" ")).addClass($(this).val() + "-type");
+      });
+      $("#assignment_type").change();
+    });
+  </script>
+  <div class="row">
+    <div class="form-group col-sm-6">
+      <%= f.label :team_subs, "Team Submissions?" %>
+      <p>If selected, submissions count as a member of a team.  If
+        not, submissions are individual even if student is a memeber of
+        a team.</p>
+      <%= f.check_box :team_subs, data: {toggle: "toggle", on: "Yes", off: "No"} %>
+    </div>
+    <div class="form-group col-sm-6">
+      <%= f.label :points_available %>
+      <p>This is the percentage of the final grade that this
+        assignment is worth.  Default: same as previous assignment.
+      </p>
+      <%= f.text_field :points_available, size: 10, class: 'form-control numeric' %>
+    </div>
   </div>
   <div class="form-group">
     <div class="row">
@@ -118,6 +237,44 @@
           });
         });
       </script>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <%= f.label :hide_grading, "Hide Grading?" %>
+    <p>If selected, assignment scores and teacher notes are hidden.</p>
+    <%= f.check_box :hide_grading, checked: @assignment.hide_grading,
+        data: {toggle: "toggle", on: "Yes", off: "No"} %>
+  </div>
+  <div class="form-group">
+    <p><strong>Late Penalty</strong></p>
+    <%= fields_for "lateness" do |late| %>
+    <%= render 'lateness/picker', :within_course => true, :f_late => late, :f_course => f %>
+    <% end %>
+  </div>
+  <div class="for-type form-group">
+    <div id="create-graders" class="files-type">
+      <p><strong>Graders</strong></p>
+      <%= fields_for "graders[]", GraderConfig.new do |graders| %>
+      <ol id="grader-defns">
+        <% unique_configs = GraderConfig.unique %>
+        <% usage_counts = Grader.group(:grader_config_id).count %>
+        <% @assignment.grader_configs.each do |conf| %>
+        <li class="grader"><%= graders.fields_for "", conf do |g| %>
+          <%= render("graders/picker", f_grader: g, 
+              target: conf, new_grader: "graderconf#{conf.id}",
+              unique_configs: unique_configs, usage_counts: usage_counts) %>
+          <% end %></li>
+        <% end %>
+      </ol>
+      <% grader_text = fields_for("graders", GraderConfig.new, :index => "new_grader") do |g|
+      render "graders/picker",
+      f_grader: g, target: g.object, unique_configs: unique_configs, usage_counts: usage_counts
+      end %>
+      <%= content_tag :span, "Add assignment grader", class: "btn btn-default",
+          id: "add-grader",
+          data: {on: :click, call: "add_grader", args: ["#{grader_text}"]} %>
+      <% end %>
     </div>
   </div>
   <div class="form-group">

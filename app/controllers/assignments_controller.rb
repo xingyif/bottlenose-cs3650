@@ -20,7 +20,7 @@ class AssignmentsController < CoursesController
     @gradesheet = Gradesheet.new(@assignment, submissions)
 
 
-    self.send(@assignment.type, false) if self.respond_to?(@assignment.type, true)
+    self.send(@assignment.type.capitalize, false) if self.respond_to?(@assignment.type.capitalize, true)
     if admin_view
       render "show_#{@assignment.type.underscore}"
     else
@@ -45,7 +45,11 @@ class AssignmentsController < CoursesController
   def edit
     @assignment = Assignment.find_by(id: params[:id])
     if @assignment.nil?
-      redirect_to back_or_else(courses_assignments_path), alert: "No such assignment"
+      redirect_to back_or_else(course_assignments_path), alert: "No such assignment"
+      return
+    end
+    if @assignment.course_id != params[:course_id].to_i
+      redirect_to back_or_else(course_assignments_path), alert: "No such assignment for this course"
       return
     end
   end
@@ -69,6 +73,7 @@ class AssignmentsController < CoursesController
       @assignment.save_uploads!
       redirect_to course_assignment_path(@course, @assignment), notice: 'Assignment was successfully created.'
     else
+      @assignment.destroy
       render action: "new"
     end
   end
@@ -171,6 +176,134 @@ class AssignmentsController < CoursesController
   end
 
   def set_grader_configs
+    if params[:assignment][:type] == "questions"
+      return set_questions_graders
+    else
+      return set_files_graders
+    end
+  end
+
+  def set_questions_graders
+    upload = params[:assignment][:assignment_file]
+    if upload.nil?
+      @assignment.errors.add(:base, "Assignment questions file is missing")
+      return false
+    end
+    begin
+      questions = YAML.load(upload.tempfile)
+      upload.rewind
+    rescue Psych::SyntaxError => e
+      @assignment.errors.add(:base, "Could not parse the supplied file")
+      return false
+    end
+    if !questions.is_a? Array
+      @assignment.errors.add(:base, "Supplied file does not contain a list of sections")
+      return false
+    else
+      question_count = 0
+      question_kinds = Assignment.question_kinds.keys
+      no_problems = true
+      def make_err(msg)
+        @assignment.errors.add(:base, msg)
+        no_problems = false
+      end
+      questions.each_with_index do |section, index|
+        if !(section.is_a? Object) or section.keys.count > 1
+          make_err "Section #{index} is  malformed"
+          next
+        else
+          section.each do |type, q|
+            question_count += 1
+            if !question_kinds.member?(type.underscore)
+              make_err "Question #{question_count} has unknown type #{type}"
+              next
+            else
+              if q["weight"].nil? or (Float(q["weight"]) rescue true)
+                make_err "Question #{question_count} has missing or invalid weight"
+              end
+              ans = q["correctAnswer"]
+              if ans.nil?
+                make_err "Question #{question_count} is missing a correctAnswer"
+              end
+              if q["prompt"].nil?
+                make_err "Question #{question_count} is missing a prompt"
+              end
+              case type
+              when "YesNo", "TrueFalse"
+                if ![true, false].member?(q["correctAnswer"])
+                  make_err "Boolean question #{question_count} has a non-boolean correctAnswer"
+                end
+              when "Numeric"
+                min = q["min"]
+                max = q["max"]
+                if max.nil? or !(Float(max) rescue false)
+                  make_err "Numeric question #{question_count} has a non-numeric max"
+                else
+                  max = max.to_f
+                end
+                if min.nil? or !(Float(min) rescue false)
+                  make_err "Numeric question #{question_count} has a non-numeric min"
+                else
+                  min = min.to_f
+                end
+                if ans.nil? or !(Float(ans) rescue false)
+                  make_err "Numeric question #{question_count} has a non-numeric ans"
+                else
+                  ans = ans.to_f
+                end
+                if Numeric(min) and Numeric(max) and Numeric(ans) and !(min <= ans and ans <= max)
+                  make_err "Numeric question #{question_count} has a correctAnswer outside the specified range"
+                end
+              when "MultipleChoice"
+                if q["options"].nil? or !q["options"].is_a? Array
+                  make_err "MultipleChoice question #{question_count} is missing an array of choices"
+                end
+                if !(Integer(ans) rescue false)
+                  make_err "MultipleChoice question #{question_count} has a non-numeric correctAnswer"
+                else
+                  ans = ans.to_i
+                end
+                if Numeric(ans) and (ans < 0 or ans >= q["options"].count)
+                  make_err "MultipleChoice question #{question_count} has a correctAnswer not in the available choices"
+                end
+              end
+              if q["parts"]
+                if !q["parts"].is_a? Array
+                  make_err "Question #{question_count} has a non-list of parts"
+                else
+                  q["parts"].each_with_index do |part, part_i|
+                    if !part.is_a? Object
+                      make_err "Question #{question_count} has a non-object part ##{part_i}"
+                    elsif part.keys.count > 1
+                      make_err "Question #{question_count} part ##{part_i} has too many keys"
+                    elsif !["codeTag", "codeTags", "text"].member?(part.keys[0])
+                      make_err "Question #{question_count} part ##{part_i} has an invalid type #{part.keys[0]}"
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+    # if no_problems
+    #   up = Upload.new
+    #   up.user_id = current_user.id
+    #   up.store_upload!(upload, {
+    #                      type: "Assignment Questions",
+    #                      date: Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
+    #                    })
+    #   unless up.save
+    #     @assignment.errors.add(:upload_file, "could not save upload")
+    #     no_problems = false
+    #   end
+    #   @assignment.assignment_file = up
+    # end
+    return no_problems
+  end
+  
+  def set_files_graders    
     params_graders = graders_params
     if params_graders.nil?
       @assignment.errors.add(:graders, "parameter is missing")
@@ -272,7 +405,7 @@ class AssignmentsController < CoursesController
   def assignment_params
     params[:assignment].permit(:name, :assignment, :due_date, :available,
                                :points_available, :hide_grading, :blame_id,
-                               :assignment_file, 
+                               :assignment_file,  :type, :related_assignment_id,
                                :course_id, :team_subs)
   end
 
