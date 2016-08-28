@@ -10,6 +10,7 @@
   var responses = [];
 </script>
 
+<% if @assignment.related_assignment_id %>
 <div class="col-sm-6">
   <div id="files-sidebar">
     <div id="files" class="nav treeview condensed"></div>
@@ -19,9 +20,18 @@
   </div>
   <script>
     <%= render partial: "render_comments.js" %>
+    $(function() {
+    
+    });
   </script>
 </div>
+<% end %>
+
+<% if @assignment.related_assignment_id.nil? %>
+<div id="responses" class="form-group container">
+<% else %>
 <div id="responses" class="form-group col-sm-6">
+<% end %>  
   <% count = 1 %>
   <% @questions.each do |section| %>
     <% section.each do |name, qs| %>

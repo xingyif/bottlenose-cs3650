@@ -181,7 +181,7 @@ class SubmissionsController < CoursesController
       end
     end
     
-    @submission_dirs = JSON.pretty_generate(sub.upload.extracted_files.map{|i| with_extracted(i)})
+    @submission_dirs = sub.upload.extracted_files.map{|i| with_extracted(i)}
   end
 
 
@@ -189,11 +189,15 @@ class SubmissionsController < CoursesController
   # Assignment types
   def Questions(edit)
     @questions = @assignment.questions
-    related_sub = @assignment.related_assignment.used_sub_for(current_user)
-    if related_sub.nil?
-      @submission_files = []
+    if @assignment.related_assignment
+      related_sub = @assignment.related_assignment.used_sub_for(current_user)
+      if related_sub.nil?
+        @submission_files = []
+      else
+        get_submission_files(related_sub)
+      end
     else
-      get_submission_files(related_sub)
+      @submission_files = []
     end
   end
 end

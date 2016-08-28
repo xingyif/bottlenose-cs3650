@@ -91,7 +91,7 @@ $(function (){
         $(data.href).addClass("active").find(".CodeMirror")[0].CodeMirror.refresh();
       }
     },
-    data: <%= raw(@submission_dirs) %>
+    data: <%= raw(JSON.pretty_generate(@submission_dirs)) %>
   });
   $("#files").treeview('expandAll', { silent: true });
   $("#files-sidebar").data("offset-top", $("#files").offset().top);
