@@ -23,43 +23,7 @@ class SubmissionsController < CoursesController
       return
     end
 
-    @lineCommentsByFile = @submission.grader_line_comments(nil)
-    
-    @submission_files = []
-    def with_extracted(item)
-      if item[:public_link]
-        @submission_files.push({
-          link: item[:public_link],
-          name: item[:public_link].sub(/^.*extracted\//, ""),
-          contents: File.read(item[:full_path].to_s),
-          type: case File.extname(item[:full_path].to_s)
-                when ".java"
-                  "text/x-java"
-                when ".arr"
-                  "pyret"
-                when ".rkt", ".ss"
-                  "scheme"
-                when ".jpg", ".jpeg", ".png"
-                  "image"
-                when ".jar"
-                  "jar"
-                when ".zip"
-                  "zip"
-                else
-                  "text/unknown"
-                end,
-          lineComments: @lineCommentsByFile[item[:public_link].to_s] || {}
-          })
-        { text: item[:path], href: "#file_#{@submission_files.count}" }
-      else
-        {
-          text: item[:path] + "/",
-          state: {selectable: false},
-          nodes: item[:children].map{|i| with_extracted(i)}
-        }
-      end
-    end
-    @submission_dirs = JSON.pretty_generate(@submission.upload.extracted_files.map{|i| with_extracted(i)})
+    get_submission_files(@submission)
   end
 
   def new
@@ -71,7 +35,9 @@ class SubmissionsController < CoursesController
       @team = current_user.active_team_for(@course)
       @submission.team = @team
     end
-    # TODO: Render by assignment type
+
+    self.send(@assignment.type.capitalize, false) if self.respond_to?(@assignment.type.capitalize, true)
+    render "new_#{@assignment.type.underscore}"
   end
 
   def create
@@ -173,6 +139,61 @@ class SubmissionsController < CoursesController
       redirect_to back_or_else(course_assignment_path(params[:course_id], params[:assignment_id])),
                   alert: "No such submission"
       return
+    end
+  end
+
+  
+  def get_submission_files(sub)
+    @lineCommentsByFile = sub.grader_line_comments(nil)
+
+    @submission_files = []
+    def with_extracted(item)
+      if item[:public_link]
+        @submission_files.push({
+          link: item[:public_link],
+          name: item[:public_link].sub(/^.*extracted\//, ""),
+          contents: File.read(item[:full_path].to_s),
+          type: case File.extname(item[:full_path].to_s)
+                when ".java"
+                  "text/x-java"
+                when ".arr"
+                  "pyret"
+                when ".rkt", ".ss"
+                  "scheme"
+                when ".jpg", ".jpeg", ".png"
+                  "image"
+                when ".jar"
+                  "jar"
+                when ".zip"
+                  "zip"
+                else
+                  "text/unknown"
+                end,
+          lineComments: @lineCommentsByFile[item[:public_link].to_s] || {}
+          })
+        { text: item[:path], href: "#file_#{@submission_files.count}" }
+      else
+        {
+          text: item[:path] + "/",
+          state: {selectable: false},
+          nodes: item[:children].map{|i| with_extracted(i)}
+        }
+      end
+    end
+    
+    @submission_dirs = JSON.pretty_generate(sub.upload.extracted_files.map{|i| with_extracted(i)})
+  end
+
+
+  ######################
+  # Assignment types
+  def Questions(edit)
+    @questions = @assignment.questions
+    related_sub = @assignment.related_assignment.used_sub_for(current_user)
+    if related_sub.nil?
+      @submission_files = []
+    else
+      get_submission_files(related_sub)
     end
   end
 end

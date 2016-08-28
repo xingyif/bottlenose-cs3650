@@ -1,0 +1,15 @@
+<% @submission_files.each_with_index do |f, i| %>
+<div class="tab-pane panel-tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="file_<%= i + 1 %>">
+  <% if f[:ftype] == "image" %>
+  <%= image_tag f[:link], alt: f[:name] %>
+  <% elsif f[:ftype] == "zip" || f[:ftype] == "jar" %>
+  <%= link_to f[:link], "Download #{f[:name]}" %>
+  <% else %>
+  <div>
+    <textarea class="sourceCode" data-lang="<%= f[:type] %>"
+              data-source="<%= f[:link] %>"
+              id="contents_<%= i %>"><%= render html: f[:contents] %></textarea>
+  </div>
+  <% end %>
+</div>
+<% end %>

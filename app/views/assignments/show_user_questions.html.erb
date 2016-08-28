@@ -1,15 +1,15 @@
-<% @page_title = "#{@course.name} / #{@gradesheet.assignment.name} / Submissions for #{@user.display_name}" %>
+<% @page_title = "#{@course.name} / #{@gradesheet.assignment.name} / Responses for #{@user.display_name}" %>
 
 <%= render 'assignment_questions_info', gradesheet: @gradesheet %>
 <h3>
-  Submissions
+  Responses
   <% if @user.id != @current_user.id %>
   for <%= @user.name %>
   <% else %>
   (<%= @gradesheet.submissions.count %>)
   <% end %>
   <% if @user.id == @current_user.id %>
-  <%= link_to "New Submission",
+  <%= link_to "New Response",
          new_course_assignment_submission_path(@course, @gradesheet.assignment), class: "btn btn-success" %>
      <% end %>
 </h3>

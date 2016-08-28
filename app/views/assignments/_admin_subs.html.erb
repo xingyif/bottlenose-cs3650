@@ -1,5 +1,5 @@
 <h3>
-  Submissions (<%= @gradesheet.submissions.count %>)
+  <%= type[:noun].pluralize(2).capitalize %> (<%= @gradesheet.submissions.count %>)
   <% if @gradesheet.assignment.due_date <= DateTime.now %>
     <%= link_to "Download all", 
         course_assignment_tarball_path(@course, @gradesheet.assignment),
@@ -16,14 +16,14 @@
         data: { confirm: "Are you sure you want to publish all grades?" }%>
     <% end %>
   <% else %>
-    <%= link_to "New Submission", 
+    <%= link_to "New #{type[:noun].capitalize}", 
         new_course_assignment_submission_path(@course, @gradesheet.assignment), class: "btn btn-success" %>
   <% end %>
 </h3>
 
 <% if @gradesheet.submissions.empty? %>
   <div class="well">
-    No submissions yet.
+    No <%= type[:noun].pluralize(2) %> yet.
   </div>
 <% else %>
   <table id="submissions" class="table table-striped row-vcenter">

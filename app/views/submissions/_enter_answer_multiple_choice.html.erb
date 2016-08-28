@@ -1,0 +1,26 @@
+<div class="form-group">
+  <% q["options"].each_with_index do |opt, opt_idx| %>
+  <div>
+    <% if opt == "other" %>
+    <label>
+      <input name="answers[<%= index %>][main]" id="answer_<%= index %>_<%= opt_idx %>"
+             type="radio" value="<%= opt_idx %>">
+      Other:
+    </label>
+    <input name="answers[<%= index %>][detail]" type="text" id="answer_<%= index %>_other">
+    <% else %>
+    <label>
+      <input name="answers[<%= index %>][main]" id="answer_<%= index %>_<%= opt_idx %>"
+             type="radio" value="<%= opt_idx %>">
+      <%= sanitize(opt, tags: %w(b strong i em)) %>
+    </label>
+    <% end %>
+    <script>
+      $(function() {
+        $("input#answer_<%= index %>_other").on("focus",
+          function() { $("input#answer_<%= index %>_<%= q["options"].count - 1 %>").prop('checked', true); });
+      });
+    </script>
+  </div>
+  <% end %>
+</div>

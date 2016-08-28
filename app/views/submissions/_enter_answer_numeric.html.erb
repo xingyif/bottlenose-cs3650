@@ -1,0 +1,7 @@
+<div class="form-inline">
+  <% min = q["min"].to_f
+     max = q["max"].to_f
+     delta = (max - min) / 20 %>
+  <%= f.spinner "", 0.0, text: {name: "answers[#{index}][main]", id: "answer_#{index}"},
+      min: min, max: max, delta: delta %>
+</div>

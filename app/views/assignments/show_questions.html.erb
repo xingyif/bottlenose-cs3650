@@ -18,7 +18,7 @@
   <ol start="<%= count %>">
     <% qs.each do |question| %>
     <% question.each do |type, q| %>
-    <li><b><%= h type %>: </b><small>(<%= pluralize(q["weight"], "point") %>)</small>
+    <li><b><%= type %>: </b><small>(<%= pluralize(q["weight"], "point") %>)</small>
       <p><%= sanitize(q["prompt"], tags: %w(b strong i em)) %></p>
       <% if q["options"] %>
       <ul>
@@ -48,4 +48,4 @@
   <% count += qs.count %>
   <% end %>
 <% end %>
-<%= render 'admin_subs' %>
+<%= render 'admin_subs', type: {noun: "response", verb: "respond", gerund: "responding" } %>

@@ -440,7 +440,7 @@ class AssignmentsController < CoursesController
   ####################
   # Assignment types
   def Questions(edit)
-    @questions = YAML.load(File.read(@assignment.assignment_upload.submission_path))
+    @questions = @assignment.questions
   end
 
 end

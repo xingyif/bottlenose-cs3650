@@ -1,0 +1,86 @@
+<% @page_title = "New Response: #{@assignment.name}" %>
+
+<% content_for :wide_content do %>
+<%= form_for [@course, @assignment, @submission] do |f| %>
+<div class="container">
+  <%= render "common", f: f, type: {noun: "response", verb: "respond", gerund: "responding" } %>
+</div>
+
+<script>
+  var responses = [];
+</script>
+
+<div class="col-sm-6">
+  <div id="files-sidebar">
+    <div id="files" class="nav treeview condensed"></div>
+  </div>
+  <div class="tab-content">
+    <%= render "files", sub_files: @submission_files %>
+  </div>
+  <script>
+    <%= render partial: "render_comments.js" %>
+  </script>
+</div>
+<div id="responses" class="form-group col-sm-6">
+  <% count = 1 %>
+  <% @questions.each do |section| %>
+    <% section.each do |name, qs| %>
+      <h4><%= name %></h4>
+      <ol start="<%= count %>">
+        <% qs.each_with_index do |question, i| %>
+          <% question.each do |type, q| %>
+            <li>
+              <p>
+                <%= sanitize(q["prompt"], tags: %w(b strong i em)) %>
+                <small>(<%= pluralize(q["weight"], "point") %>)</small>
+              </p>
+              <%= render "enter_answer_#{type.underscore}", f: f, q: q, index: i + count %>
+              <p></p>
+              <% if q["parts"] %>
+                <% q["parts"].each_with_index do |part, part_i| %>
+                  <% if part["codeTag"] %>
+                  <p><%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
+                  <p class="form-inline">
+                    File: <select name="answers[<%= i %>][part][<%= part_i %>][file]">
+                      <option disabled selected value style="display: none;"> -- select a file -- </option>
+                      <% @submission_files.each do |file| %>
+                      <option value="<%= file[:link] %>"><%= file[:name] %></option>
+                      <% end %>
+                    </select>
+                    Line number: <input type="text" class="form-control numeric"
+                                        name="answers[<%= i %>][part][<%= part_i %>][file]">
+                  </p>
+                  <% end %>
+                <% end %>
+              <% end %>
+            </li>
+          <% end %>
+        <% end %>
+      </ol>
+      <% count += qs.count %>
+    <% end %>
+  <% end %>
+</div>
+
+<script>
+  $(function() {
+    $('button.btn.answer').click(function() {
+      $('button.btn.answer[data-id="'+$(this).data('id')+'"]').removeClass('active');
+      $(this).addClass('active');
+      $('input#'+$(this).data('id')).val($(this).text());
+    });
+    $('.spinner').each(function() { activateSpinner(this, {precision: 2}) });
+  });
+</script>
+
+<div class="container">
+  <div class="form-group">
+    <%= f.label :student_notes %>
+    <%= f.text_area :student_notes, class: 'form-control' %>
+  </div>
+  <div class="form-group">
+    <%= f.submit "Submit response", class: "btn btn-primary" %>
+  </div>
+</div>
+<% end %>
+<% end %>

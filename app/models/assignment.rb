@@ -164,4 +164,12 @@ class Assignment < ActiveRecord::Base
       used_sub_for(sreg.user)
     end
   end
+
+  def questions
+    if self.type == "questions"
+      YAML.load(File.read(self.assignment_upload.submission_path))
+    else
+      nil
+    end
+  end
 end
