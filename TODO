@@ -27,8 +27,11 @@
 [ ] backup database
 [ ] export all files
 [ ] self-evals
-   [ ] new assignment type
-   [X] questionnaire
+   [X] new assignment type
+   [X] upload YAML
+   [X] view questions
+   [ ] enter answers
+   [ ] view answers (w/ grading if available)
    [ ] grading
 [ ] exams
 [ ] quizzes

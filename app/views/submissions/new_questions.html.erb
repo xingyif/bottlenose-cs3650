@@ -6,10 +6,6 @@
   <%= render "common", f: f, type: {noun: "response", verb: "respond", gerund: "responding" } %>
 </div>
 
-<script>
-  var responses = [];
-</script>
-
 <% if @assignment.related_assignment_id %>
 <div class="col-sm-6">
   <div id="files-sidebar">
@@ -20,9 +16,6 @@
   </div>
   <script>
     <%= render partial: "render_comments.js" %>
-    $(function() {
-    
-    });
   </script>
 </div>
 <% end %>
@@ -51,14 +44,14 @@
                   <% if part["codeTag"] %>
                   <p><%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
                   <p class="form-inline">
-                    File: <select name="answers[<%= i %>][part][<%= part_i %>][file]">
+                    File: <select name="answers[<%= i + count %>][parts][<%= part_i %>][file]" class="pick-file">
                       <option disabled selected value style="display: none;"> -- select a file -- </option>
                       <% @submission_files.each do |file| %>
                       <option value="<%= file[:link] %>"><%= file[:name] %></option>
                       <% end %>
                     </select>
                     Line number: <input type="text" class="form-control numeric"
-                                        name="answers[<%= i %>][part][<%= part_i %>][file]">
+                                        name="answers[<%= i + count %>][parts][<%= part_i %>][file]">
                   </p>
                   <% end %>
                 <% end %>
@@ -73,14 +66,6 @@
 </div>
 
 <script>
-  $(function() {
-    $('button.btn.answer').click(function() {
-      $('button.btn.answer[data-id="'+$(this).data('id')+'"]').removeClass('active');
-      $(this).addClass('active');
-      $('input#'+$(this).data('id')).val($(this).text());
-    });
-    $('.spinner').each(function() { activateSpinner(this, {precision: 2}) });
-  });
 </script>
 
 <div class="container">
@@ -92,5 +77,8 @@
     <%= f.submit "Submit response", class: "btn btn-primary" %>
   </div>
 </div>
+<script>
+  <%= render partial: "new_questions.js", locals: {count: (count - 1)} %>
+</script>
 <% end %>
 <% end %>

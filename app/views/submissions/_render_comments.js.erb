@@ -18,7 +18,6 @@ function renderComments(lineComments) {
 
 function renderComment(cm, type, line, comment) {
   var widget = $("<div>").addClass(comment.severity).addClass(type);
-  console.log("type = " + type);
   var table = $("<table>");
   widget.append(table);
   var row = $("<tr>");
@@ -82,7 +81,6 @@ $(function (){
     collapseIcon: 'glyphicon glyphicon-chevron-down', // always expanded
     enableLinks: true,
     onNodeSelected: function(e, data) {
-      console.log(data);
       e.preventDefault();
       e.stopPropagation();
       if (data.href !== undefined && data.href !== "#") {
@@ -93,8 +91,24 @@ $(function (){
     },
     data: <%= raw(JSON.pretty_generate(@submission_dirs)) %>
   });
-  $("#files").treeview('expandAll', { silent: true });
+  var filesTreeview = $("#files").treeview(true);
+  filesTreeview.expandAll({ silent: true });
   $("#files-sidebar").data("offset-top", $("#files").offset().top);
-  if (document.location.hash !== "")
+  var fileMap = {}
+  filesTreeview.findNodes('', 'href').forEach(function(n, i) {
+    fileMap[n.href] = n;
+    fileMap[i] = n.href;
+  });
+  window.selectTreeviewFileByHref = function(href) {
+    filesTreeview.selectNode(fileMap[href]);
+  }
+  window.selectTreeviewFileByIndex = function(index) {
+    filesTreeview.selectNode(fileMap[fileMap[index]]);
+  }
+  if (document.location.hash !== "") {
     $("#files a[href='" + document.location.hash + "']").tab('show');
+    selectTreeviewFileByHref(document.location.hash);
+  } else {
+    selectTreeviewFileByIndex(0);
+  }
 });
