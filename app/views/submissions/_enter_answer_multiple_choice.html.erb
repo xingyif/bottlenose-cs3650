@@ -1,17 +1,22 @@
 <div class="form-group">
+  <% if @answers and @answers[index]
+     value = @answers[index]["main"].to_i
+     detail = @answers[index]["detail"]
+     end %>
   <% q["options"].each_with_index do |opt, opt_idx| %>
   <div>
     <% if opt == "other" %>
     <label>
       <input name="answers[<%= index %>][main]" id="answer_<%= index %>_<%= opt_idx %>"
-             type="radio" value="<%= opt_idx %>">
+             type="radio" value="<%= opt_idx %>" <%= if value == opt_idx then 'checked' end %>>
       Other:
     </label>
-    <input name="answers[<%= index %>][detail]" type="text" id="answer_<%= index %>_other">
+    <input name="answers[<%= index %>][detail]" type="text" id="answer_<%= index %>_other"
+           <% if detail %>value="<%= detail %>"<% end %> >
     <% else %>
     <label>
       <input name="answers[<%= index %>][main]" id="answer_<%= index %>_<%= opt_idx %>"
-             type="radio" value="<%= opt_idx %>">
+             type="radio" value="<%= opt_idx %>" <%= if value == opt_idx then 'checked' end %>>
       <%= sanitize(opt, tags: %w(b strong i em)) %>
     </label>
     <% end %>

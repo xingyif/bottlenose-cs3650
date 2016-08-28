@@ -2,6 +2,9 @@
   <% min = q["min"].to_f
      max = q["max"].to_f
      delta = (max - min) / 20 %>
-  <%= f.spinner "", 0.0, text: {name: "answers[#{index}][main]", id: "answer_#{index}"},
+  <% if @answers and @answers[index]
+     value = @answers[index]["main"].capitalize
+     end %>
+  <%= f.spinner "", value || 0.0, text: {name: "answers[#{index}][main]", id: "answer_#{index}"},
       min: min, max: max, delta: delta %>
 </div>

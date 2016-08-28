@@ -1,5 +1,7 @@
 <% @page_title = "New Response: #{@assignment.name}" %>
 
+<%= @submission.errors.to_s %>
+
 <% content_for :wide_content do %>
 <%= form_for [@course, @assignment, @submission] do |f| %>
 <div class="container">
@@ -25,11 +27,11 @@
 <% else %>
 <div id="responses" class="form-group col-sm-6">
 <% end %>  
-  <% count = 1 %>
+  <% count = 0 %>
   <% @questions.each do |section| %>
     <% section.each do |name, qs| %>
       <h4><%= name %></h4>
-      <ol start="<%= count %>">
+      <ol start="<%= count + 1 %>">
         <% qs.each_with_index do |question, i| %>
           <% question.each do |type, q| %>
             <li>
@@ -41,18 +43,34 @@
               <p></p>
               <% if q["parts"] %>
                 <% q["parts"].each_with_index do |part, part_i| %>
+                  <% part_ans = @answers
+                     part_ans = part_ans[i + count] if part_ans
+                     part_ans = part_ans["parts"] if part_ans
+                     part_ans = part_ans[part_i] if part_ans %>
                   <% if part["codeTag"] %>
                   <p><%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
                   <p class="form-inline">
                     File: <select name="answers[<%= i + count %>][parts][<%= part_i %>][file]" class="pick-file">
                       <option disabled selected value style="display: none;"> -- select a file -- </option>
                       <% @submission_files.each do |file| %>
-                      <option value="<%= file[:link] %>"><%= file[:name] %></option>
+                      <option value="<%= file[:link] %>" <% if part_ans and part_ans["file"] == file[:link] %>selected<% end %>>
+                        <%= file[:name] %>
+                      </option>
                       <% end %>
                     </select>
                     Line number: <input type="text" class="form-control numeric"
-                                        name="answers[<%= i + count %>][parts][<%= part_i %>][file]">
+                                        name="answers[<%= i + count %>][parts][<%= part_i %>][line]"
+                                        <% if part_ans %>value="<%= part_ans['line'] %>"<% end %>>
                   </p>
+                  <% elsif part["codeTags"] %>
+                  <p><%= sanitize(part["codeTags"], tags: %w(b strong i em)) %></p>
+                  <input type="text" class="form-control"
+                         name="answers[<%= i + count %>][parts][<%= part_i %>][line]"
+                         <% if part_ans %>value="<%= part_ans['line'] %>"<% end %>>
+                  <% elsif part["text"] %>
+                  <p><%= sanitize(part["text"], tags: %w(b strong i em)) %></p>
+                  <textarea class="form-control" rows="5"
+                            name="answers[<%= i + count %>][parts][<%= part_i %>][info]"><%= if part_ans then part_ans['info'] end %></textarea>
                   <% end %>
                 <% end %>
               <% end %>

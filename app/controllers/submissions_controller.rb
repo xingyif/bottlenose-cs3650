@@ -36,7 +36,7 @@ class SubmissionsController < CoursesController
       @submission.team = @team
     end
 
-    self.send(@assignment.type.capitalize, false) if self.respond_to?(@assignment.type.capitalize, true)
+    self.send("new_#{@assignment.type.capitalize}", false) if self.respond_to?("new_#{@assignment.type.capitalize}", true)
     render "new_#{@assignment.type.underscore}"
   end
 
@@ -61,17 +61,8 @@ class SubmissionsController < CoursesController
       @submission.ignore_late_penalty = false
     end
 
-    # TODO: per-assignment-type processing, to save question answers as upload
-    
-    if @submission.save_upload and @submission.save
-      @submission.set_used_sub!
-      @submission.autograde!
-      path = course_assignment_submission_path(@course, @assignment, @submission)
-      redirect_to(path, notice: 'Submission was successfully created.')
-    else
-      @submission.cleanup!
-      render :new
-    end
+
+    self.send("create_#{@assignment.type.capitalize}", false) if self.respond_to?("create_#{@assignment.type.capitalize}", true)
   end
 
   def recreate_grader
@@ -109,6 +100,26 @@ class SubmissionsController < CoursesController
     else
       params[:submission].permit(:assignment_id, :user_id, :student_notes,
                                  :upload, :upload_file)
+    end
+  end
+
+  def answers_params
+    array_from_hash(params[:answers])
+  end
+  def array_from_hash(h)
+    return h unless h.is_a? Hash
+
+    all_numbers = h.keys.all? { |k| k.to_i.to_s == k }
+    if all_numbers
+      ans = []
+      h.keys.sort_by{ |k| k.to_i }.map{ |i| ans[i.to_i] = array_from_hash(h[i]) }
+      ans
+    else
+      ans = {}
+      h.each do |k, v|
+        ans[k] = array_from_hash(v)
+      end
+      ans
     end
   end
 
@@ -187,7 +198,7 @@ class SubmissionsController < CoursesController
 
   ######################
   # Assignment types
-  def Questions(edit)
+  def new_Questions(edit)
     @questions = @assignment.questions
     if @assignment.related_assignment
       related_sub = @assignment.related_assignment.used_sub_for(current_user)
@@ -199,5 +210,96 @@ class SubmissionsController < CoursesController
     else
       @submission_files = []
     end
+  end
+
+  def create_Files(edit)
+    if @submission.save_upload and @submission.save
+      @submission.set_used_sub!
+      @submission.autograde!
+      path = course_assignment_submission_path(@course, @assignment, @submission)
+      redirect_to(path, notice: 'Submission was successfully created.')
+    else
+      @submission.cleanup!
+      render :new
+    end
+  end
+
+  def create_Questions(edit)
+    @answers = answers_params
+    questions = @assignment.questions.reduce([]) do |acc, section|
+      section.reduce(acc) do |acc, (name, qs)| acc + qs end
+    end
+    num_qs = questions.count
+    no_problems = true
+    if @answers.count != num_qs
+      @submission.errors.add(:base, "There were #{plural(@answers.count, 'answer')} for #{plural(num_qs, 'question')}")
+      @submission.cleanup!
+      no_problems = false
+    else
+      questions.zip(@answers).each_with_index do |(q, a), i|
+        if a["main"].nil?
+          @submission.errors.add(:base, "Question #{i + 1} is missing an answer")
+          no_problems = false
+        end
+        if q["YesNo"]
+          type = "YesNo"
+          unless ["yes", "no"].member?(a["main"].downcase)
+            @submission.errors.add(:base, "Question #{i + 1} has a non-Yes/No answer")
+            no_problems = false
+          end
+        elsif q["TrueFalse"]
+          type = "TrueFalse"
+          unless ["true", "false"].member?(a["main"].downcase)
+            @submission.errors.add(:base, "Question #{i + 1} has non-true/false answer")
+            no_problems = false
+          end
+        elsif q["Numeric"]
+          type = "Numeric"
+          if !(Float(a["main"]) rescue false)
+            @submission.errors.add(:base, "Question #{i + 1} has a non-numeric answer")
+            no_problems = false
+          end
+        elsif q["MultipleChoice"]
+          type = "MultipleChoice"
+          if !(Integer(a["main"]) rescue false)
+            @submission.errors.add(:base, "Question #{i + 1} has an invalid multiple-choice answer")
+            no_problems = false
+          elsif a["main"].to_i < 0 or a["main"].to_i >= q[type]["options"].count
+            @submission.errors.add(:base, "Question #{i + 1} has an invalid multiple-choice answer")
+            no_problems = false
+          end
+        elsif q["Text"]
+          type = "Text"
+        end
+        if q[type]["parts"]
+          if a["parts"].nil? or q[type]["parts"].count != a["parts"].count
+            @submission.errors.add(:base, "Question #{i + 1} is missing answers to its sub-parts")
+            no_problems = false
+          else
+            q[type]["parts"].zip(a["parts"]).each_with_index do |(qp, ap), j|
+              if qp["codeTag"]
+                if ap["file"].to_s.empty? or !(Integer(ap["line"]) rescue false)
+                  @submission.errors.add(:base, "Question #{i + 1} part #{j + 1} has an invalid code-tag")
+                  no_problems = false
+                end
+              elsif qp["codeTags"]
+                # TODO
+              elsif qp["text"]
+                # TODO
+              end
+            end
+          end
+        end
+      end
+    end
+
+    if no_problems
+      debugger
+      path = course_assignment_submission_path(@course, @assignment, @submission)
+      redirect_to(path, notice: 'Response was successfully created.')
+    else
+      new_Questions(false)
+      render "new_#{@assignment.type.underscore}"
+    end      
   end
 end

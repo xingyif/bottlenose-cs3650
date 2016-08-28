@@ -11,10 +11,10 @@ $(function() {
 });
 $(function() {
   var answered = [];
-  for (var i = 0; i < <%= count %>; i++) {
+  for (var i = 0; i <= <%= count %>; i++) {
     answered[i] = { 
       answered: {}, 
-      root: "answers[" + (i + 1) + "]",
+      root: "answers[" + i + "]",
       subs: {"main": false, "detail": false, "parts": false},
       ids: []
     };
@@ -56,13 +56,13 @@ $(function() {
       }).map(function() { 
         return this.blame; 
       });
-      if (unanswered.length > 0) {
-        e.preventDefault();
-        alert("There are " + unanswered.length + " questions unanswered");
-        unanswered.each(function() {
-          $(this).addClass("unanswered");
-        });
-      }
+      // if (unanswered.length > 0) {
+      //   e.preventDefault();
+      //   alert("There are " + unanswered.length + " questions unanswered");
+      //   unanswered.each(function() {
+      //     $(this).addClass("unanswered");
+      //   });
+      // }
     } catch (exn) {
       alert("Something went wrong: " + exn);
       e.preventDefault();
