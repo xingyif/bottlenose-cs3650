@@ -2,6 +2,7 @@
   File: <select name="answers[<%= i + count %>][parts][<%= part_i %>][file]"
                 class="pick-file <%= if @answers and (part_ans.nil? or part_ans['file'].to_s.empty?) then 'unanswered' end %>">
     <option disabled selected value style="display: none;"> -- select a file -- </option>
+    <option value="<none>" <% if part_ans and part_ans["file"] == "<none>" %>selected<% end %>>
     <% @submission_files.each do |file| %>
     <option value="<%= file[:link] %>" <% if part_ans and part_ans["file"] == file[:link] %>selected<% end %>>
       <%= file[:name] %>

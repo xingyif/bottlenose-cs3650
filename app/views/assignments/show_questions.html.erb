@@ -10,7 +10,8 @@
 <% end %>
 
 <%= render 'assignment_questions_info', gradesheet: @gradesheet %>
-<h3>Questions</h3>
+<h3 data-toggle="collapse" data-target="#questions">Questions</h3>
+<div id="questions" class="collapse in">
 <% count = 1 %>
 <% @questions.each do |section| %>
   <% section.each do |name, qs| %>
@@ -27,20 +28,47 @@
         <% end %>
       </ul>
       <% end %>
-      <% if !q["correctAnswer"].nil? %>
-      <p><i><b>Correct answer:</b> <%= q["correctAnswer"] %></i></p>
-      <% end %>
       <% if q["parts"] %>
         <% q["parts"].each do |part| %>
           <% if part["codeTag"] %>
           <p>(CodeTag) <%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
           <% elsif part["codeTags"] %>
           <p>(Multiple CodeTags) <%= sanitize(part["codeTags"], tags: %w(b strong i em)) %></p>
+          <% elsif part["requiredText"] %>
+          <p>(Required text) <%= sanitize(part["requiredText"], tags: %w(b strong i em)) %></p>
           <% elsif part["text"] %>
           <p>(Text) <%= sanitize(part["text"], tags: %w(b strong i em)) %></p>
           <% end %>
         <% end %>
-      <% end %>  
+      <% end %>
+      <div class="panel panel-info">
+      <div class="panel-heading"><i><b>Rubric:</b></i></div>
+      <div class="panel-body">
+      <% if !q["correctAnswer"].nil? %>
+      <p><i><b>Correct answer:</b>
+          <%= case type
+              when "YesNo"
+                if q["correctAnswer"] then "Yes" else "No" end
+              when "TrueFalse"
+                q["correctAnswer"].to_s.capitalize
+              when "MultipleChoice"
+                q["options"][q["correctAnswer"].to_i]
+              else
+                q["correctAnswer"]
+              end
+              %></i></p>
+      <% end %>
+      <% if q["rubric"] %>
+      <ul>
+      <% q["rubric"].each do |entry| %>
+        <% entry.each do |val, hint| %>
+        <li><b><%= val %>:</b> <%= hint %></li>
+        <% end %>
+      <% end %>
+      </ul>
+      <% end %>
+      </div>
+      </div>
     </li>
     <% end %>
     <% end %>
@@ -48,4 +76,5 @@
   <% count += qs.count %>
   <% end %>
 <% end %>
+</div>
 <%= render 'admin_subs', type: {noun: "response", verb: "respond", gerund: "responding" } %>

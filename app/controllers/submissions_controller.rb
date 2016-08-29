@@ -295,7 +295,7 @@ class SubmissionsController < CoursesController
           else
             q[type]["parts"].zip(a["parts"]).each_with_index do |(qp, ap), j|
               if qp["codeTag"]
-                if ap["file"].to_s.empty? or !(Integer(ap["line"]) rescue false)
+                if ap["file"].to_s.empty? or (ap["file"] == "<none>" and !(Integer(ap["line"]) rescue false))
                   @submission.errors.add(:base, "Question #{i + 1} part #{j + 1} has an invalid code-tag")
                   no_problems = false
                 end

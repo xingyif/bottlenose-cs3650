@@ -45,7 +45,8 @@
   </tr>
 </table>
 
-<h3>Questions</h3>
+<h3 data-toggle="collapse" data-target="#questions">Questions</h3>
+<div id="questions" class="collapse in">
 <% count = 1 %>
 <% @questions.each do |section| %>
   <% section.each do |name, qs| %>
@@ -101,6 +102,9 @@
           <%= Upload.upload_path_for(a["parts"][j]["file"]) %>, line <%= a["parts"][j]["line"] %></i></p>
           <% elsif part["codeTags"] %>
           <p>(Multiple CodeTags) <%= sanitize(part["codeTags"], tags: %w(b strong i em)) %></p>
+          <% elsif part["requiredText"] %>
+          <p>(Required text) <%= sanitize(part["requiredText"], tags: %w(b strong i em)) %></p>
+          <p><i><b>Student answer:</b></i> <%= sanitize(a["parts"][j]["info"], tags: %w(b strong i em)) %></p>
           <% elsif part["text"] %>
           <p>(Text) <%= sanitize(part["text"], tags: %w(b strong i em)) %></p>
           <p><i><b>Student answer:</b></i> <%= sanitize(a["parts"][j]["info"], tags: %w(b strong i em)) %></p>
@@ -114,3 +118,4 @@
   <% count += qs.count %>
   <% end %>
 <% end %>
+</div>
