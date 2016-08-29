@@ -183,6 +183,7 @@ $(function() {
     e.stopPropagation();
     filesTree.treeview("uncheckNode", data);
   });
-  filesTree.treeview("selectNode", filesTree.treeview("getCollapsed")[0]);
+  filesTree.treeview("uncheckNode", filesTree.treeview("getCollapsed")[0]);
+  selectTreeviewFileByIndex(0);
   
 });

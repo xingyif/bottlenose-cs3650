@@ -150,7 +150,8 @@ class GradersController < ApplicationController
   # Grader responses
   
   def JavaStyleGrader(edit)
-    redirect_to files_course_assignment_submission_path(@course, @assignment, @submission)
+    redirect_to files_course_assignment_submission_path(@course, @assignment, @submission),
+                flash: {show_comments: true}
   end
 
   def JunitGrader(edit)
@@ -267,7 +268,7 @@ class GradersController < ApplicationController
           }
         end
       end
-      @submission_dirs = JSON.pretty_generate(@submission.upload.extracted_files.map{|i| with_extracted(i)})
+      @submission_dirs = @submission.upload.extracted_files.map{|i| with_extracted(i)}
       render "edit_#{@grader.grader_config.type}"
     else
       redirect_to files_course_assignment_submission_path(@course, @assignment, @submission)

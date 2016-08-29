@@ -157,7 +157,11 @@ class SubmissionsController < CoursesController
 
   
   def get_submission_files(sub)
-    @lineCommentsByFile = sub.grader_line_comments(nil)
+    if flash[:show_comments]
+      @lineCommentsByFile = sub.grader_line_comments(nil)
+    else
+      @lineCommentsByFile = {}
+    end
 
     @submission_files = []
     def with_extracted(item)
