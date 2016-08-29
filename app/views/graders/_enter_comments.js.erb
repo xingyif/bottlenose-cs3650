@@ -134,7 +134,7 @@ $(function() {
       $("<div>")
         .append(delComment)
         .append($("<label>").text("Comment:").attr("for", "message_" + i))
-        .append($("<span>").text(" (by " + comment.author + ")"))
+        .append($("<span>").text(" (by " + comment.label + ")"))
         .append(commentText));
     commentText.on("change", function() {
       comment.comment = $(this).val();

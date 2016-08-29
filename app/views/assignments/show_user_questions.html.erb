@@ -3,14 +3,14 @@
 <%= render 'assignment_questions_info', gradesheet: @gradesheet %>
 <h3>
   Responses
-  <% if @user.id != @current_user.id %>
+  <% if @user.id != current_user.id %>
   for <%= @user.name %>
   <% else %>
   (<%= @gradesheet.submissions.count %>)
   <% end %>
-  <% if @user.id == @current_user.id %>
+  <% if @user.id == current_user.id %>
   <%= link_to "New Response",
          new_course_assignment_submission_path(@course, @gradesheet.assignment), class: "btn btn-success" %>
-     <% end %>
+  <% end %>
 </h3>
 <%= render 'user_subs', user: @user, course: @course, gradesheet: @gradesheet %>

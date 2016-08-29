@@ -67,7 +67,7 @@ function validateNumericInput(e) {
   if (validKeys[e.key] || validKeyCodes[e.keyCode]) return;
   if (!Number.isNaN(Number.parseInt(e.key))) return;
   if (e.key == "." && e.currentTarget.value.indexOf(".") < 0) return;
-  if (e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
   e.preventDefault();
 };
 
@@ -91,7 +91,7 @@ $(function() {
     }
   });
   
-  $("input.numeric").on("keypress", validateNumericInput);
+  $("input.numeric").on("keydown", validateNumericInput);
 })
 
 
@@ -129,23 +129,28 @@ function activateSpinner(obj, options) {
   }
   input.on("change", validate);
   function increment() {
-    var newVal = parseFloat(input.val(), 10) + delta;
+    var newVal = (parseFloat(input.val(), 10) || 0) + delta;
     if (max !== undefined) {
       newVal = Math.min(max, newVal);
     }
     input.val(newVal.toFixed(precision)).change();
   }
   function decrement() {
-    var newVal = parseFloat(input.val(), 10) - delta;
+    var newVal = (parseFloat(input.val(), 10) || 0) - delta;
     if (min !== undefined) {
       newVal = Math.max(min, newVal);
     }
     input.val(newVal.toFixed(precision)).change();
   }
-  input.on("keypress", function(e) {
+  input.on("keydown", function(e) {
     validateNumericInput(e);
     if (e.key === "ArrowUp") { increment(); return; }
     if (e.key === "ArrowDown") { decrement(); return; }
+    var curVal = $(this).val();
+    var newVal = curVal.slice(0, this.selectionStart) + e.key + curVal.slice(this.selectionEnd, curVal.length);
+    newVal = parseFloat(newVal, 10);
+    if (max !== undefined && newVal > max) { e.preventDefault(); }
+    if (min !== undefined && newVal < min) { e.preventDefault(); }
   });
   
   $(upArrow).on('mousedown', function() {
