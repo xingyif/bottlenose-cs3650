@@ -1,14 +1,14 @@
 <%= content_tag :div, { "class" => "input-group spinner" }.update(options[:wrapper].stringify_keys) do %>
   <%= text_field_tag name, value, 
       { "data-min" => options[:min], "data-max" => options[:max], "data-delta" => options[:delta],
-        "class" => "form-control"}.update(options[:text].stringify_keys) %>
+        "disabled" => options[:disabled], "class" => "form-control"}.update(options[:text].stringify_keys) %>
   <div class="input-group-btn-vertical">
     <%= content_tag :button, 
-        { "type" => "button", "class" => "btn btn-default" }.update(options[:buttons].stringify_keys) do %>
+        { "type" => "button", "disabled" => options[:disabled], "class" => "btn btn-default" }.update(options[:buttons].stringify_keys) do %>
       <i class="fa fa-caret-up"></i>
     <% end %>
     <%= content_tag :button, 
-        { "type" => "button", "class" => "btn btn-default" }.update(options[:buttons].stringify_keys) do %>
+        { "type" => "button", "disabled" => options[:disabled], "class" => "btn btn-default" }.update(options[:buttons].stringify_keys) do %>
       <i class="fa fa-caret-down"></i>
     <% end %>
   </div>

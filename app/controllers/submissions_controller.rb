@@ -19,13 +19,14 @@ class SubmissionsController < CoursesController
     redirect_to course_assignment_path(@course, @assignment)
   end
 
-  def files
+  def details
     unless @submission.visible_to?(current_user)
       redirect_to course_assignment_path(@course, @assignment), alert: "That's not your submission."
       return
     end
 
-    get_submission_files(@submission)
+    self.send("details_#{@assignment.type.capitalize}", false) if self.respond_to?("details_#{@assignment.type.capitalize}", true)
+    render "details_#{@assignment.type.underscore}"
   end
 
   def new
@@ -206,6 +207,7 @@ class SubmissionsController < CoursesController
   # Assignment types
   def new_Questions(edit)
     @questions = @assignment.questions
+    @submission_dirs = []
     if @assignment.related_assignment
       related_sub = @assignment.related_assignment.used_sub_for(current_user)
       if related_sub.nil?
@@ -221,10 +223,41 @@ class SubmissionsController < CoursesController
   def show_Files(edit)
     @gradesheet = Gradesheet.new(@assignment, [@submission])
   end
+
+  def details_Files(edit)
+    get_submission_files(@submission)
+  end
   
   def show_Questions(edit)
     @questions = @assignment.questions
     @answers = YAML.load(File.open(@submission.upload.submission_path))
+    @submission_dirs = []
+    if @assignment.related_assignment
+      related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
+      if related_sub.nil?
+        @submission_files = []
+      else
+        get_submission_files(related_sub)
+      end
+    else
+      @submission_files = []
+    end
+  end
+
+  def details_Questions(edit)
+    @questions = @assignment.questions
+    @answers = YAML.load(File.open(@submission.upload.submission_path))
+    @submission_dirs = []
+    if @assignment.related_assignment
+      related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
+      if related_sub.nil?
+        @submission_files = []
+      else
+        get_submission_files(related_sub)
+      end
+    else
+      @submission_files = []
+    end
   end
   
   def create_Files(edit)

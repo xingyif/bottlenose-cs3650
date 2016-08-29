@@ -103,7 +103,10 @@ $(function (){
     filesTreeview.selectNode(fileMap[href]);
   }
   window.selectTreeviewFileByIndex = function(index) {
-    filesTreeview.selectNode(fileMap[fileMap[index]]);
+    try {
+      filesTreeview.selectNode(fileMap[fileMap[index]]);
+    } catch(e) {
+    }
   }
   if (document.location.hash !== "") {
     $("#files a[href='" + document.location.hash + "']").tab('show');

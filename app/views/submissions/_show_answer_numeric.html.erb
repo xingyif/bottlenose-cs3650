@@ -6,6 +6,6 @@
      value = @answers[index]["main"].capitalize
      end %>
   <%= spinner_tag "", value || 0.0, text: {name: "answers[#{index}][main]", id: "answer_#{index}"},
-      min: min, max: max, delta: delta, class: (if @answers and
+      disabled: 'disabled', min: min, max: max, delta: delta, class: (if @answers and
      value.nil? then 'unanswered' else '' end)  %>
 </div>

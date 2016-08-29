@@ -1,0 +1,34 @@
+<div class="form-group">
+  <% if @answers and @answers[index]
+     value = @answers[index]["main"]
+     value = value.to_i if value
+     detail = @answers[index]["detail"]
+     end %>
+  <% q["options"].each_with_index do |opt, opt_idx| %>
+  <div>
+    <% if opt == "other" %>
+    <label>
+      <input name="answers[<%= index %>][main]" disabled id="answer_<%= index %>_<%= opt_idx %>"
+             type="radio" value="<%= opt_idx %>" <%= if value == opt_idx then 'checked' end %> >
+      Other:
+    </label>
+    <input name="answers[<%= index %>][detail]" disabled type="text" id="answer_<%= index %>_other"
+           <% unless detail.to_s.empty? %>value="<%= detail %>"<% end %> >
+    <% else %>
+    <label>
+      <input name="answers[<%= index %>][main]" disabled id="answer_<%= index %>_<%= opt_idx %>"
+             type="radio" value="<%= opt_idx %>" <%= if value == opt_idx then 'checked' end %> >
+      <%= sanitize(opt, tags: %w(b strong i em)) %>
+    </label>
+    <% end %>
+    <script>
+      $(function() {
+        $("input[name^='answers[<%= index %>][main]']").on("focus",
+          function() { $("input#answer_<%= index %>_other").removeClass("unanswered"); });
+        $("input#answer_<%= index %>_other").on("focus",
+          function() { $("input#answer_<%= index %>_<%= q['options'].count - 1 %>").prop('checked', true).change(); });
+      });
+    </script>
+  </div>
+  <% end %>
+</div>

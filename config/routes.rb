@@ -43,7 +43,7 @@ Bottlenose::Application.routes.draw do
       end
       resources :submissions do
         member do
-          get :files
+          get :details
           get :use, to: 'submissions#use_for_grading', as: 'use'
           patch :publish, to: 'submissions#publish', as: 'publish'
           post 'recreate/:grader_config_id', to: 'submissions#recreate_grader', as: 'recreate_grader'

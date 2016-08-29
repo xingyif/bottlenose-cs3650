@@ -31,7 +31,7 @@
    [X] upload YAML
    [X] view questions
    [X] enter answers
-   [ ] view answers (w/ grading if available)
+   [X] view answers (w/ grading if available)
    [ ] grading
 [ ] exams
 [ ] quizzes

@@ -201,7 +201,8 @@ class AssignmentsController < CoursesController
       @assignment.errors.add(:base, "Supplied file does not contain a list of sections")
       return false
     else
-      question_count = 0
+      @question_count = 0
+      @total_weight = 0
       question_kinds = Assignment.question_kinds.keys
       @no_problems = true
       def make_err(msg)
@@ -222,90 +223,91 @@ class AssignmentsController < CoursesController
           section.each do |secName, sec_questions|
             sec_questions.each do |question|
               question.each do |type, q|
-                question_count += 1
+                @question_count += 1
                 if !question_kinds.member?(type.underscore)
-                  make_err "Question #{question_count} has unknown type #{type}"
+                  make_err "Question #{@question_count} has unknown type #{type}"
                   next
                 else
                   if q["weight"].nil? or !(Float(q["weight"]) rescue false)
-                    make_err "Question #{question_count} has missing or invalid weight"
+                    make_err "Question #{@question_count} has missing or invalid weight"
                   end
+                  @total_weight += Float(q["weight"])
                   ans = q["correctAnswer"]
                   if ans.nil?
-                    make_err "Question #{question_count} is missing a correctAnswer"
+                    make_err "Question #{@question_count} is missing a correctAnswer"
                   end
                   if q["rubric"].nil?
-                    make_err "Question #{question_count} is missing a rubric"
+                    make_err "Question #{@question_count} is missing a rubric"
                   elsif !(q["rubric"].is_a? Array)
-                    make_err "Question #{question_count} has an invalid rubric"
+                    make_err "Question #{@question_count} has an invalid rubric"
                   else
                     q["rubric"].each_with_index do |guide, i|
                       if !(guide.is_a? Object) or guide.keys.count != 1
-                        make_err "Question #{question_count}, rubric entry #{i} is ill-formed"
+                        make_err "Question #{@question_count}, rubric entry #{i} is ill-formed"
                       else
                         guide.each do |weight, hint|
                           if !(Float(weight) rescue false)
-                            make_err "Question #{question_count}, rubric entry #{i} has non-numeric weight"
+                            make_err "Question #{@question_count}, rubric entry #{i} has non-numeric weight"
                           elsif Float(weight) < 0 or Float(weight) > 1
-                            make_err "Question #{question_count}, rubric entry #{i} has out-of-bounds weight"
+                            make_err "Question #{@question_count}, rubric entry #{i} has out-of-bounds weight"
                           end
                         end
                       end
                     end
                   end
                   if q["prompt"].nil?
-                    make_err "Question #{question_count} is missing a prompt"
+                    make_err "Question #{@question_count} is missing a prompt"
                   end
                   case type
                   when "YesNo", "TrueFalse"
                     if ![true, false].member?(q["correctAnswer"])
-                      make_err "Boolean question #{question_count} has a non-boolean correctAnswer"
+                      make_err "Boolean question #{@question_count} has a non-boolean correctAnswer"
                     end
                   when "Numeric"
                     min = q["min"]
                     max = q["max"]
                     if max.nil? or !is_float(min)
-                      make_err "Numeric question #{question_count} has a non-numeric max"
+                      make_err "Numeric question #{@question_count} has a non-numeric max"
                     else
                       max = max.to_f
                     end
                     if min.nil? or !is_float(min)
-                      make_err "Numeric question #{question_count} has a non-numeric min"
+                      make_err "Numeric question #{@question_count} has a non-numeric min"
                     else
                       min = min.to_f
                     end
                     if ans.nil? or !is_float(ans)
-                      make_err "Numeric question #{question_count} has a non-numeric ans"
+                      make_err "Numeric question #{@question_count} has a non-numeric ans"
                     else
                       ans = ans.to_f
                     end
                     if is_float(min) and is_float(max) and is_float(ans) and !(min <= ans and ans <= max)
-                      make_err "Numeric question #{question_count} has a correctAnswer outside the specified range"
+                      make_err "Numeric question #{@question_count} has a correctAnswer outside the specified range"
                     end
                   when "MultipleChoice"
                     if q["options"].nil? or !q["options"].is_a? Array
-                      make_err "MultipleChoice question #{question_count} is missing an array of choices"
+                      make_err "MultipleChoice question #{@question_count} is missing an array of choices"
                     end
                     if !is_int(ans)
-                      make_err "MultipleChoice question #{question_count} has a non-numeric correctAnswer"
+                      make_err "MultipleChoice question #{@question_count} has a non-numeric correctAnswer"
                     else
                       ans = ans.to_i
                     end
                     if is_int(ans) and (ans < 0 or ans >= q["options"].count)
-                      make_err "MultipleChoice question #{question_count} has a correctAnswer not in the available choices"
+                      make_err "MultipleChoice question #{@question_count} has a correctAnswer not in the available choices"
                     end
                   end
                   if q["parts"]
                     if !q["parts"].is_a? Array
-                      make_err "Question #{question_count} has a non-list of parts"
+                      make_err "Question #{@question_count} has a non-list of parts"
                     else
                       q["parts"].each_with_index do |part, part_i|
                         if !part.is_a? Object
-                          make_err "Question #{question_count} has a non-object part ##{part_i + 1}"
+                          make_err "Question #{@question_count} has a non-object part ##{part_i + 1}"
                         elsif part.keys.count > 1
-                          make_err "Question #{question_count} part ##{part_i + 1} has too many keys"
+                          make_err "Question #{@question_count} part ##{part_i + 1} has too many keys"
                         elsif !["codeTag", "codeTags", "requiredText", "text"].member?(part.keys[0])
-                          make_err "Question #{question_count} part ##{part_i + 1} has an invalid type #{part.keys[0]}"
+                          make_err "Question #{@question_count} part ##{part_i + 1} has an invalid type #{part.keys[0]}"
                         end
                       end
                     end
@@ -317,19 +319,15 @@ class AssignmentsController < CoursesController
         end
       end
     end
-    # if @no_problems
-    #   up = Upload.new
-    #   up.user_id = current_user.id
-    #   up.store_upload!(upload, {
-    #                      type: "Assignment Questions",
-    #                      date: Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
-    #                    })
-    #   unless up.save
-    #     @assignment.errors.add(:upload_file, "could not save upload")
-    #     @no_problems = false
-    #   end
-    #   @assignment.assignment_file = up
-    # end
+    if @no_problems
+      c = GraderConfig.find_or_create_by(type: "QuestionsGrader", avail_score: @total_weight)
+      if c.invalid? or !c.save
+        no_problems = false
+        @assignment.errors.add(:graders, "Could not create grader #{c.to_s}")
+      else
+        AssignmentGrader.create!(assignment_id: @assignment.id, grader_config_id: c.id, order: 1)
+      end
+    end
     return @no_problems
   end
   

@@ -1,11 +1,44 @@
-<% @page_title = "New Response: #{@assignment.name}" %>
+<% @page_title = "View Response" %>
+<% cur_reg = current_user.registration_for(@course) %>
+<% content_for :wide_content_before do %>
+
+<p>
+  <%= link_to "Back to Assignment: #{@assignment.name}", course_assignment_path(@course, @assignment) %>
+</p>
+
+<h1>Response</h1>
+
+<table class="table row-vcenter">
+  <tr>
+    <td><strong>Assignment</strong></td>
+    <td><%= @submission.assignment.name %></td>
+  </tr>
+  <% if @submission.team.nil? %>
+    <tr>
+      <td><strong>Student</strong></td>
+      <td><%= @submission.user.name %></td>
+    </tr>
+  <% else %>
+    <tr>
+      <td><strong>Team</strong></td>
+      <td><%= @submission.team %> (submitted by <%= @submission.user.name %>)</td>
+    </tr>
+  <% end %>
+  <tr>
+    <td><strong>Submission Time</strong></td>
+    <td><span class="local-time"><%= @submission.created_at %></span></td>
+  </tr>
+  <tr>
+    <td><strong>Student Notes</strong></td>
+    <td>
+      <div class="prose"><%= @submission.student_notes %></div>
+    </td>
+  </tr>
+</table>
+
+<% end %>
+
 <% content_for :wide_content do %>
-
-<%= form_for [@course, @assignment, @submission] do |f| %>
-<div class="container">
-  <%= render "common", f: f, type: {noun: "response", verb: "respond", gerund: "responding" } %>
-</div>
-
 <% if @assignment.related_assignment_id %>
 <div class="col-sm-6">
   <div id="files-sidebar">
@@ -37,7 +70,7 @@
                 <%= sanitize(q["prompt"], tags: %w(b strong i em)) %>
                 <small>(<%= pluralize(q["weight"], "point") %>)</small>
               </p>
-              <%= render "enter_answer_#{type.underscore}", q: q, index: i + count %>
+              <%= render "show_answer_#{type.underscore}", q: q, index: i + count %>
               <p></p>
               <% if q["parts"] %>
                 <div class="parts" data-qnum="<%= i + count %>">
@@ -48,18 +81,27 @@
                      part_ans = part_ans[part_i] if part_ans %>
                   <% if part["codeTag"] %>
                   <p><%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
-                  <%= render partial: "code_tag", locals: {i: i, count: count, part_ans: part_ans, part_i: part_i} %>
+                  <span class="btn btn-default btn-sm btn-disabled" disabled>
+                    <%= @submission_files.find(link: part_ans["file"]).first[:name] %>, line <%= part_ans["line"] %>
+                  </span>
                   <% elsif part["text"] %>
                   <p><%= sanitize(part["text"], tags: %w(b strong i em)) %></p>
-                  <textarea class="form-control" rows="5"
+                  <textarea disabled class="form-control" rows="5"
                             name="answers[<%= i + count %>][parts][<%= part_i %>][info]"><%= if part_ans then part_ans['info'] end %></textarea>
                   <% elsif part["requiredText"] %>
                   <p><%= sanitize(part["requiredText"], tags: %w(b strong i em)) %></p>
-                  <textarea class="form-control <%= if @answers and (part_ans.nil? or part_ans['info'].to_s.empty?) then 'unanswered' end %>" rows="5"
+                  <textarea disabled class="form-control <%= if @answers and (part_ans.nil? or part_ans['info'].to_s.empty?) then 'unanswered' end %>" rows="5"
                             name="answers[<%= i + count %>][parts][<%= part_i %>][info]"><%= if part_ans then part_ans['info'] end %></textarea>
                   <% end %>
                 <% end %>
                 </div>
+              <% end %>
+              <% if @grades %>
+              <% grade = @grades[i + count] %>
+              <div class="panel panel-info">
+                <div class="panel-heading"><%= to_fixed(grade["score"] * 100) %>%</div>
+                <div class="panel-body"><%= grade["comments"] %></div>
+              </div>
               <% end %>
             </li>
           <% end %>
@@ -69,18 +111,4 @@
     <% end %>
   <% end %>
 </div>
-
-<div class="container">
-  <div class="form-group">
-    <%= f.label :student_notes %>
-    <%= f.text_area :student_notes, class: 'form-control' %>
-  </div>
-  <div class="form-group">
-    <%= f.submit "Submit response", class: "btn btn-primary" %>
-  </div>
-</div>
-<script>
-  <%= render partial: "new_questions.js", locals: {count: (count - 1)} %>
-</script>
-<% end %>
 <% end %>
