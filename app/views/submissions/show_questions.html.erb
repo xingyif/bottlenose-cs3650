@@ -1,0 +1,116 @@
+<% @page_title = "View Response" %>
+<% cur_reg = current_user.registration_for(@course) %>
+
+<p>
+  <%= link_to "Back to Assignment: #{@assignment.name}", course_assignment_path(@course, @assignment) %>
+</p>
+
+<h1>Response</h1>
+
+<table class="table row-vcenter">
+  <tr>
+    <td><strong>Assignment</strong></td>
+    <td><%= @submission.assignment.name %></td>
+  </tr>
+  <% if @submission.team.nil? %>
+    <tr>
+      <td><strong>Student</strong></td>
+      <td><%= @submission.user.name %></td>
+    </tr>
+  <% else %>
+    <tr>
+      <td><strong>Team</strong></td>
+      <td><%= @submission.team %> (submitted by <%= @submission.user.name %>)</td>
+    </tr>
+  <% end %>
+  <tr>
+    <td><strong>Submission Time</strong></td>
+    <td><span class="local-time"><%= @submission.created_at %></span></td>
+  </tr>
+  <tr>
+    <td><strong>Submission Details</strong></td>
+    <td><%= link_to "See individual files",
+            files_course_assignment_submission_path(@course, @assignment, @submission),
+            class: "btn btn-success" %>
+      <%= link_to @submission.file_path, class: "btn btn-default" do %>
+      <i class="glyphicon glyphicon-download-alt"></i> Download  <%= @submission.file_name %> 
+      <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Student Notes</strong></td>
+    <td>
+      <div class="prose"><%= @submission.student_notes %></div>
+    </td>
+  </tr>
+</table>
+
+<h3>Questions</h3>
+<% count = 1 %>
+<% @questions.each do |section| %>
+  <% section.each do |name, qs| %>
+  <h4><%= name %></h4>
+  <ol start="<%= count %>">
+    <% qs.each_with_index do |question, i| %>
+    <% question.each do |type, q| %>
+    <% a = @answers[i + count - 1] %>
+    <li><b><%= type %>: </b><small>(worth <%= pluralize(q["weight"], "point") %>)</small>
+      <p><%= sanitize(q["prompt"], tags: %w(b strong i em)) %></p>
+      <% if q["options"] %>
+      <ul>
+        <% q["options"].each do |opt| %>
+        <li><%= sanitize(opt, tags: %w(b strong i em)) %></li>
+        <% end %>
+      </ul>
+      <% end %>
+      <% if !q["correctAnswer"].nil? %>
+      <p><i><b>Correct answer:</b>
+          <%= case type
+              when "YesNo"
+                if q["correctAnswer"] then "Yes" else "No" end
+              when "TrueFalse"
+                q["correctAnswer"].to_s.capitalize
+              when "MultipleChoice"
+                q["options"][q["correctAnswer"].to_i]
+              else
+                q["correctAnswer"]
+              end
+              %></i></p>
+      <% end %>
+      <p><i><b>Student answer:</b>
+          <%= case type
+              when "YesNo"
+                if a["main"] then "Yes" else "No" end
+              when "TrueFalse"
+                a["main"].to_s.capitalize
+              when "MultipleChoice"
+                if a["detail"].to_s.empty?
+                  q["options"][a["main"].to_i]
+                else
+                  "#{q['options'][a['main'].to_i]}: #{a['detail']}"
+                end
+              else
+                a["correctAnswer"]
+              end
+              %></i></p>
+      <% if q["parts"] %>
+        <% q["parts"].each_with_index do |part, j| %>
+          <% if part["codeTag"] %>
+          <p>(CodeTag) <%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
+          <p><i><b>Student answer:</b>
+          <%= Upload.upload_path_for(a["parts"][j]["file"]) %>, line <%= a["parts"][j]["line"] %></i></p>
+          <% elsif part["codeTags"] %>
+          <p>(Multiple CodeTags) <%= sanitize(part["codeTags"], tags: %w(b strong i em)) %></p>
+          <% elsif part["text"] %>
+          <p>(Text) <%= sanitize(part["text"], tags: %w(b strong i em)) %></p>
+          <p><i><b>Student answer:</b></i> <%= sanitize(a["parts"][j]["info"], tags: %w(b strong i em)) %></p>
+          <% end %>
+        <% end %>
+      <% end %>  
+    </li>
+    <% end %>
+    <% end %>
+  </ol>
+  <% count += qs.count %>
+  <% end %>
+<% end %>

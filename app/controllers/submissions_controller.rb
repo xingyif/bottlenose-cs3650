@@ -1,3 +1,5 @@
+require 'tempfile'
+
 class SubmissionsController < CoursesController
   prepend_before_action :find_submission, except: [:index, :new, :create]
   prepend_before_action :find_course_assignment
@@ -9,7 +11,7 @@ class SubmissionsController < CoursesController
       return
     end
 
-    @gradesheet = Gradesheet.new(@assignment, [@submission])
+    self.send("show_#{@assignment.type.capitalize}", false) if self.respond_to?("show_#{@assignment.type.capitalize}", true)
     render "show_#{@assignment.type.underscore}"
   end
 
@@ -212,6 +214,15 @@ class SubmissionsController < CoursesController
     end
   end
 
+  def show_Files(edit)
+    @gradesheet = Gradesheet.new(@assignment, [@submission])
+  end
+  
+  def show_Questions(edit)
+    @questions = @assignment.questions
+    @answers = YAML.load(File.open(@submission.upload.submission_path))
+  end
+  
   def create_Files(edit)
     if @submission.save_upload and @submission.save
       @submission.set_used_sub!
@@ -261,7 +272,9 @@ class SubmissionsController < CoursesController
           end
         elsif q["MultipleChoice"]
           type = "MultipleChoice"
-          if !(Integer(a["main"]) rescue false)
+          if a["main"].nil?
+            # nothing, was handled above
+          elsif !(Integer(a["main"]) rescue false)
             @submission.errors.add(:base, "Question #{i + 1} has an invalid multiple-choice answer")
             no_problems = false
           elsif a["main"].to_i < 0 or a["main"].to_i >= q[type]["options"].count
@@ -286,6 +299,11 @@ class SubmissionsController < CoursesController
                 # TODO
               elsif qp["text"]
                 # TODO
+              elsif qp["requiredText"]
+                if ap["info"].to_s.empty?
+                  @submission.errors.add(:base, "Question #{i + 1} part #{j + 1} has a missing required text answer")
+                  no_problems = false
+                end
               end
             end
           end
@@ -294,7 +312,16 @@ class SubmissionsController < CoursesController
     end
 
     if no_problems
-      debugger
+      Tempfile.open('answers.yaml', Rails.root.join('tmp')) do |f|
+        f.write(YAML.dump(@answers))
+        f.flush
+        f.rewind
+        uploadfile = ActionDispatch::Http::UploadedFile.new(filename: "answers.yaml", tempfile: f)
+        @submission.upload_file = uploadfile
+        @submission.save_upload
+      end
+      @submission.save
+      @submission.set_used_sub!
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Response was successfully created.')
     else

@@ -6,5 +6,5 @@
      value = @answers[index]["main"].capitalize
      end %>
   <%= f.spinner "", value || 0.0, text: {name: "answers[#{index}][main]", id: "answer_#{index}"},
-      min: min, max: max, delta: delta %>
+      min: min, max: max, delta: delta, class: (if @answers and value.nil? then 'unanswered' else '' end)  %>
 </div>

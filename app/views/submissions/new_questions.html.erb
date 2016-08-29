@@ -42,6 +42,7 @@
               <%= render "enter_answer_#{type.underscore}", f: f, q: q, index: i + count %>
               <p></p>
               <% if q["parts"] %>
+                <div class="parts" data-qnum="<%= i + count %>">
                 <% q["parts"].each_with_index do |part, part_i| %>
                   <% part_ans = @answers
                      part_ans = part_ans[i + count] if part_ans
@@ -49,30 +50,23 @@
                      part_ans = part_ans[part_i] if part_ans %>
                   <% if part["codeTag"] %>
                   <p><%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
-                  <p class="form-inline">
-                    File: <select name="answers[<%= i + count %>][parts][<%= part_i %>][file]" class="pick-file">
-                      <option disabled selected value style="display: none;"> -- select a file -- </option>
-                      <% @submission_files.each do |file| %>
-                      <option value="<%= file[:link] %>" <% if part_ans and part_ans["file"] == file[:link] %>selected<% end %>>
-                        <%= file[:name] %>
-                      </option>
-                      <% end %>
-                    </select>
-                    Line number: <input type="text" class="form-control numeric"
-                                        name="answers[<%= i + count %>][parts][<%= part_i %>][line]"
-                                        <% if part_ans %>value="<%= part_ans['line'] %>"<% end %>>
-                  </p>
+                  <%= render partial: "code_tag", locals: {i: i, count: count, part_ans: part_ans, part_i: part_i} %>
                   <% elsif part["codeTags"] %>
                   <p><%= sanitize(part["codeTags"], tags: %w(b strong i em)) %></p>
-                  <input type="text" class="form-control"
-                         name="answers[<%= i + count %>][parts][<%= part_i %>][line]"
-                         <% if part_ans %>value="<%= part_ans['line'] %>"<% end %>>
+                  <div class="subparts" data-subpart="<%= part_i %>">
+                  <%= render partial: "code_tag", locals: {i: i, count: count, part_ans: part_ans, part_i: part_i} %>
+                  </div>
                   <% elsif part["text"] %>
                   <p><%= sanitize(part["text"], tags: %w(b strong i em)) %></p>
                   <textarea class="form-control" rows="5"
                             name="answers[<%= i + count %>][parts][<%= part_i %>][info]"><%= if part_ans then part_ans['info'] end %></textarea>
+                  <% elsif part["requiredText"] %>
+                  <p><%= sanitize(part["requiredText"], tags: %w(b strong i em)) %></p>
+                  <textarea class="form-control <%= if @answers and (part_ans.nil? or part_ans['info'].to_s.empty?) then 'unanswered' end %>" rows="5"
+                            name="answers[<%= i + count %>][parts][<%= part_i %>][info]"><%= if part_ans then part_ans['info'] end %></textarea>
                   <% end %>
                 <% end %>
+                </div>
               <% end %>
             </li>
           <% end %>
@@ -82,9 +76,6 @@
     <% end %>
   <% end %>
 </div>
-
-<script>
-</script>
 
 <div class="container">
   <div class="form-group">

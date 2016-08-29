@@ -1,4 +1,9 @@
-#responses input.unanswered, #responses button.unanswered, #responses select.unanswered {
+#responses input.unanswered,
+#responses button.unanswered, 
+#responses select.unanswered,
+#responses label.unanswered,
+#responses textarea.unanswered
+ {
    border: 1px solid #eed3d7;
    box-shadow: 0 0 1em #eed3d7;
 }
