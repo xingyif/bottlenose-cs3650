@@ -187,7 +187,7 @@ class GradersController < ApplicationController
     render "show_JunitGrader"
   end
 
-  def CheckerGrader(edit)
+  def grade_CheckerGrader(edit)
     if @grader.grading_output
       @grading_output = File.read(@grader.grading_output)
       begin
@@ -219,60 +219,74 @@ class GradersController < ApplicationController
     render "show_CheckerGrader"
   end
 
+  def QuestionsGrader(edit)
+    @questions = @assignment.questions
+    @answers = YAML.load(File.open(@submission.upload.submission_path))
+    if edit
+      @submission_dirs = []
+      if @assignment.related_assignment
+        related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
+        if related_sub.nil?
+          @submission_files = []
+        else
+          get_submission_files(related_sub)
+        end
+      else
+        @submission_files = []
+      end
+      render "edit_QuestionsGrader"
+    else
+      redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
+    end
+  end
+  
   def ManualGrader(edit)
     if edit
       @lineCommentsByFile = @submission.grader_line_comments(current_user)
-      # @lineCommentsByFile.each do |file, cBF|
-      #   cBF.each do |type, byType|
-      #     byType.each do |line, byLine|
-      #       byLine.each do |comment|
-      #         if comment[:info] and comment[:info]["filename"]
-      #           comment[:info]["filename"] = Upload.upload_path_for(comment[:info]["filename"])
-      #         end
-      #       end
-      #     end
-      #   end
-      # end
-      
-      @submission_files = []
-      def with_extracted(item)
-        if item[:public_link]
-          @submission_files.push({
-                                   link: item[:public_link],
-                                   name: item[:public_link].sub(/^.*extracted\//, ""),
-                                   contents: File.read(item[:full_path].to_s),
-                                   type: case File.extname(item[:full_path].to_s)
-                                         when ".java"
-                                           "text/x-java"
-                                         when ".arr"
-                                           "pyret"
-                                         when ".rkt", ".ss"
-                                           "scheme"
-                                         when ".jpg", ".jpeg", ".png"
-                                           "image"
-                                         when ".jar"
-                                           "jar"
-                                         when ".zip"
-                                           "zip"
-                                         else
-                                           "text/unknown"
-                                         end,
-                                   lineComments: @lineCommentsByFile[item[:public_link].to_s] || {}
-                                 })
-          { text: item[:path], href: "#file_#{@submission_files.count}" }
-        else
-          {
-            text: item[:path] + "/",
-            state: {selectable: false},
-            nodes: item[:children].map{|i| with_extracted(i)}
-          }
-        end
-      end
-      @submission_dirs = @submission.upload.extracted_files.map{|i| with_extracted(i)}
-      render "edit_#{@grader.grader_config.type}"
+      get_submission_files(sub)
+      render "edit_ManualGrader"
     else
       redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
     end
   end
 
+  def get_submission_files(sub)
+    @submission_files = []
+    @lineCommentsByFile = {}
+    def with_extracted(item)
+      if item[:public_link]
+        @submission_files.push({
+                                 link: item[:public_link],
+                                 name: item[:public_link].sub(/^.*extracted\//, ""),
+                                 contents: File.read(item[:full_path].to_s),
+                                 type: case File.extname(item[:full_path].to_s)
+                                       when ".java"
+                                         "text/x-java"
+                                       when ".arr"
+                                         "pyret"
+                                       when ".rkt", ".ss"
+                                         "scheme"
+                                       when ".jpg", ".jpeg", ".png"
+                                         "image"
+                                       when ".jar"
+                                         "jar"
+                                       when ".zip"
+                                         "zip"
+                                       else
+                                         "text/unknown"
+                                       end,
+                                 lineComments: @lineCommentsByFile[item[:public_link].to_s] || {}
+                               })
+        { text: item[:path], href: "#file_#{@submission_files.count}" }
+      else
+        {
+          text: item[:path] + "/",
+          state: {selectable: false},
+          nodes: item[:children].map{|i| with_extracted(i)}
+        }
+      end
+    end
+    @submission_dirs = sub.upload.extracted_files.map{|i| with_extracted(i)}
+  end
+  
 end

@@ -229,6 +229,7 @@ class SubmissionsController < CoursesController
   end
   
   def show_Questions(edit)
+    @gradesheet = Gradesheet.new(@assignment, [@submission])
     @questions = @assignment.questions
     @answers = YAML.load(File.open(@submission.upload.submission_path))
     @submission_dirs = []

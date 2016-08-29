@@ -1,0 +1,69 @@
+<% count = 0 %>
+<% @questions.each do |section| %>
+  <% section.each do |name, qs| %>
+    <h4><%= name %></h4>
+    <ol start="<%= count + 1 %>">
+      <% qs.each_with_index do |question, i| %>
+        <% question.each do |type, q| %>
+          <li id="question_<%= count + i %>">
+            <p>
+              <%= sanitize(q["prompt"], tags: %w(b strong i em)) %>
+              <small>(<%= pluralize(q["weight"], "point") %>)</small>
+            </p>
+            <%= render "submissions/show_answer_#{type.underscore}", q: q, index: i + count %>
+            <p></p>
+            <% if q["parts"] %>
+              <div class="parts" data-qnum="<%= i + count %>">
+              <% q["parts"].each_with_index do |part, part_i| %>
+                <% part_ans = @answers
+                   part_ans = part_ans[i + count] if part_ans
+                   part_ans = part_ans["parts"] if part_ans
+                   part_ans = part_ans[part_i] if part_ans %>
+                <% if part["codeTag"] %>
+                <p><%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
+                <span class="btn btn-default btn-sm btn-disabled"
+                      data-on="click" data-call="showFile"
+                      data-args="<%= [@submission_dirs.find(link: part_ans['file']).first[:href], 
+                                 part_ans['line'].to_i] %>">
+                  <%= @submission_files.find(link: part_ans["file"]).first[:name] %>, line <%= part_ans["line"] %>
+                </span>
+                <% elsif part["text"] %>
+                <p><%= sanitize(part["text"], tags: %w(b strong i em)) %></p>
+                <textarea disabled class="form-control" rows="5"
+                          name="answers[<%= i + count %>][parts][<%= part_i %>][info]"><%= if part_ans then part_ans['info'] end %></textarea>
+                <% elsif part["requiredText"] %>
+                <p><%= sanitize(part["requiredText"], tags: %w(b strong i em)) %></p>
+                <textarea disabled class="form-control <%= if @answers and (part_ans.nil? or part_ans['info'].to_s.empty?) then 'unanswered' end %>" rows="5"
+                          name="answers[<%= i + count %>][parts][<%= part_i %>][info]"><%= if part_ans then part_ans['info'] end %></textarea>
+                <% end %>
+              <% end %>
+              </div>
+            <% end %>
+            <% if @grades %>
+            <% grade = @grades[i + count] %>
+            <div class="panel panel-info">
+              <div class="panel-heading"><%= to_fixed(grade["score"] * 100) %>%</div>
+              <div class="panel-body"><%= grade["comments"] %></div>
+            </div>
+            <% end %>
+          </li>
+        <% end %>
+      <% end %>
+    </ol>
+    <% count += qs.count %>
+  <% end %>
+<% end %>
+<script>
+  $(function() { enableReflectiveCalls(); });
+  var prevLine = {};
+  function showFile(href, line) {
+    selectTreeviewFileByHref(href);
+    var cm = $(href).find(".CodeMirror")[0].CodeMirror;
+    var newY = cm.charCoords({line: line - 10, ch: 1}, "local"); // minus 10, for visual context
+    cm.scrollTo(null, newY.top);
+    if (prevLine[href])
+      cm.removeLineClass(prevLine[href] - 1, "background", "highlightLine");
+    cm.addLineClass(line - 1, "background", "highlightLine");
+    prevLine[href] = line;
+  }
+</script>

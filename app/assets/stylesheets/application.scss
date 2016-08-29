@@ -26,6 +26,10 @@ table.row-vcenter > tbody > tr > td {
    vertical-align: middle;
 }
 
+div.CodeMirror .highlightLine {
+   background-color: #FAFAD2;
+}
+
 
 ol#grader-defns {
    list-style: none;

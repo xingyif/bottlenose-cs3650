@@ -101,17 +101,17 @@ $(function (){
   });
   window.selectTreeviewFileByHref = function(href) {
     filesTreeview.selectNode(fileMap[href]);
+    return fileMap[href];
   }
   window.selectTreeviewFileByIndex = function(index) {
     try {
-      filesTreeview.selectNode(fileMap[fileMap[index]]);
+      return filesTreeview.selectNode(fileMap[fileMap[index]]);
     } catch(e) {
     }
   }
   if (document.location.hash !== "") {
-    $("#files a[href='" + document.location.hash + "']").tab('show');
-    selectTreeviewFileByHref(document.location.hash);
+    return selectTreeviewFileByHref(document.location.hash);
   } else {
-    selectTreeviewFileByIndex(0);
+    return selectTreeviewFileByIndex(0);
   }
 });
