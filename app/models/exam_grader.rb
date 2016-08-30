@@ -16,6 +16,16 @@ class ExamGrader < GraderConfig
     "Question grading"
   end
 
+  def expect_num_questions(num)
+    @num_questions = num
+  end
+
+  def upload_file=(data)
+    unless data.nil?
+      errors[:base] << "You cannot submit a file for exams."
+      return
+    end
+  end
   
   protected
   
@@ -25,10 +35,10 @@ class ExamGrader < GraderConfig
     score = comments.pluck(:weight).reduce(0) do |sum, w| sum + w end
     
     g.out_of = self.avail_score
-    g.score = [0, self.avail_score].max # can get extra credit above max score
+    g.score = [0, score].max # can get extra credit above max score
     
     g.updated_at = DateTime.now
-    g.available = false
+    g.available = (comments.count == @num_questions)
     g.save!
 
     return g.score

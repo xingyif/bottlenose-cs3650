@@ -19,7 +19,7 @@ Bottlenose::Application.routes.draw do
 
   resources :terms
 
-  resources :courses do
+  resources :courses, except: [:destroy] do
     resources :registrations, except: [:edit, :update] do
       collection do
         post :bulk
@@ -41,13 +41,13 @@ Bottlenose::Application.routes.draw do
       member do
         post 'create_missing_graders' => 'assignments#recreate_graders'
       end
-      resources :graders do
+      resources :grader_configs do
         member do
           get 'bulk' => 'graders#edit_grades'
           post 'bulk' => 'graders#update_grades'
         end
       end
-      resources :submissions do
+      resources :submissions, except: [:edit, :update, :destroy] do
         member do
           get :details
           get :use, to: 'submissions#use_for_grading', as: 'use'
@@ -61,9 +61,7 @@ Bottlenose::Application.routes.draw do
         end
       end
     end
-    resources :questionnaires do
-    end
-    resources :teams do
+    resources :teams, except: [:edit, :update, :destroy] do
       member do
         patch :disolve
       end

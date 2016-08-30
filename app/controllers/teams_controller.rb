@@ -44,7 +44,7 @@ class TeamsController < CoursesController
     @course = Course.find(params[:course_id])
     @team = Team.find(params[:id])
 
-    if @team.users.exclude?(current_user)
+    if !(current_user_site_admin? or current_user_staff_for?(@course)) and @team.users.exclude?(current_user)
       redirect_to(root_path, alert: "You are not a member of that team.")
     end
   end

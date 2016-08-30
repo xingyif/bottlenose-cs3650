@@ -1,0 +1,35 @@
+<% col_count = @questions.count %>
+<table id="grades-table" class="table col-sm-12">
+  <thead>
+    <tr>
+      <th>Last name</th>
+      <th>First name</th>
+      <% @questions.each do |q| %>
+      <th><%= q["name"].gsub("Problem ", "") %><% if q["extra"] %> (Extra Credit)<% end %></th>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody id="grades">
+    <% @student_info.sort_by(&:last_name).each do |u| %>
+    <tr>
+      <td><%= u.last_name %></td>
+      <td><%= u.first_name %></td>
+      <% sub = @used_subs.find_by(user_id: u.id) %>
+      <% grades = @grade_comments[sub.id].sort_by(&:line) if sub %>
+      <% col_count.times do |i| %>
+      <td>
+        <% if grades %>
+        <% val = grades[i]["weight"] %>
+        <% else %>
+        <% val = "" %>
+        <% end %>
+        <%= spinner_tag "student[#{u.id}][#{i}]", val, min: 0, max: @questions[i]["weight"], delta: 0.5 %>
+      </td>
+      <% end %>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<script>
+  <%= render partial: "edit_exam_grades.js", locals: {col_count: col_count} %>
+</script>

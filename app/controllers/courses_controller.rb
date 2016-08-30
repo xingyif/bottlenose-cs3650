@@ -69,10 +69,10 @@ class CoursesController < ApplicationController
     end
   end
 
-  def destroy
-    @course.destroy
-    redirect_to courses_path
-  end
+  # def destroy
+  #   @course.destroy
+  #   redirect_to courses_path
+  # end
 
   def public
     @course = Course.find_by(id: params[:id])

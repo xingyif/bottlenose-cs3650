@@ -1,6 +1,8 @@
 <div id="<%= f_late.object_name %>_lateness-configuration" class="">
+  <% if !within_course %>
   <p class="col-sm-12">(This is the default late policy for all
-    assignments in this course.)</p>    
+    assignments in this course.)</p>
+  <% end %>
   <%= f_late.hidden_field :type %>
   <ul class="nav nav-tabs">
     <% if within_course %>
@@ -68,7 +70,9 @@
       var target = $(e.target).attr("href") // activated tab
       $("#<%= f_late.object_name %>_type").val(target.substr(1));
     });
-    <% if within_course %>
+    <% if @assignment && @assignment.lateness_config %>
+    $("[href='#<%= f_late.object_name %>_<%= @assignment.lateness_config.type %>']").tab('show');
+    <% elsif within_course %>
     $("[href='#<%= f_late.object_name %>_UseCourseDefaultConfig']").tab('show');
     <% else %>
     $("[href='#<%= f_late.object_name %>_LatePerDayConfig']").tab('show');

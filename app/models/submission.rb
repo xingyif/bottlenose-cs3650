@@ -263,7 +263,7 @@ class Submission < ActiveRecord::Base
   end
 
   def submitted_file_or_manual_grade
-    if upload_id.nil?
+    if upload_id.nil? and self.assignment.type != "exam"
       errors[:base] << "You need to submit a file."
     end
   end

@@ -225,7 +225,7 @@ class AssignmentsController < CoursesController
                 make_err "Question #{q_num}#{@part_name} has an invalid weight"
               end
               next
-            else
+            elsif !part["extra"]
               @total_weight += Float(part["weight"])
             end
             @part_name.next!
@@ -237,7 +237,7 @@ class AssignmentsController < CoursesController
             make_err "Question #{q_num} has an invalid weight"
           end
           next
-        else
+        elsif !q["extra"]
           @total_weight += Float(q["weight"])
         end
       end
@@ -554,7 +554,7 @@ class AssignmentsController < CoursesController
 
   def Exam(edit)
     @questions = @assignment.questions
-    @grader = @assignment.grader_configs.first
+    @grader_config = @assignment.grader_configs.first
   end
 
 end

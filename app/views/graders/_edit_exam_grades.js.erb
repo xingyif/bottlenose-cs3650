@@ -1,35 +1,29 @@
 $(function() {
-  enableReflectiveCalls();
-  $("input[name='student[0][name]']").on("focus", unhilight).on("blur", checkName);
+  $.tablesorter.themes.bootstrap = {
+    caption      : 'caption',
+    sortNone     : '',
+    sortAsc      : '',
+    sortDesc     : '',
+    active       : '', // applied when column is sorted
+    hover        : '', // custom css required - a defined bootstrap style may not override other classes
+    // icon class names
+    icons        : '', // add "icon-white" to make them white; this icon class is added to the <i> in the header
+    iconSortAsc  : 'glyphicon glyphicon-chevron-up', // class name added to icon when column has ascending sort
+    iconSortDesc : 'glyphicon glyphicon-chevron-down', // class name added to icon when column has descending sort
+    filterRow    : '', // filter row class; use widgetOptions.filter_cssFilter for the input/select element
+    footerRow    : '',
+    footerCells  : '',
+    even         : '', // even row zebra striping
+    odd          : ''  // odd row zebra striping
+  };
+  $("#grades-table").tablesorter({
+    headerTemplate: "{content} {icon}",
+    theme: "bootstrap",
+    widgets: ['uitheme']
+  });
+  $('.spinner').each(function() { activateSpinner(this, {precision: 1}) });
 });
-function checkName() {
-  if ($.inArray($(this).val(), usernames) >= 0)
-    $(this).addClass("goodAnswer");
-  else
-    $(this).addClass("badAnswer");
-}
-function unhilight() {
-  $(this).removeClass("goodAnswer badAnswer");
-}
-function addRow() {
-  var body = $("tbody#grades");
-  var rowCount = body.find("tr").length;
-  var row = $("<tr>");
-  var newUser = $("<input>").attr("type", "text")
-      .addClass("form-control")
-      .attr("name", "student[" + rowCount + "][name]")
-      .on("focus", unhilight).on("blur", checkName);
-  row.append($("<td>").append(newUser));
-  for (var i = 0; i < <%= col_count %>; i++) {
-    row.append($("<td>").append($("<input>")
-                                .attr("type", "text")
-                                .addClass("form-control numeric")
-                                .on("keydown", validateNumericInput)
-                                .attr("name", "student[" + rowCount + "][grade][" + i + "]")));
-  }
-  body.append(row);
-  newUser.focus();
-}
+
 $("form").submit(function() {
   return confirm("Are you sure?");
 });

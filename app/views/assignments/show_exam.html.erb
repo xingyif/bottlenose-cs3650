@@ -10,6 +10,12 @@
 <% end %>
 
 <%= render 'assignment_questions_info', gradesheet: @gradesheet %>
+<div>
+<div class="pull-right">
+<%= link_to "Enter all grades",
+    bulk_course_assignment_grader_config_path(@course, @assignment, @grader_config),
+    class: "btn btn-success" %>
+</div>
 <h3 data-toggle="collapse" data-target="#questions">Questions</h3>
 <div id="questions" class="collapse in">
 <% count = 1 %>
@@ -37,8 +43,8 @@
   </li>
   <% end %>
   <% end %>
+</ul>
 </div>
-<%= link_to "Enter grades",
-    bulk_course_assignment_grader_path(@course, @assignment, @grader),
-    class: "btn btn-success" %>
+</div>
+<%= render "admin_subs", type: {noun: "exam", verb: "answer", gerund: "answering"} %>
 

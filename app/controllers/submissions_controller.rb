@@ -194,8 +194,8 @@ class SubmissionsController < CoursesController
       redirect_to back_or_else(course_assignment_path(@course, @assignment)),
                   alert: "Must be an admin or staff to enter exam grades."
     end
-    @grader = @assignment.grader_configs.first
-    redirect_to bulk_course_assignment_grader(@course, @assignment, @grader)
+    @grader_config = @assignment.grader_configs.first
+    redirect_to bulk_course_assignment_grader_config_path(@course, @assignment, @grader_config)
   end
   def new_Questions(edit)
     @questions = @assignment.questions
@@ -240,6 +240,28 @@ class SubmissionsController < CoursesController
     else
       @submission_files = []
     end
+  end
+
+  def show_Exam(edit)
+    @questions = []
+    @assignment.questions.each_with_index do |q, i|
+      if q["parts"]
+        @part_name = "a"
+        q["parts"].each do |p|
+          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
+          @questions.push p
+          @part_name.next!
+        end
+      else
+        q["name"] = "Problem #{i + 1}" unless q["name"]
+        @questions.push q
+      end
+    end
+
+    @student_info = @course.students.select(:username, :last_name, :first_name, :id)
+    @grader_config = @assignment.grader_configs.first
+    @grader = Grader.find_by(grader_config_id: @grader_config.id, submission_id: @submission.id)
+    @grade_comments = InlineComment.where(submission_id: @submission.id)
   end
 
   def details_Questions(edit)

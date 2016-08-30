@@ -1,0 +1,30 @@
+<% @page_title = "View grades: #{@assignment.name}" %>
+
+<% cur_reg = current_user.registration_for(@course) %>
+
+<p>
+  <%= link_to "Back to Assignment: #{@assignment.name}", course_assignment_path(@course, @assignment) %>
+</p>
+
+<table id="grades-table" class="table col-sm-12">
+  <% @questions.each_with_index do |q, i| %>
+  <tr>
+    <td><%= q["name"] %><% if q["extra"] %> (Extra Credit)<% end %></td>
+    <td>
+      <%= show_score((@grade_comments[i] and @grade_comments[i].weight.to_f),
+      @assignment, cur_reg.staff?) %>
+       / <%= show_score(q["weight"]) %>
+    </td>
+  </tr>
+  <% end %>
+  <tr>
+    <td>Raw score:</td>
+    <td><%= show_score(@grade_comments.pluck(:weight).sum,
+    @assignment, cur_reg.staff?) %> / <%= show_score(@grader_config.avail_score) %></td>
+  </tr>  
+</table>
+<% if cur_reg.staff? %>
+<%= link_to "Edit grades",
+    edit_course_assignment_submission_grader_path(@course, @assignment, @submission, @grader),
+    class: "btn btn-warning" %>
+<% end %>
