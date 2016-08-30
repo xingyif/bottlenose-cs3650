@@ -76,4 +76,21 @@ class ApplicationController < ActionController::Base
       target
     end
   end
+
+  def array_from_hash(h)
+    return h unless h.is_a? Hash
+
+    all_numbers = h.keys.all? { |k| k.to_i.to_s == k }
+    if all_numbers
+      ans = []
+      h.keys.sort_by{ |k| k.to_i }.map{ |i| ans[i.to_i] = array_from_hash(h[i]) }
+      ans
+    else
+      ans = {}
+      h.each do |k, v|
+        ans[k] = array_from_hash(v)
+      end
+      ans
+    end
+  end
 end

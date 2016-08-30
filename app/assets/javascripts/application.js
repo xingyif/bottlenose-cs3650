@@ -111,6 +111,8 @@ function activateSpinner(obj, options) {
   if (min !== undefined && val <= min)
     downArrow.addClass("disabled");
   function validate() {
+    max = input.data("max");
+    min = input.data("min");
     var val = parseFloat(input.val(), 10);
     if (max !== undefined && val >= max) {
       upArrow.addClass("disabled");

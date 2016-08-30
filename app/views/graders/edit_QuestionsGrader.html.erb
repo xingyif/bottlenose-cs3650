@@ -59,7 +59,7 @@
   <script>
     <%= render partial: "submissions/render_comments.js" %>
   </script>
-</div>
+  </div>
 <% end %>
 
 <% if @assignment.related_assignment_id.nil? %>
@@ -67,8 +67,8 @@
 <% else %>
 <div id="responses" class="form-group col-sm-6">
 <% end %>
-<%= render "submissions/render_questions" %>  
+<%= render "submissions/render_questions" %>
+<%= f.submit "Submit grade", id: "completed", class: "btn btn-success" %>
 </div>
-<%= f.submit "Submit grade", id: "completed", class: "btn btn-success disabled" %>
 <% end %>
 <% end %>

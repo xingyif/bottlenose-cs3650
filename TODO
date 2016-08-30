@@ -26,17 +26,18 @@
    [ ] deep-clone assignments
 [ ] backup database
 [ ] export all files
-[ ] self-evals
+[X] self-evals
    [X] new assignment type
    [X] upload YAML
    [X] view questions
    [X] enter answers
    [X] view answers (w/ grading if available)
-   [ ] grading
+   [X] grading
 [ ] exams
-[ ] quizzes
-   [ ] online
-   [ ] auto-graded?
+   [ ] bulk upload grades
+[X] quizzes
+   [X] online
+   [?] auto-graded?
 [X] dropping class
    [X] students self-dropping
    [X] profs dropping students -- via impersonation

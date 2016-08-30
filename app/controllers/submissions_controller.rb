@@ -109,22 +109,6 @@ class SubmissionsController < CoursesController
   def answers_params
     array_from_hash(params[:answers])
   end
-  def array_from_hash(h)
-    return h unless h.is_a? Hash
-
-    all_numbers = h.keys.all? { |k| k.to_i.to_s == k }
-    if all_numbers
-      ans = []
-      h.keys.sort_by{ |k| k.to_i }.map{ |i| ans[i.to_i] = array_from_hash(h[i]) }
-      ans
-    else
-      ans = {}
-      h.each do |k, v|
-        ans[k] = array_from_hash(v)
-      end
-      ans
-    end
-  end
 
   def require_admin_or_staff
     unless current_user_site_admin? || current_user_staff_for?(@course)
@@ -159,7 +143,8 @@ class SubmissionsController < CoursesController
   
   def get_submission_files(sub)
     if flash[:show_comments]
-      @lineCommentsByFile = sub.grader_line_comments(nil)
+      show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
+      @lineCommentsByFile = sub.grader_line_comments(nil, show_hidden)
     else
       @lineCommentsByFile = {}
     end
@@ -248,6 +233,15 @@ class SubmissionsController < CoursesController
   def details_Questions(edit)
     @questions = @assignment.questions
     @answers = YAML.load(File.open(@submission.upload.submission_path))
+    if current_user_site_admin? || current_user_staff_for?(@course)
+      @grades = @submission.inline_comments
+    else
+      @grades = @submission.visible_inline_comments
+    end
+
+    @show_graders = edit
+    
+    @grades = @grades.select(:line, :name, :weight, :comment).joins(:user).sort_by(&:line).to_a
     @submission_dirs = []
     if @assignment.related_assignment
       related_sub = @assignment.related_assignment.used_sub_for(@submission.user)

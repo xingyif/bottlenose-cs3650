@@ -111,9 +111,14 @@ class Submission < ActiveRecord::Base
     end
   end
 
-  def grader_line_comments(comment_author_user)
+  def grader_line_comments(comment_author_user, show_hidden)
     config_types = Grader.where(submission_id: self.id).joins(:grader_config).pluck(:id, :type).to_h
-    self.inline_comments.group_by(&:filename).map do |filename, byfile|
+    if show_hidden
+      comments = self.inline_comments
+    else
+      comments = self.visible_inline_comments
+    end
+    comments.group_by(&:filename).map do |filename, byfile|
       [Upload.upload_path_for(filename), byfile.group_by(&:grader_id).map do |grader, bygrader|
          [config_types[grader], bygrader.group_by(&:line).map do |line, byline|
             [line, byline.map{|c| c.to_editable_json(comment_author_user)}]
@@ -123,8 +128,16 @@ class Submission < ActiveRecord::Base
     # self.graders.map(&:line_comments).reduce({}, &:merge)
   end
 
-  def grader_submission_comments
-    self.inline_comments.where(line: 0).group_by(&:filename)
+  def grader_submission_comments(show_hidden)
+    if show_hidden
+      self.inline_comments.where(line: 0).group_by(&:filename)
+    else
+      self.visible_inline_comments.where(line: 0).group_by(&:filename)
+    end
+  end
+
+  def visible_inline_comments
+    self.inline_comments.joins(:grader).where("graders.available": true)
   end
   
   def comments_upload_file=(data)

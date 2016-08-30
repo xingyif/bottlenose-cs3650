@@ -171,7 +171,8 @@
   </tr>
 </table>
 
-<% sub_comments = @submission.grader_submission_comments
+<% show_hidden = (current_user_site_admin? || cur_reg.staff?)
+   sub_comments = @submission.grader_submission_comments(show_hidden)
    if sub_comments.count > 0 %>
 <h1>General comments</h1>
 <div class="row">
