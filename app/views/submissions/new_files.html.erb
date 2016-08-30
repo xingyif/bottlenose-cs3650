@@ -3,6 +3,15 @@
 <%= form_for [@course, @assignment, @submission] do |f| %>
   <%= render "common", f: f, type: {noun: "submission", verb: "submit", gerund: "submitting" } %>
 
+<% if @assignment.request_time_taken %>
+<div class="form-group">
+  <%= f.label :time_taken, "How many hours have you worked on this assignment?" %>
+  <%= f.spinner :time_taken, @submission.time_taken || "", :min => 0, :delta => 0.5 %>
+</div>
+<script>
+  $(function() { $(".spinner").each(function() { activateSpinner(this, {precision: 1}) }); })
+</script>
+<% end %>
 <div class="form-group">
   <%= f.label :student_notes %>
   <%= f.text_area :student_notes, class: 'form-control' %>

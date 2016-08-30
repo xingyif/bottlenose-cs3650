@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160827221358) do
+ActiveRecord::Schema.define(version: 20160830135950) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -44,8 +44,9 @@ ActiveRecord::Schema.define(version: 20160827221358) do
     t.float    "points_available"
     t.integer  "lateness_config_id"
     t.datetime "available",                               null: false
-    t.string   "type",                  default: "files", null: false
+    t.string   "type",                  default: "Files", null: false
     t.integer  "related_assignment_id"
+    t.boolean  "request_time_taken",    default: false
   end
 
   add_index "assignments", ["course_id"], name: "index_assignments_on_course_id", using: :btree
@@ -177,6 +178,7 @@ ActiveRecord::Schema.define(version: 20160827221358) do
     t.boolean  "stale_team"
     t.float    "score"
     t.string   "type",                default: "Files", null: false
+    t.float    "time_taken"
   end
 
   add_index "submissions", ["assignment_id"], name: "index_submissions_on_assignment_id", using: :btree

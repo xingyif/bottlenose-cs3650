@@ -99,10 +99,10 @@ class SubmissionsController < CoursesController
                                  :grading_output, :grading_uid, :team_id,
                                  :teacher_score, :teacher_notes,
                                  :ignore_late_penalty, :upload_file,
-                                 :comments_upload_file)
+                                 :comments_upload_file, :time_taken)
     else
       params[:submission].permit(:assignment_id, :user_id, :student_notes,
-                                 :upload, :upload_file)
+                                 :upload, :upload_file, :time_taken)
     end
   end
 
@@ -256,14 +256,20 @@ class SubmissionsController < CoursesController
   end
   
   def create_Files(edit)
-    if @submission.save_upload and @submission.save
+    clean_so_far = @submission.save_upload and @submission.save
+    if @assignment.request_time_taken and @submission.time_taken.to_s.empty?
+      @submission.errors[:base] << "Please specify how long you have worked on this assignment"
+      clean_so_far = false
+    end
+    if clean_so_far
       @submission.set_used_sub!
       @submission.autograde!
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Submission was successfully created.')
     else
       @submission.cleanup!
-      render :new
+      self.send("new_#{@assignment.type.capitalize}", false) if self.respond_to?("new_#{@assignment.type.capitalize}", true)
+      render "new_#{@assignment.type.underscore}"
     end
   end
 

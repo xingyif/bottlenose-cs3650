@@ -439,7 +439,7 @@ class AssignmentsController < CoursesController
     params[:assignment].permit(:name, :assignment, :due_date, :available,
                                :points_available, :hide_grading, :blame_id,
                                :assignment_file,  :type, :related_assignment_id,
-                               :course_id, :team_subs)
+                               :course_id, :team_subs, :request_time_taken)
   end
 
   def graders_params
