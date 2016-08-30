@@ -1,0 +1,44 @@
+<% @page_title = "Enter grades: #{@assignment.name}" %>
+
+<%= form_tag do %>
+<div class="container">
+  <% col_count = @questions.count %>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Student name</th>
+        <% @questions.each do |q| %>
+        <th><%= q["name"].gsub("Problem ", "") %><% if q["extra"] %> (Extra Credit)<% end %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody id="grades">
+      <tr>
+        <td><input type="text" name="student[0][name]"
+        class="form-control" /></td>
+        <% col_count.times do |i| %>
+        <td><input type="text" name="student[0][grade][<%= i %>]" class="form-control numeric" /></td>
+        <% end %>
+      </tr>
+    </tbody>
+  </table>
+  <div class="form-group">
+    <button type="button" class="btn btn-default"
+            data-on="click", data-call="addRow", data-args="[]">
+      <i class="glyphicon glyphicon-plus"></i>
+      Record additional grades
+    </button>
+  </div>
+</div>
+<script>
+  var usernames = <%= raw JSON.pretty_generate(@course.users.pluck(:username)) %>
+  <%= render partial: "edit_exam_grades.js", locals: {col_count: col_count} %>
+</script>
+
+
+<div class="container">
+  <div class="form-group">
+    <%= submit_tag "Submit grades", class: "btn btn-primary" %>
+  </div>
+</div>
+<% end %>

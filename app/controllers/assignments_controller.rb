@@ -177,13 +177,85 @@ class AssignmentsController < CoursesController
   end
 
   def set_grader_configs
-    if params[:assignment][:type] == "questions"
-      return set_questions_graders
-    else
-      return set_files_graders
-    end
+    return self.send("set_#{params[:assignment][:type]}_graders")
   end
 
+  def set_exam_graders
+    upload = params[:assignment][:assignment_file]
+    if upload.nil?
+      if @assignment.assignment_upload.nil?
+        @assignment.errors.add(:base, "Exam questions file is missing")
+        return false
+      else
+        return true
+      end
+    else
+      begin
+        questions = YAML.load(upload.tempfile)
+        upload.rewind
+      rescue Psych::SyntaxError => e
+        @assignment.errors.add(:base, "Could not parse the supplied file")
+        return false
+      end
+    end
+    if !questions.is_a? Array
+      @assignment.errors.add(:base, "Supplied file does not contain a list of questions")
+      return false
+    else
+      @no_problems = true
+      @total_weight = 0
+      def make_err(msg)
+        @assignment.errors.add(:base, msg)
+        @no_problems = false
+      end
+      def is_float(val)
+        Float(val) rescue false
+      end
+      def is_int(val)
+        Integer(val) rescue false
+      end
+      questions.each_with_index do |q, q_num|
+        if q["parts"].is_a? Array
+          @part_name = "a"
+          q["parts"].each do |part|
+            if !is_float(part["weight"])
+              if part["name"]
+                make_err "Question #{part['name']} has an invalid weight"
+              else
+                make_err "Question #{q_num}#{@part_name} has an invalid weight"
+              end
+              next
+            else
+              @total_weight += Float(part["weight"])
+            end
+            @part_name.next!
+          end
+        elsif !is_float(q["weight"])
+          if q["name"]
+            make_err "Question #{q['name']} has an invalid weight"
+          else
+            make_err "Question #{q_num} has an invalid weight"
+          end
+          next
+        else
+          @total_weight += Float(q["weight"])
+        end
+      end
+    end
+    if @no_problems
+      c = GraderConfig.find_or_create_by(type: "ExamGrader", avail_score: @total_weight)
+      if c.invalid? or !c.save
+        no_problems = false
+        @assignment.errors.add(:graders, "Could not create grader #{c.to_s}")
+      else
+        AssignmentGrader
+          .find_or_initialize_by(assignment_id: @assignment.id, grader_config_id: c.id)
+          .update(order: 1)
+      end
+    end
+    return @no_problems
+  end
+  
   def set_questions_graders
     upload = params[:assignment][:assignment_file]
     if upload.nil?
@@ -330,7 +402,9 @@ class AssignmentsController < CoursesController
         no_problems = false
         @assignment.errors.add(:graders, "Could not create grader #{c.to_s}")
       else
-        AssignmentGrader.create!(assignment_id: @assignment.id, grader_config_id: c.id, order: 1)
+        AssignmentGrader
+          .find_or_initialize_by(assignment_id: @assignment.id, grader_config_id: c.id)
+          .update(order: 1)
       end
     end
     return @no_problems
@@ -415,7 +489,9 @@ class AssignmentsController < CoursesController
           @assignment.errors.add(:graders, "Could not create grader #{c.to_s}")
           raise ActiveRecord::Rollback
         else
-          AssignmentGrader.create!(assignment_id: @assignment.id, grader_config_id: c.id, order: max_order)
+          AssignmentGrader
+            .find_or_intialize_by(assignment_id: @assignment.id, grader_config_id: c.id)
+            .update(order: max_order)
           max_order += 1
         end
       end
@@ -474,6 +550,11 @@ class AssignmentsController < CoursesController
   # Assignment types
   def Questions(edit)
     @questions = @assignment.questions
+  end
+
+  def Exam(edit)
+    @questions = @assignment.questions
+    @grader = @assignment.grader_configs.first
   end
 
 end

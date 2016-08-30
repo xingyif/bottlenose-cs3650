@@ -27,31 +27,46 @@
     <%= f.label :type, "Assignment Type" %>
     <p>Choose what form of assignment this is.  Your choice will
       affect the configuration options below.</p>
-    <%= f.select :type, Assignment.assignment_kinds.to_a.map { |type_name, type_val| [type_name.humanize, type_name] } %>
+    <% if @assignment.new_record? %>
+    <%= f.select :type,
+        Assignment.assignment_kinds.to_a.map { |type_name, type_val| [type_name.humanize, type_name] } %>
+    <% else %>
+    <%= f.select :type,
+        Assignment.assignment_kinds.to_a.map { |type_name, type_val| [type_name.humanize, type_name] },
+        {}, {disabled: true, data: {toggle: "tooltip", placement:
+      "right"}, title: "You cannot change assignment types once they've
+      been created"}%>
+    <%= f.hidden_field :type %>
+    <% end %>
   </div>
   <div class="for-type row">
     <div class="form-group col-sm-6">
       <p>
       <%= f.label :assignment_file, "Assignment starter files", class: "files-type" %>
-      <%= f.label :assignment_file, "Assignment questions", class:
-          "questions-type" %>
+      <%= f.label :assignment_file, "Assignment questions", class: "questions-type" %>
+      <%= f.label :assignment_file, "Exam questions", class: "exam-type" %>      
       </p>
       <p class="files-type">This file will be available for students
-        to download as starter code for this assignment.</p>
+        to download as starter code for this
+        assignment.</p>
       <p class="questions-type">This file contains the questions for
         this assignment, in YAML format.
         <span class="btn btn-info btn-sm" data-toggle="collapse"
               data-target="#questions-schema">See schema</span>
       </p>
+      <p class="exam-type">This file contains a skeleton of the exam
+        questions, in YAML format.
+        <span class="btn btn-info btn-sm" data-toggle="collapse"
+              data-target="#exam-schema">See schema</span>
+      </p>
       <p class="form-inline">
         <label class="btn btn-default btn-file">
-          Browse <%= f.file_field :assignment_file, id:
-                     "questions-file", style: "display: none;" %>
+          Browse <%= f.file_field :assignment_file, id: "assignment-file", style: "display: none;" %>
         </label>
         <span id="current_file" class="btn">Current file:
           <%= @assignment.assignment_file.empty? ? "nothing" : @assignment.assignment_file %></span>
         <script>
-          $("#questions-file").change(function() {
+          $("#assignment-file").change(function() {
             var label = $(this).val().replace(/\\/g, '/').replace(/.*\//, '');
             $("#current_file").text("New file: " + label);
           });
@@ -69,9 +84,44 @@
       Skipped <%= @assignment.id %>
     </div>
   </div>
+
+  <div class="for-type row">
+    <div class="exam-type col-sm-12">
+      <div id="exam-schema" class="well-sm collapse">
+        <h5>YAML Exam schema:</h5>
+        <ul>
+          <li>An exam file has a list of questions.</li>
+          <li>A question has a <code>weight</code>, an
+            optional <code>name</code>, and an
+            optional <code>description</code>.</li>
+          <li>A question can contain a list of questions as
+            <code>parts</code>.  If sub-parts are present, the weight of the
+            question is the sum of the sub-parts' <code>weight</code>s, and its own
+            <code>weight</code> field is ignored.</li>
+          <li>A question can be marked as <code>extra</code>, to count
+            as extra credit</li>
+        </ul>
+        <p>Here is a short example exam file:</p>
+        <pre>
+---
+- weight: 6
+- weight: 6
+  name: "Question 2!"
+- parts:
+  - weight: 3
+    name: "Problem 3a"
+  - weight: 5
+    name: "Problem 3b"
+- weight: 3
+  extra: true
+...
+        </pre>
+      </div>
+    </div>
+  </div>
   
   <div class="for-type row">
-    <div class="questions-type">
+    <div class="questions-type col-sm-12">
       <div id="questions-schema" class="well-sm collapse">
         <h5>YAML Question schema:</h5>
         <ul>
@@ -185,19 +235,10 @@
         </pre>
       </div>
     </div>
-
   </div>
-  <script>
-    $(function() {
-      $("#assignment_type").change(function(e) {
-        var values = $(this).find("option").map(function() { return this.value + "-type"; }).get();
-        $(".for-type").removeClass(values.join(" ")).addClass($(this).val() + "-type");
-      });
-      $("#assignment_type").change();
-    });
-  </script>
-  <div class="row">
-    <div class="form-group col-sm-6">
+
+  <div class="for-type row">
+    <div class="form-group col-sm-6 files-type questions-type">
       <%= f.label :team_subs, "Team Submissions?" %>
       <p>If selected, submissions count as a member of a team.  If
         not, submissions are individual even if student is a memeber of
@@ -206,69 +247,47 @@
     </div>
     <div class="form-group col-sm-6">
       <%= f.label :points_available %>
-      <p>This is the percentage of the final grade that this
-        assignment is worth.  Default: same as previous assignment.
-      </p>
+      <p>
+        <span class="files-type questions-type">This is the percentage of the final grade that this
+          assignment is worth.  Default: same as previous assignment.</span>
+        <span class="exam-type">This is the percentage of the final grade
+          that this exam is worth.</span></p>
       <%= f.text_field :points_available, size: 10, class: 'form-control numeric' %>
     </div>
   </div>
-  <div class="form-group">
-    <div class="row">
-      <div class="col-sm-6">
-        <%= f.label :due_date %>
-        <p>(Assignment should not be submitted after this time. Default: one week from today.)</p>
-        <div>
-          <%= f.text_field :due_date,
-              value: ((@assignment and @assignment.due_date) or (DateTime.current.end_of_day + 1.week))
-                      .strftime("%Y-%m-%d %H:%M %Z"),
-              class: 'form-control' %>
-        </div>
+
+  <div class="for-type row">  
+    <div class="form-group col-sm-6">
+      <%= f.label :due_date, class: "files-type questions-type" %>
+      <%= f.label :due_date, "Exam date", class: "exam-type" %>
+      <p>Assignment should not be submitted after this time. Default: one week from today.</p>
+      <div>
+        <%= f.text_field :due_date,
+            value: ((@assignment and @assignment.due_date) or (DateTime.current.end_of_day + 1.week))
+                    .strftime("%Y-%m-%d %H:%M %Z"),
+            class: 'form-control' %>
       </div>
-      <div class="col-sm-6">
-        <%= f.label :available_date %>
-        <p>(Assignment will not be visible until this time. Default: today.)</p>
-        <div>
-          <%= f.text_field :available,
-              value: ((@assignment and @assignment.available) or DateTime.current.beginning_of_day)
-                      .strftime("%Y-%m-%d %H:%M %Z"),
-              class: 'form-control' %>
-        </div>
+    </div>
+    <div class="form-group col-sm-6 files-type questions-type">
+      <%= f.label :available_date %>
+      <p>Assignment will not be visible until this time. Default: today.</p>
+      <div>
+        <%= f.text_field :available,
+            value: ((@assignment and @assignment.available) or DateTime.current.beginning_of_day)
+                    .strftime("%Y-%m-%d %H:%M %Z"),
+            class: 'form-control' %>
       </div>
-      <script type="text/javascript">
-        $(function () {
-          $('#assignment_available').datetimepicker({
-            sideBySide: true,
-            format: "YYYY/MM/DD h:mm A",
-            minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
-            <% if @assignment.available.nil? %>
-            defaultDate: "<%= DateTime.current.beginning_of_day.strftime("%Y-%m-%d %H:%M %Z") %>"
-            <% else %>
-            defaultDate: "<%= @assignment.available.strftime("%Y-%m-%d %H:%M %Z") %>"
-            <% end %>
-          });
-          $('#assignment_due_date').datetimepicker({
-            sideBySide: true,
-            format: "YYYY/MM/DD h:mm A",
-            minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
-            <% if @assignment.due_date.nil? %>
-            defaultDate: "<%= (DateTime.current.end_of_day + 1.week).strftime("%Y-%m-%d %H:%M %Z") %>"
-            <% else %>
-            defaultDate: "<%= @assignment.due_date.strftime("%Y-%m-%d %H:%M %Z") %>"
-            <% end %>
-          });
-        });
-      </script>
     </div>
   </div>
-  
-  <div class="form-group">
-    <div class="col-sm-6">
+
+  <div class="for-type row">  
+    <div class="form-group col-sm-6 files-type questions-type">
       <%= f.label :hide_grading, "Hide Grading?" %>
       <p>If selected, assignment scores and teacher notes are hidden.</p>
       <%= f.check_box :hide_grading, checked: @assignment.hide_grading,
           data: {toggle: "toggle", on: "Yes", off: "No"} %>
     </div>
-    <div class="col-sm-6">
+    <div class="form-group col-sm-6 files-type questions-type">
       <%= f.label :request_time_taken, "Request time taken?" %>
       <p>If selected, ask students on each submission how long they've
         worked on the assignment.</p>
@@ -276,11 +295,13 @@
           data: {toggle: "toggle", on: "Yes", off: "No"} %>
     </div>          
   </div>
-  <div class="form-group">
-    <p><strong>Late Penalty</strong></p>
-    <%= fields_for "lateness" do |late| %>
-    <%= render 'lateness/picker', :within_course => true, :f_late => late, :f_course => f %>
-    <% end %>
+  <div class="form-group for-type">
+    <div class="files-type questions-type">
+      <p><strong>Late Penalty</strong></p>
+      <%= fields_for "lateness" do |late| %>
+      <%= render 'lateness/picker', :within_course => true, :f_late => late, :f_course => f %>
+      <% end %>
+    </div>
   </div>
   <div class="for-type form-group">
     <div id="create-graders" class="files-type">
@@ -311,6 +332,35 @@
   <%= f.submit nil, class: 'btn btn-primary' %>
   </div>
 <% end %>
+<script>
+  $(function() {
+    $("#assignment_type").change(function(e) {
+      var values = $(this).find("option").map(function() { return this.value + "-type"; }).get();
+      $(".for-type").removeClass(values.join(" ")).addClass($(this).val() + "-type");
+    });
+    $("#assignment_type").change();
+    $('#assignment_available').datetimepicker({
+      sideBySide: true,
+      format: "YYYY/MM/DD h:mm A",
+      minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
+      <% if @assignment.available.nil? %>
+      defaultDate: "<%= DateTime.current.beginning_of_day.strftime("%Y-%m-%d %H:%M %Z") %>"
+      <% else %>
+      defaultDate: "<%= @assignment.available.strftime("%Y-%m-%d %H:%M %Z") %>"
+      <% end %>
+    });
+    $('#assignment_due_date').datetimepicker({
+      sideBySide: true,
+      format: "YYYY/MM/DD h:mm A",
+      minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
+      <% if @assignment.due_date.nil? %>
+      defaultDate: "<%= (DateTime.current.end_of_day + 1.week).strftime("%Y-%m-%d %H:%M %Z") %>"
+      <% else %>
+      defaultDate: "<%= @assignment.due_date.strftime("%Y-%m-%d %H:%M %Z") %>"
+      <% end %>
+    });
+  });
+</script>
 <script>
   $(function() { enableReflectiveCalls(); });
   function add_grader(content) {

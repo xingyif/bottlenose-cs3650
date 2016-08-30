@@ -2,7 +2,8 @@ require 'tap_parser'
 
 class GradersController < ApplicationController
   prepend_before_action :find_grader
-  prepend_before_action :find_course_assignment_submission
+  prepend_before_action :find_submission, except: [:edit_grades, :update_grades]
+  prepend_before_action :find_course_assignment
   before_action :require_admin_or_staff, except: [:show, :update]
   def edit
     if @grader.grader_config.autograde?
@@ -31,6 +32,31 @@ class GradersController < ApplicationController
     @grader.grader_config.grade(@assignment, @submission)
     @submission.compute_grade! if @submission.grade_complete?
     redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission))
+  end
+
+  def edit_grades
+    self.send("edit_#{@assignment.type.capitalize}_grades") if self.respond_to?("edit_#{@assignment.type.capitalize}_grades", true)
+  end
+  def edit_Exam_grades
+    @questions = []
+    @assignment.questions.each_with_index do |q, i|
+      if q["parts"]
+        @part_name = "a"
+        q["parts"].each do |p|
+          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
+          @questions.push p
+          @part_name.next!
+        end
+      else
+        q["name"] = "Problem #{i + 1}" unless q["name"]
+        @questions.push q
+      end
+    end
+    render "edit_#{@assignment.type.underscore}_grades"
+  end
+
+  def update_grades
+    debugger
   end
   
   def update
@@ -95,10 +121,9 @@ class GradersController < ApplicationController
     end
   end
 
-  def find_course_assignment_submission
+  def find_course_assignment
     @course = Course.find_by(id: params[:course_id])
     @assignment = Assignment.find_by(id: params[:assignment_id])
-    @submission = Submission.find_by(id: params[:submission_id])
     if @course.nil?
       redirect_to back_or_else(root_path), alert: "No such course"
       return
@@ -107,6 +132,9 @@ class GradersController < ApplicationController
       redirect_to back_or_else(course_path(@course)), alert: "No such assignment for this course"
       return
     end
+  end
+  def find_submission
+    @submission = Submission.find_by(id: params[:submission_id])
     if @submission.nil? or @submission.assignment_id != @assignment.id
       redirect_to back_or_else(course_assignment_path(@course, @assignment)),
                   alert: "No such submission for this assignment"

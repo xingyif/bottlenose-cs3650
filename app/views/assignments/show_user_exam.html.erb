@@ -1,0 +1,7 @@
+<% @page_title = "#{@course.name} / #{@gradesheet.assignment.name} / Responses for #{@user.display_name}" %>
+
+<%= render 'assignment_questions_info', gradesheet: @gradesheet %>
+<h3>
+  Grades
+</h3>
+<%= render 'user_subs', user: @user, course: @course, gradesheet: @gradesheet %>

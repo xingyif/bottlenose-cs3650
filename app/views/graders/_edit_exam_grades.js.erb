@@ -1,0 +1,35 @@
+$(function() {
+  enableReflectiveCalls();
+  $("input[name='student[0][name]']").on("focus", unhilight).on("blur", checkName);
+});
+function checkName() {
+  if ($.inArray($(this).val(), usernames) >= 0)
+    $(this).addClass("goodAnswer");
+  else
+    $(this).addClass("badAnswer");
+}
+function unhilight() {
+  $(this).removeClass("goodAnswer badAnswer");
+}
+function addRow() {
+  var body = $("tbody#grades");
+  var rowCount = body.find("tr").length;
+  var row = $("<tr>");
+  var newUser = $("<input>").attr("type", "text")
+      .addClass("form-control")
+      .attr("name", "student[" + rowCount + "][name]")
+      .on("focus", unhilight).on("blur", checkName);
+  row.append($("<td>").append(newUser));
+  for (var i = 0; i < <%= col_count %>; i++) {
+    row.append($("<td>").append($("<input>")
+                                .attr("type", "text")
+                                .addClass("form-control numeric")
+                                .on("keydown", validateNumericInput)
+                                .attr("name", "student[" + rowCount + "][grade][" + i + "]")));
+  }
+  body.append(row);
+  newUser.focus();
+}
+$("form").submit(function() {
+  return confirm("Are you sure?");
+});

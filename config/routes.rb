@@ -41,6 +41,12 @@ Bottlenose::Application.routes.draw do
       member do
         post 'create_missing_graders' => 'assignments#recreate_graders'
       end
+      resources :graders do
+        member do
+          get 'bulk' => 'graders#edit_grades'
+          post 'bulk' => 'graders#update_grades'
+        end
+      end
       resources :submissions do
         member do
           get :details

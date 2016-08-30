@@ -40,7 +40,6 @@ class SubmissionsController < CoursesController
     end
 
     self.send("new_#{@assignment.type.capitalize}", false) if self.respond_to?("new_#{@assignment.type.capitalize}", true)
-    render "new_#{@assignment.type.underscore}"
   end
 
   def create
@@ -190,6 +189,14 @@ class SubmissionsController < CoursesController
 
   ######################
   # Assignment types
+  def new_Exam(edit)
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                  alert: "Must be an admin or staff to enter exam grades."
+    end
+    @grader = @assignment.grader_configs.first
+    redirect_to bulk_course_assignment_grader(@course, @assignment, @grader)
+  end
   def new_Questions(edit)
     @questions = @assignment.questions
     @submission_dirs = []
@@ -203,6 +210,11 @@ class SubmissionsController < CoursesController
     else
       @submission_files = []
     end
+    render "new_#{@assignment.type.underscore}"
+  end
+
+  def new_Files(edit)
+    render "new_#{@assignment.type.underscore}"
   end
 
   def show_Files(edit)
@@ -364,7 +376,6 @@ class SubmissionsController < CoursesController
       redirect_to(path, notice: 'Response was successfully created.')
     else
       new_Questions(false)
-      render "new_#{@assignment.type.underscore}"
-    end      
+    end
   end
 end
