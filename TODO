@@ -33,8 +33,8 @@
    [X] enter answers
    [X] view answers (w/ grading if available)
    [X] grading
-[ ] exams
-   [ ] bulk upload grades
+[X] exams
+   [X] bulk upload grades
 [X] quizzes
    [X] online
    [?] auto-graded?
