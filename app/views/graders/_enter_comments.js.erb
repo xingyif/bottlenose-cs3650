@@ -97,10 +97,17 @@ $(function() {
         .append($("<option>")
                 .text("<%= s_name.humanize %>").attr({value: "<%= s_name %>", name: "<%= s_name.humanize %>"}))
         <% end %>;
+    var deductionInput = makeSpinner({val: comment.deduction, klass: "deduction", min: 0, delta: 0.1, precision: 2})
+        .attr("id", "deduction_" + i)
     categoryInput.on("change", function() {
       widget.removeClass(widget.data("severity"))
         .data("severity", $(this).find(":selected").first().attr("name"))
         .addClass($(this).find(":selected").first().attr("name"));
+      if ($(this).find(":selected").first().attr("name") == "Info") {
+        $(deductionInput).find("input").removeData("min").change();
+      } else {
+        $(deductionInput).find("input").data("min", 0).change();
+      }
       comment.severity = $(this).val();
       comment.saved = false;
     });
@@ -112,8 +119,7 @@ $(function() {
     td.append(
       $("<p>").append($("<label>").attr("for", "severity_" + i)
                       .text("Severity:")).append(categoryInput));
-    var deductionInput = makeSpinner({val: comment.deduction, klass: "deduction", min: 0, delta: 0.1, precision: 2})
-        .attr("id", "deduction_" + i)
+    // deductionInput: 
     td.append(
       $("<p>").append($("<label>").attr("for", "deduction_" + i).text("Deduction:"))
         .append($("<span>").css({"display": "inline-block", "vertical-align": "bottom"})
