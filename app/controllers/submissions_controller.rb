@@ -138,16 +138,16 @@ class SubmissionsController < CoursesController
                   alert: "No such submission"
       return
     end
+    if @submission.assignment_id != @assignment.id
+      redirect_to back_or_else(course_assignment_path(@course, @assignment)), alert: "No such submission for this assignment"
+      return
+    end
   end
 
   
   def get_submission_files(sub)
-    if flash[:show_comments]
-      show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
-      @lineCommentsByFile = sub.grader_line_comments(nil, show_hidden)
-    else
-      @lineCommentsByFile = {}
-    end
+    show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
+    @lineCommentsByFile = sub.grader_line_comments(nil, show_hidden)
 
     @submission_files = []
     def with_extracted(item)

@@ -86,7 +86,7 @@ class AssignmentsController < CoursesController
     end
 
     if @assignment.update_attributes(assignment_params)
-      @assignment.save_uploads!
+      @assignment.save_uploads! if params[:assignment][:assignment_file]
       redirect_to course_assignment_path(@course, @assignment), notice: 'Assignment was successfully updated.'
     else
       render action: "edit"
@@ -126,10 +126,10 @@ class AssignmentsController < CoursesController
   end
 
   def publish
-    assignment = Assignment.find(params[:id])
-    used = assignment.used_submissions
+    @assignment = Assignment.find(params[:id])
+    used = @assignment.used_submissions
     used.each do |u|
-      u.graders.where(score: nil).each do |g| g.grader_config.grade(assignment, u) end
+      u.graders.where(score: nil).each do |g| g.grader_config.grade(@assignment, u) end
       u.graders.update_all(:available => true)
       u.compute_grade!
     end
@@ -187,15 +187,20 @@ class AssignmentsController < CoursesController
   def set_questions_graders
     upload = params[:assignment][:assignment_file]
     if upload.nil?
-      @assignment.errors.add(:base, "Assignment questions file is missing")
-      return false
-    end
-    begin
-      questions = YAML.load(upload.tempfile)
-      upload.rewind
-    rescue Psych::SyntaxError => e
-      @assignment.errors.add(:base, "Could not parse the supplied file")
-      return false
+      if @assignment.assignment_upload.nil?
+        @assignment.errors.add(:base, "Assignment questions file is missing")
+        return false
+      else
+        return true
+      end
+    else
+      begin
+        questions = YAML.load(upload.tempfile)
+        upload.rewind
+      rescue Psych::SyntaxError => e
+        @assignment.errors.add(:base, "Could not parse the supplied file")
+        return false
+      end
     end
     if !questions.is_a? Array
       @assignment.errors.add(:base, "Supplied file does not contain a list of sections")

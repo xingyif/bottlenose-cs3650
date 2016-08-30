@@ -74,7 +74,7 @@
               recreate_grader_course_assignment_submission_path(@course, @assignment, @submission, @gradesheet.configs[i]),
               method: 'post', class: "btn btn-warning" %>
         <% else %>
-          <% if grader.grading_output %>
+          <% if grader.available %>
             <%= link_to "Grader output", 
                 course_assignment_submission_grader_path(@course, @assignment, @submission, grader) %>
             <%= if !grader.complete? then " (hidden)" end %>
@@ -87,16 +87,16 @@
             <% if grader.complete? %>
             <%= link_to "Regrade",
                 edit_course_assignment_submission_grader_path(@course, @assignment, @submission, grader),
-                class: "btn btn-info"%>
+                class: "btn btn-info", style: "margin-left: 5em;"%>
             <% else %>
             <%= link_to "Grade",
                 edit_course_assignment_submission_grader_path(@course, @assignment, @submission, grader),
-                class: "btn btn-success" %>
+                class: "btn btn-success", style: "margin-left: 5em;" %>
             <% end %>
           <% end %>
         <% end %>  
       <% else %>
-        <% if grader && grader.available && !grader.grading_output.nil? %>
+        <% if grader && grader.available %>
           <%= link_to "Grader output",
               course_assignment_submission_grader_path(@course, @assignment, @submission, grader) %>
         <% else %>
@@ -171,7 +171,7 @@
   </tr>
 </table>
 
-<% show_hidden = (current_user_site_admin? || cur_reg.staff?)
+<% show_hidden = (current_user.site_admin? || cur_reg.staff?)
    sub_comments = @submission.grader_submission_comments(show_hidden)
    if sub_comments.count > 0 %>
 <h1>General comments</h1>

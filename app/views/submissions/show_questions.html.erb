@@ -47,8 +47,13 @@
 <table class="table table-striped row-vcenter">
   <% grades = @gradesheet.grades[:grades].find(sub: @submission).first
      all_scores = if cur_reg.staff? then grades[:staff_scores] else grades[:blind_scores] end
-     unavailable = !(@gradesheet.graders[@submission.id].all?(&:available))
-     complete = @gradesheet.graders[@submission.id].all?(&:complete?)
+     if @gradesheet.graders[@submission.id].nil?
+       unavailable = true
+       available = false
+     else
+       unavailable = !(@gradesheet.graders[@submission.id].all?(&:available))
+       complete = @gradesheet.graders[@submission.id].all?(&:complete?)
+     end
      @gradesheet.configs.each_with_index do |c, i|
        scores = all_scores[:scores][i]
        grader = @gradesheet.graders[@submission.id].find{|gr| gr.grader_config_id == c.id}
@@ -93,7 +98,7 @@
           <% end %>
         <% end %>  
       <% else %>
-        <% if grader && grader.available && !grader.grading_output.nil? %>
+        <% if grader && grader.available %>
           <%= link_to "Grader output",
               course_assignment_submission_grader_path(@course, @assignment, @submission, grader) %>
         <% else %>

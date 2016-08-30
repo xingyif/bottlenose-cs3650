@@ -31,9 +31,14 @@ function renderComment(cm, type, line, comment) {
         .data("toggle", "toolip").data("placement", "top")
         .attr("title", "Too many errors of this type were found; no further points were deducted");
     td.append(icon);
-    var deduction = $("<span>").text("[-" + comment.deduction + "]").addClass("label label-default")
+    var deduction = $("<span>").addClass("label label-default")
         .data("toggle", "tooltip").data("placement", "top")
         .attr("title", "This problem would normally deduct " + comment.deduction + " points");
+    if (comment.deduction < 0)
+      deduction.text("[+" + Math.abs(comment.deduction) + "]");
+    else {
+      deduction.text("[-" + comment.deduction + "]");
+    }
     td.append(deduction);
   } else {
     var icon = $("<span>").addClass("glyphicon")
@@ -45,7 +50,17 @@ function renderComment(cm, type, line, comment) {
     else
       icon.addClass("glyphicon-info-sign").attr("title", "Suggestion");
     td.append(icon);
-    var deduction = $("<span>").text("-" + comment.deduction).addClass("label label-danger");
+    var deduction = $("<span>").addClass("label label-danger");
+    if (comment.deduction < 0)
+      deduction.text("[+" + Math.abs(comment.deduction) + "]");
+    else {
+      deduction.text("[-" + comment.deduction + "]");
+    }
+    if (comment.deduction < 0)
+      deduction.text("+" + Math.abs(comment.deduction));
+    else {
+      deduction.text("-" + comment.deduction);
+    }    
     td.append(deduction);
   }
   td = $("<td>");

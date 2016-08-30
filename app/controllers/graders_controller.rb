@@ -189,8 +189,7 @@ class GradersController < ApplicationController
   # Grader responses
   
   def JavaStyleGrader(edit)
-    redirect_to details_course_assignment_submission_path(@course, @assignment, @submission),
-                flash: {show_comments: true}
+    redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
   end
 
   def JunitGrader(edit)
@@ -296,7 +295,7 @@ class GradersController < ApplicationController
 
   def get_submission_files(sub)
     @submission_files = []
-    @lineCommentsByFile = {}
+    @lineCommentsByFile ||= {}
     def with_extracted(item)
       if item[:public_link]
         @submission_files.push({
