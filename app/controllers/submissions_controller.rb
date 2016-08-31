@@ -11,7 +11,7 @@ class SubmissionsController < CoursesController
       return
     end
 
-    self.send("show_#{@assignment.type.capitalize}", false) if self.respond_to?("show_#{@assignment.type.capitalize}", true)
+    self.send("show_#{@assignment.type.capitalize}")
     render "show_#{@assignment.type.underscore}"
   end
 
@@ -25,7 +25,7 @@ class SubmissionsController < CoursesController
       return
     end
 
-    self.send("details_#{@assignment.type.capitalize}", false) if self.respond_to?("details_#{@assignment.type.capitalize}", true)
+    self.send("details_#{@assignment.type.capitalize}")
     render "details_#{@assignment.type.underscore}"
   end
 
@@ -39,7 +39,7 @@ class SubmissionsController < CoursesController
       @submission.team = @team
     end
 
-    self.send("new_#{@assignment.type.capitalize}", false) if self.respond_to?("new_#{@assignment.type.capitalize}", true)
+    self.send("new_#{@assignment.type.capitalize}")
   end
 
   def create
@@ -64,7 +64,7 @@ class SubmissionsController < CoursesController
     end
 
 
-    self.send("create_#{@assignment.type.capitalize}", false) if self.respond_to?("create_#{@assignment.type.capitalize}", true)
+    self.send("create_#{@assignment.type.capitalize}")
   end
 
   def recreate_grader
@@ -189,15 +189,11 @@ class SubmissionsController < CoursesController
 
   ######################
   # Assignment types
-  def new_Exam(edit)
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to back_or_else(course_assignment_path(@course, @assignment)),
-                  alert: "Must be an admin or staff to enter exam grades."
-    end
-    @grader_config = @assignment.grader_configs.first
-    redirect_to bulk_course_assignment_grader_config_path(@course, @assignment, @grader_config)
+  # NEW
+  def new_Files
+    render "new_#{@assignment.type.underscore}"
   end
-  def new_Questions(edit)
+  def new_Questions
     @questions = @assignment.questions
     @submission_dirs = []
     if @assignment.related_assignment
@@ -212,84 +208,17 @@ class SubmissionsController < CoursesController
     end
     render "new_#{@assignment.type.underscore}"
   end
-
-  def new_Files(edit)
-    render "new_#{@assignment.type.underscore}"
-  end
-
-  def show_Files(edit)
-    @gradesheet = Gradesheet.new(@assignment, [@submission])
-  end
-
-  def details_Files(edit)
-    get_submission_files(@submission)
-  end
-  
-  def show_Questions(edit)
-    @gradesheet = Gradesheet.new(@assignment, [@submission])
-    @questions = @assignment.questions
-    @answers = YAML.load(File.open(@submission.upload.submission_path))
-    @submission_dirs = []
-    if @assignment.related_assignment
-      related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
-      if related_sub.nil?
-        @submission_files = []
-      else
-        get_submission_files(related_sub)
-      end
-    else
-      @submission_files = []
+  def new_Exam
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                  alert: "Must be an admin or staff to enter exam grades."
     end
-  end
-
-  def show_Exam(edit)
-    @questions = []
-    @assignment.questions.each_with_index do |q, i|
-      if q["parts"]
-        @part_name = "a"
-        q["parts"].each do |p|
-          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
-          @questions.push p
-          @part_name.next!
-        end
-      else
-        q["name"] = "Problem #{i + 1}" unless q["name"]
-        @questions.push q
-      end
-    end
-
-    @student_info = @course.students.select(:username, :last_name, :first_name, :id)
     @grader_config = @assignment.grader_configs.first
-    @grader = Grader.find_by(grader_config_id: @grader_config.id, submission_id: @submission.id)
-    @grade_comments = InlineComment.where(submission_id: @submission.id)
+    redirect_to bulk_course_assignment_grader_config_path(@course, @assignment, @grader_config)
   end
 
-  def details_Questions(edit)
-    @questions = @assignment.questions
-    @answers = YAML.load(File.open(@submission.upload.submission_path))
-    if current_user_site_admin? || current_user_staff_for?(@course)
-      @grades = @submission.inline_comments
-    else
-      @grades = @submission.visible_inline_comments
-    end
-
-    @show_graders = edit
-    
-    @grades = @grades.select(:line, :name, :weight, :comment).joins(:user).sort_by(&:line).to_a
-    @submission_dirs = []
-    if @assignment.related_assignment
-      related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
-      if related_sub.nil?
-        @submission_files = []
-      else
-        get_submission_files(related_sub)
-      end
-    else
-      @submission_files = []
-    end
-  end
-  
-  def create_Files(edit)
+  # CREATE
+  def create_Files
     clean_so_far = @submission.save_upload and @submission.save
     if @assignment.request_time_taken and @submission.time_taken.to_s.empty?
       @submission.errors[:base] << "Please specify how long you have worked on this assignment"
@@ -302,12 +231,10 @@ class SubmissionsController < CoursesController
       redirect_to(path, notice: 'Submission was successfully created.')
     else
       @submission.cleanup!
-      self.send("new_#{@assignment.type.capitalize}", false) if self.respond_to?("new_#{@assignment.type.capitalize}", true)
-      render "new_#{@assignment.type.underscore}"
+      new_Files
     end
   end
-
-  def create_Questions(edit)
+  def create_Questions
     @answers = answers_params
     questions = @assignment.questions.reduce([]) do |acc, section|
       section.reduce(acc) do |acc, (name, qs)| acc + qs end
@@ -397,7 +324,85 @@ class SubmissionsController < CoursesController
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Response was successfully created.')
     else
-      new_Questions(false)
+      @submission.cleanup!
+      new_Questions
     end
+  end
+  def create_Exam
+    
+  end
+
+  
+  # SHOW
+  def show_Files
+    @gradesheet = Gradesheet.new(@assignment, [@submission])
+  end
+  def show_Questions
+    @gradesheet = Gradesheet.new(@assignment, [@submission])
+    @questions = @assignment.questions
+    @answers = YAML.load(File.open(@submission.upload.submission_path))
+    @submission_dirs = []
+    if @assignment.related_assignment
+      related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
+      if related_sub.nil?
+        @submission_files = []
+      else
+        get_submission_files(related_sub)
+      end
+    else
+      @submission_files = []
+    end
+  end
+  def show_Exam
+    @questions = []
+    @assignment.questions.each_with_index do |q, i|
+      if q["parts"]
+        @part_name = "a"
+        q["parts"].each do |p|
+          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
+          @questions.push p
+          @part_name.next!
+        end
+      else
+        q["name"] = "Problem #{i + 1}" unless q["name"]
+        @questions.push q
+      end
+    end
+
+    @student_info = @course.students.select(:username, :last_name, :first_name, :id)
+    @grader_config = @assignment.grader_configs.first
+    @grader = Grader.find_by(grader_config_id: @grader_config.id, submission_id: @submission.id)
+    @grade_comments = InlineComment.where(submission_id: @submission.id)
+  end
+
+  # DETAILS
+  def details_Files
+    get_submission_files(@submission)
+  end
+  def details_Questions
+    @questions = @assignment.questions
+    @answers = YAML.load(File.open(@submission.upload.submission_path))
+    if current_user_site_admin? || current_user_staff_for?(@course)
+      @grades = @submission.inline_comments
+    else
+      @grades = @submission.visible_inline_comments
+    end
+
+    @show_graders = false
+    
+    @grades = @grades.select(:line, :name, :weight, :comment).joins(:user).sort_by(&:line).to_a
+    @submission_dirs = []
+    if @assignment.related_assignment
+      related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
+      if related_sub.nil?
+        @submission_files = []
+      else
+        get_submission_files(related_sub)
+      end
+    else
+      @submission_files = []
+    end
+  end
+  def details_Exam
   end
 end

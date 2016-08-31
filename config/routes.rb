@@ -41,10 +41,10 @@ Bottlenose::Application.routes.draw do
       member do
         post 'create_missing_graders' => 'assignments#recreate_graders'
       end
-      resources :grader_configs do
+      resources :grader_configs, only: [] do
         member do
-          get 'bulk' => 'graders#edit_grades'
-          post 'bulk' => 'graders#update_grades'
+          get 'bulk' => 'graders#bulk_edit'
+          post 'bulk' => 'graders#bulk_update'
         end
       end
       resources :submissions, except: [:edit, :update, :destroy] do
@@ -77,45 +77,7 @@ Bottlenose::Application.routes.draw do
     end
   end
 
-  get 'courses/:course_id/assignments/:id/user/:user_id' => 'assignments#show_user', as: 'course_assignment_user'
-  get 'courses/:course_id/assignments/:id/tarball' => 'assignments#tarball', as: 'course_assignment_tarball'
+  get   'courses/:course_id/assignments/:id/user/:user_id' => 'assignments#show_user', as: 'course_assignment_user'
+  get   'courses/:course_id/assignments/:id/tarball' => 'assignments#tarball', as: 'course_assignment_tarball'
   patch 'courses/:course_id/assignments/:id/publish' => 'assignments#publish', as: 'course_assignment_publish'
-
-  # # Staff routes.
-  # ###############
-  #
-  # namespace :staff do
-  #   root to: "main#dashboard"
-  #
-  #   resource :settings, only: [:edit, :update]
-  #   resources :users do
-  #     collection do
-  #       post :stop_impersonating
-  #     end
-  #     member do
-  #       post :impersonate
-  #     end
-  #   end
-  #   resources :terms
-  #   resources :courses do
-  #     delete 'reg_requests/:id/accept', to: 'reg_requests#accept', as: 'reg_request_accept'
-  #     delete 'reg_requests/:id/reject', to: 'reg_requests#reject', as: 'reg_request_reject'
-  #     resources :registrations, except: [:edit, :update] do
-  #       collection do
-  #         post :bulk
-  #       end
-  #       member do
-  #         post :toggle
-  #       end
-  #     end
-  #     resources :teams do
-  #       member do
-  #         patch :disolve
-  #       end
-  #     end
-  #     resources :assignments do
-  #       resources :submissions
-  #     end
-  #   end
-  # end
 end

@@ -2,7 +2,7 @@ require 'tap_parser'
 
 class GradersController < ApplicationController
   prepend_before_action :find_grader
-  prepend_before_action :find_submission, except: [:edit_grades, :update_grades]
+  prepend_before_action :find_submission, except: [:bulk_edit, :bulk_update]
   prepend_before_action :find_course_assignment
   before_action :require_admin_or_staff, except: [:show, :update]
   def edit
@@ -12,7 +12,7 @@ class GradersController < ApplicationController
       return
     end
 
-    self.send("edit_#{@grader.grader_config.type}") if self.respond_to?("edit_#{@grader.grader_config.type}", true)
+    self.send("edit_#{@grader.grader_config.type}")
   end
 
   def show
@@ -25,7 +25,7 @@ class GradersController < ApplicationController
       end
     end
     
-    self.send("show_#{@grader.grader_config.type}") if self.respond_to?("show_#{@grader.grader_config.type}", true)
+    self.send("show_#{@grader.grader_config.type}")
   end
 
   def regrade
@@ -34,104 +34,17 @@ class GradersController < ApplicationController
     redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission))
   end
 
-  def edit_grades
-    self.send("edit_#{@assignment.type.capitalize}_grades") if self.respond_to?("edit_#{@assignment.type.capitalize}_grades", true)
-  end
-  def edit_Exam_grades
-    edit_Exam_grades_for(@course.students)
-    
-    render "edit_#{@assignment.type.underscore}_grades"
-  end
-  def edit_Exam_grades_for(students)
-    @questions = []
-    @assignment.questions.each_with_index do |q, i|
-      if q["parts"]
-        @part_name = "a"
-        q["parts"].each do |p|
-          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
-          @questions.push p
-          @part_name.next!
-        end
-      else
-        q["name"] = "Problem #{i + 1}" unless q["name"]
-        @questions.push q
-      end
-    end
-
-    @student_info = students.select(:username, :last_name, :first_name, :id)
-    @used_subs = @assignment.used_submissions
-    @grade_comments = InlineComment.where(submission_id: @used_subs.map(&:id)).group_by(&:submission_id)
-  end
-
-  def edit_ExamGrader
-    edit_Exam_grades_for(User.where(id: @submission.user_id))
-    render "edit_ExamGrader"
-  end
-  def show_ExamGrader
-    redirect_to course_assignment_submission_path(@course, @assignment, @submission)
+  def bulk_edit
+    self.send("bulk_edit_#{@assignment.type.capitalize}")
   end
   
-  def update_grades
-    do_update_grades
-    redirect_to back_or_else(course_assignment_path(@course, @assignment)),
-                    notice: "Grades saved"
-  end
-  def do_update_grades
-    all_grades = array_from_hash(params[:student])
-    @student_info = @course.students.select(:username, :last_name, :first_name, :id).where(id: params[:student].keys)
-    @grader_config = @assignment.grader_configs.first # and only config
-    # @used_subs = @assignment.used_submissions
-    # @grade_comments = InlineComment.where(submission_id: @used_subs.map(&:id)).group_by(&:user_id)
-
-    @questions = []
-    @assignment.questions.each_with_index do |q, i|
-      if q["parts"]
-        @part_name = "a"
-        q["parts"].each do |p|
-          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
-          @questions.push p
-          @part_name.next!
-        end
-      else
-        q["name"] = "Problem #{i + 1}" unless q["name"]
-        @questions.push q
-      end
-    end
-    
-    @student_info.each do |student|
-      @sub = @assignment.used_sub_for(student)
-      if @sub.nil?
-        @sub = Submission.create!(assignment: @assignment,
-                                  user: student,
-                                  type: "Exam")
-      end
-      @sub.set_used_sub!
-      @grader = Grader.find_or_create_by(grader_config_id: @grader_config.id, submission_id: @sub.id)
-      if @grader.new_record?
-        @grader.out_of = @grader_config.avail_score
-      end
-      grades = all_grades[student.id]
-      grades.each_with_index do |g, q_num|
-        comment = InlineComment.find_or_initialize_by(submission_id: @sub.id, grader_id: @grader.id, line: q_num)
-        next if g.to_s.empty? and comment.new_record? # no need to save blanks
-        comment.update(label: "Exam question",
-                       filename: @assignment.name,
-                       severity: InlineComment.severities["info"],
-                       user_id: current_user.id,
-                       weight: g,
-                       comment: "",
-                       suppressed: false,
-                       title: "",
-                       info: nil)
-      end
-      @grader_config.expect_num_questions(@questions.count)
-      @grader_config.grade(@assignment, @sub)
-    end
+  def bulk_update
+    self.send("bulk_update_#{@assignment.type.capitalize}")
   end
 
   def update
     if current_user_site_admin? || current_user_staff_for?(@course)
-      self.send("update_#{@assignment.type.capitalize}") if self.respond_to?("update_#{@assignment.type.capitalize}", true)
+      self.send("update_#{@assignment.type.capitalize}")
     else
       respond_to do |f|
         f.json { render :json => {unauthorized: "Must be an admin or staff"} }
@@ -141,38 +54,6 @@ class GradersController < ApplicationController
         }
       end
     end
-  end
-  def update_Files
-    respond_to do |f|
-      f.json { autosave_comments(comments_params, :comment_to_inlinecomment) }
-      f.html {
-        save_all_comments(comments_params, :comment_to_inlinecomment)
-        redirect_to course_assignment_submission_path(@course, @assignment, @submission),
-                    notice: "Comments saved; grading completed"
-      }
-    end
-  end
-  def update_Questions
-    missing, qp = questions_params.partition{|q| q["score"].nil? or q["score"].empty? }
-    missing = missing.map{|q| q["index"].to_i + 1}
-    
-    save_all_comments(qp, :question_to_inlinecomment)
-    if missing.empty?
-      redirect_to course_assignment_submission_path(@course, @assignment, @submission),
-                  notice: "Comments saved; grading completed"
-    else
-      if missing.count > 1
-        msg = "Questions #{missing.join(', ')} do not have grades"
-      else
-        msg = "Question #{missing[0]} does not have a grade"
-      end
-      redirect_to :back, alert: msg
-    end
-  end
-  def update_Exam
-    do_update_grades
-    redirect_to course_assignment_submission_path(@course, @assignment, @submission),
-                notice: "Grades saved"
   end
   
 
@@ -190,8 +71,20 @@ class GradersController < ApplicationController
 
   def require_admin_or_staff
     unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
-                  alert: "Must be an admin or staff."
+      msg = "Must be an admin or staff."
+      if @course
+        if @assignment
+          if @submission
+            redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)), alert: msg
+          else
+            redirect_to back_or_else(course_assignment_path(@course, @assignment)), alert: msg
+          end
+        else
+          redirect_to back_or_else(course_path(@course)), alert: msg
+        end
+      else
+          redirect_to back_or_else(root_path), alert: msg
+      end        
       return
     end
   end
@@ -294,8 +187,75 @@ class GradersController < ApplicationController
   end
 
   ###################################
-  # Grader responses
-  
+  # Per-assignment-type actions, by action
+  # Bulk editing of grades
+  def bulk_edit_Exam
+    edit_exam_grades_for(@course.students)
+    
+    render "edit_#{@assignment.type.underscore}_grades"
+  end
+  def bulk_edit_Files
+    redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                alert: "Bulk grade editing for that assignment type is not supported"
+  end
+  def bulk_edit_Questions
+    redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                alert: "Bulk grade editing for that assignment type is not supported"
+  end
+
+  # Bulk updates of grades
+  def bulk_update_Exam
+    update_exam_grades
+    redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                    notice: "Grades saved"
+  end
+  def bulk_update_Files
+    redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                alert: "Bulk grade updating for that assignment type is not supported"
+  end
+  def bulk_update_Questions
+    redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                alert: "Bulk grade updating for that assignment type is not supported"
+  end
+
+  # Individual updates, mostly of comments
+  def update_Files
+    respond_to do |f|
+      f.json { autosave_comments(comments_params, :comment_to_inlinecomment) }
+      f.html {
+        save_all_comments(comments_params, :comment_to_inlinecomment)
+        redirect_to course_assignment_submission_path(@course, @assignment, @submission),
+                    notice: "Comments saved; grading completed"
+      }
+    end
+  end
+  def update_Questions
+    missing, qp = questions_params.partition{|q| q["score"].nil? or q["score"].empty? }
+    missing = missing.map{|q| q["index"].to_i + 1}
+    
+    save_all_comments(qp, :question_to_inlinecomment)
+    if missing.empty?
+      redirect_to course_assignment_submission_path(@course, @assignment, @submission),
+                  notice: "Comments saved; grading completed"
+    else
+      if missing.count > 1
+        msg = "Questions #{missing.join(', ')} do not have grades"
+      else
+        msg = "Question #{missing[0]} does not have a grade"
+      end
+      redirect_to :back, alert: msg
+    end
+  end
+  def update_Exam
+    update_exam_grades
+    redirect_to course_assignment_submission_path(@course, @assignment, @submission),
+                notice: "Grades saved"
+  end
+
+  ###################################
+  # Grader responses, by grader type
+
+  # JavaStyleGrader
   def show_JavaStyleGrader
     redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
   end
@@ -303,6 +263,7 @@ class GradersController < ApplicationController
     redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
   end
 
+  # JunitGrader
   def show_JunitGrader
     if @grader.grading_output
       @grading_output = File.read(@grader.grading_output)
@@ -336,6 +297,7 @@ class GradersController < ApplicationController
     render "show_JunitGrader"
   end
 
+  # CheckerGrader
   def show_CheckerGrader
     if @grader.grading_output
       @grading_output = File.read(@grader.grading_output)
@@ -368,6 +330,7 @@ class GradersController < ApplicationController
     render "show_CheckerGrader"
   end
 
+  # QuestionsGrader
   def edit_QuestionsGrader
     @questions = @assignment.questions
     @answers = YAML.load(File.open(@submission.upload.submission_path))
@@ -394,7 +357,8 @@ class GradersController < ApplicationController
     @answers = YAML.load(File.open(@submission.upload.submission_path))
     redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
   end
-  
+
+  # ManualGrader
   def edit_ManualGrader
     show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
     @lineCommentsByFile = @submission.grader_line_comments(current_user, show_hidden)
@@ -403,6 +367,91 @@ class GradersController < ApplicationController
   end
   def show_ManualGrader
     redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
+  end
+
+  # ExamGrader
+  def edit_ExamGrader
+    edit_exam_grades_for(User.where(id: @submission.user_id))
+    render "edit_ExamGrader"
+  end
+  def show_ExamGrader
+    redirect_to course_assignment_submission_path(@course, @assignment, @submission)
+  end
+  
+
+  ##############################
+  def edit_exam_grades_for(students)
+    @questions = []
+    @assignment.questions.each_with_index do |q, i|
+      if q["parts"]
+        @part_name = "a"
+        q["parts"].each do |p|
+          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
+          @questions.push p
+          @part_name.next!
+        end
+      else
+        q["name"] = "Problem #{i + 1}" unless q["name"]
+        @questions.push q
+      end
+    end
+
+    @student_info = students.select(:username, :last_name, :first_name, :id)
+    @used_subs = @assignment.used_submissions
+    @grade_comments = InlineComment.where(submission_id: @used_subs.map(&:id)).group_by(&:submission_id)
+  end
+
+  def update_exam_grades
+    all_grades = array_from_hash(params[:student])
+    @student_info = @course.students.select(:username, :last_name, :first_name, :id).where(id: params[:student].keys)
+    @grader_config = @assignment.grader_configs.first # and only config
+    # @used_subs = @assignment.used_submissions
+    # @grade_comments = InlineComment.where(submission_id: @used_subs.map(&:id)).group_by(&:user_id)
+
+    @questions = []
+    @assignment.questions.each_with_index do |q, i|
+      if q["parts"]
+        @part_name = "a"
+        q["parts"].each do |p|
+          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
+          @questions.push p
+          @part_name.next!
+        end
+      else
+        q["name"] = "Problem #{i + 1}" unless q["name"]
+        @questions.push q
+      end
+    end
+    
+    @student_info.each do |student|
+      @sub = @assignment.used_sub_for(student)
+      if @sub.nil?
+        @sub = Submission.create!(assignment: @assignment,
+                                  user: student,
+                                  type: "Exam")
+      end
+      @sub.set_used_sub!
+      @grader = Grader.find_or_create_by(grader_config_id: @grader_config.id, submission_id: @sub.id)
+      if @grader.new_record?
+        @grader.out_of = @grader_config.avail_score
+      end
+      grades = all_grades[student.id]
+      grades.each_with_index do |g, q_num|
+        comment = InlineComment.find_or_initialize_by(submission_id: @sub.id, grader_id: @grader.id, line: q_num)
+        next if g.to_s.empty? and comment.new_record? # no need to save blanks
+        comment.update(label: "Exam question",
+                       filename: @assignment.name,
+                       severity: InlineComment.severities["info"],
+                       user_id: current_user.id,
+                       weight: g,
+                       comment: "",
+                       suppressed: false,
+                       title: "",
+                       info: nil)
+      end
+      @grader_config.expect_num_questions(@questions.count)
+      @grader_config.grade(@assignment, @sub)
+    end
   end
 
   def get_submission_files(sub)

@@ -20,7 +20,7 @@ class AssignmentsController < CoursesController
     @gradesheet = Gradesheet.new(@assignment, submissions)
 
 
-    self.send(@assignment.type.capitalize, false) if self.respond_to?(@assignment.type.capitalize, true)
+    self.send("show_#{@assignment.type.capitalize}")
     if admin_view
       render "show_#{@assignment.type.underscore}"
     else
@@ -180,6 +180,65 @@ class AssignmentsController < CoursesController
     return self.send("set_#{params[:assignment][:type]}_graders")
   end
 
+
+  def do_recreate_graders(assignment)
+    confs = assignment.grader_configs.to_a
+    count = @assignment.used_submissions.reduce(0) do |sum, sub|
+      sum + sub.recreate_missing_graders(confs)
+    end
+    count
+  end
+  
+  def assignment_params
+    params[:assignment].permit(:name, :assignment, :due_date, :available,
+                               :points_available, :hide_grading, :blame_id,
+                               :assignment_file,  :type, :related_assignment_id,
+                               :course_id, :team_subs, :request_time_taken)
+  end
+
+  def graders_params
+    if params[:graders].nil?
+      nil
+    else
+      params[:graders].map do |k, v|
+        [k, v.permit([:id, :type, :removed,
+                      :JavaStyleGrader => [:avail_score, :upload_file, :params, :type],
+                      :CheckerGrader => [:avail_score, :upload_file, :params, :type],
+                      :JunitGrader => [:avail_score, :upload_file, :params, :type],
+                    :ManualGrader => [:avail_score, :upload_file, :params, :type]])]
+      end.to_h
+    end
+  end
+
+  def require_admin_or_prof
+    unless current_user_site_admin? || current_user_prof_for?(@course)
+      redirect_to back_or_else(course_assignments_path), alert: "Must be an admin or professor."
+      return
+    end
+  end
+  def require_admin_or_staff
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      redirect_to root_path, alert: "Must be an admin or staff."
+      return
+    end
+  end
+
+
+  ####################
+  # Per-assignment-type actions, by action
+  
+  # Show
+  def show_Files
+  end
+  def show_Questions
+    @questions = @assignment.questions
+  end
+  def show_Exam
+    @questions = @assignment.questions
+    @grader_config = @assignment.grader_configs.first
+  end
+
+  # setup graders
   def set_exam_graders
     upload = params[:assignment][:assignment_file]
     if upload.nil?
@@ -501,60 +560,6 @@ class AssignmentsController < CoursesController
     end
 
     return no_problems
-  end
-
-  def do_recreate_graders(assignment)
-    confs = assignment.grader_configs.to_a
-    count = @assignment.used_submissions.reduce(0) do |sum, sub|
-      sum + sub.recreate_missing_graders(confs)
-    end
-    count
-  end
-  
-  def assignment_params
-    params[:assignment].permit(:name, :assignment, :due_date, :available,
-                               :points_available, :hide_grading, :blame_id,
-                               :assignment_file,  :type, :related_assignment_id,
-                               :course_id, :team_subs, :request_time_taken)
-  end
-
-  def graders_params
-    if params[:graders].nil?
-      nil
-    else
-      params[:graders].map do |k, v|
-        [k, v.permit([:id, :type, :removed,
-                      :JavaStyleGrader => [:avail_score, :upload_file, :params, :type],
-                      :CheckerGrader => [:avail_score, :upload_file, :params, :type],
-                      :JunitGrader => [:avail_score, :upload_file, :params, :type],
-                    :ManualGrader => [:avail_score, :upload_file, :params, :type]])]
-      end.to_h
-    end
-  end
-
-  def require_admin_or_prof
-    unless current_user_site_admin? || current_user_prof_for?(@course)
-      redirect_to back_or_else(course_assignments_path), alert: "Must be an admin or professor."
-      return
-    end
-  end
-  def require_admin_or_staff
-    unless current_user_site_admin? || current_user_staff_for?(@course)
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-  end
-
-
-  ####################
-  # Assignment types
-  def Questions(edit)
-    @questions = @assignment.questions
-  end
-
-  def Exam(edit)
-    @questions = @assignment.questions
-    @grader_config = @assignment.grader_configs.first
   end
 
 end
