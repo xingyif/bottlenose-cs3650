@@ -549,7 +549,7 @@ class AssignmentsController < CoursesController
           raise ActiveRecord::Rollback
         else
           AssignmentGrader
-            .find_or_intialize_by(assignment_id: @assignment.id, grader_config_id: c.id)
+            .find_or_initialize_by(assignment_id: @assignment.id, grader_config_id: c.id)
             .update(order: max_order)
           max_order += 1
         end

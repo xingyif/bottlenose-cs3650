@@ -182,7 +182,8 @@ class Submission < ActiveRecord::Base
     if config.grader_exists_for(self)
       false
     else
-      config.grade(assignment, self)
+      config.delay.grade(assignment, self)
+      true
     end
   end
 

@@ -24,6 +24,6 @@ module Bottlenose
 
     config.assets.precompile += ["codemirror*", "codemirror/**/*"]
 
-    #config.active_job.queue_adapter = :delayed_job
+    config.active_job.queue_adapter = :delayed_job
   end
 end

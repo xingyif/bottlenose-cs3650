@@ -226,7 +226,7 @@ class SubmissionsController < CoursesController
     end
     if clean_so_far
       @submission.set_used_sub!
-      @submission.autograde!
+      @submission.delay.autograde!
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Submission was successfully created.')
     else
