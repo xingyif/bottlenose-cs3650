@@ -178,12 +178,12 @@ class User < ActiveRecord::Base
     ret = {}
     regs = self.registrations
     terms = Term.all_sorted.to_a
-    terms.each do |term|
-      regs_by_term = regs.joins(:course).where("courses.term_id = ?", term.id).to_a
-      Registration.roles.each do |role_name, role_val|
-        by_role = ret[role_name]
-        if by_role.nil? then by_role = ret[role_name] = {} end
-        if by_role[:count].nil? then by_role[:count] = 0 end
+    Registration.roles.each do |role_name, role_val|
+      by_role = ret[role_name]
+      if by_role.nil? then by_role = ret[role_name] = {} end
+      if by_role[:count].nil? then by_role[:count] = 0 end
+      terms.each do |term|
+        regs_by_term = regs.joins(:course).where("courses.term_id = ?", term.id).to_a
         by_term = by_role[term.name]
         if by_term.nil? then by_term = by_role[term.name] = [] end
         regs_by_term.select{|r| r.role == role_name}.each do |r|
