@@ -89,7 +89,6 @@ class User < ActiveRecord::Base
       if self.username == "justin.case@fallback.ccs.neu" && 
           Devise::Encryptor.compare(self.class, self.encrypted_password, pwd)
         Audit.log("Letting Justin in!")
-        print("Letting Justin in!\n")
         true
       else
         super

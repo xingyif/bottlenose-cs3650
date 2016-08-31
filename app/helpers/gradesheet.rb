@@ -61,6 +61,5 @@ class Gradesheet
       end
       @grades[:grades].push res
     end
-    print "Done initializing gradesheet for #{assignment.name}\n"
   end
 end

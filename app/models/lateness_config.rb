@@ -29,14 +29,14 @@ class LatenessConfig < ActiveRecord::Base
   def penalize(score, assignment, submission)
     # score is [0, 100]
     penalty = late_penalty(assignment, submission) # compute penalty in [0, 100]
-    print "Penalty is #{penalty}\n"
+    #print "Penalty is #{penalty}\n"
     if self.max_penalty # cap it
       penalty = penalty.clamp(0, self.max_penalty)
     end
-    print "Penalty is now #{penalty}\n"
-    print "Score is #{score}\n"
+    #print "Penalty is now #{penalty}\n"
+    #print "Score is #{score}\n"
     ans = (score - penalty).clamp(0, 100)
-    print "Penalized score is #{ans}\n"
+    #print "Penalized score is #{ans}\n"
     ans
   end
 

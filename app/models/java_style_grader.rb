@@ -1,5 +1,6 @@
 require 'open3'
 require 'tap_parser'
+require 'audit'
 
 class JavaStyleGrader < GraderConfig
   def autograde?
@@ -24,7 +25,7 @@ class JavaStyleGrader < GraderConfig
 
     grader_dir.mkpath
 
-    print("Command line: java -jar #{Rails.root.join('lib/assets/StyleChecker.jar').to_s} #{files_dir.to_s} -maxPoints #{self.avail_score.to_s}\n")
+    Audit.log("Running JavaStyle checker.  Command line: java -jar #{Rails.root.join('lib/assets/StyleChecker.jar').to_s} #{files_dir.to_s} -maxPoints #{self.avail_score.to_s}\n")
     output, err, status = Open3.capture3("java", "-jar", Rails.root.join("lib/assets/StyleChecker.jar").to_s,
                  files_dir.to_s, "-maxPoints", self.avail_score.to_s)
     File.open(grader_dir.join("style.tap"), "w") do |style|
@@ -32,7 +33,7 @@ class JavaStyleGrader < GraderConfig
       g.grading_output = style.path
     end
     tap = TapParser.new(output)
-    print "Tap: #{tap.points_earned}\n"
+    Audit.log "JavaStyle checker results: Tap: #{tap.points_earned}\n"
 
     g.score = tap.points_earned
     g.out_of = tap.points_available

@@ -225,7 +225,7 @@ class CoursesController < ApplicationController
         @course.errors[:Section] << "CRN must be present"
         errs = true
       else
-        print "CRN: #{sp[:crn]}\n"
+        Audit.log "Creating section with CRN: #{sp[:crn]}\n"
       end
       if sp[:meeting_time].nil? or sp[:meeting_time].length < 3
         @course.errors[:Section] << "meeting time is missing or too short"
