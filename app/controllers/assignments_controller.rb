@@ -70,7 +70,7 @@ class AssignmentsController < CoursesController
     @assignment.blame_id = current_user.id
 
     if set_lateness_config and @assignment.save and set_grader_configs
-      @assignment.save_uploads!
+      @assignment.save_uploads! if params[:assignment][:assignment_file]
       redirect_to course_assignment_path(@course, @assignment), notice: 'Assignment was successfully created.'
     else
       @assignment.destroy
