@@ -258,8 +258,10 @@
 
   <div class="for-type row">  
     <div class="form-group col-sm-6">
-      <%= f.label :due_date, class: "files-type questions-type" %>
-      <%= f.label :due_date, "Exam date", class: "exam-type" %>
+      <%= f.label :due_date do %>
+      <span class="files-type questions-type">Due date</span>
+      <span class="exam-type">Exam date</span>
+      <% end %>
       <p>Assignment should not be submitted after this time. Default: one week from today.</p>
       <div>
         <%= f.text_field :due_date,
