@@ -158,7 +158,7 @@ end
       sheet.push_row(nil, [
                        u.last_name || u.name,
                        u.first_name || "",
-                       reg.section.instructor,
+                       reg.section.instructor.last_name,
                        u.nuid || "",
                        u.email,
                        reg.section.crn,
@@ -174,7 +174,7 @@ end
 
     hw_cols = []
 
-    course.assignments.order(:due_date).each do |assn|
+    course.assignments.where.not(type: "exam").order(:due_date).each do |assn|
       used_subs = assn.all_used_subs.to_a
       grades = Gradesheet.new(assn, used_subs)
       subs_for_grading = SubsForGrading.where(assignment: assn).to_a
