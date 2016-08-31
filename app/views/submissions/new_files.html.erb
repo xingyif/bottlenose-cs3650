@@ -1,8 +1,14 @@
 <% @page_title = "New Submission: #{@assignment.name}" %>
 
 <%= form_for [@course, @assignment, @submission] do |f| %>
-  <%= render "common", f: f, type: {noun: "submission", verb: "submit", gerund: "submitting" } %>
+  <% allowed = @assignment.sub_allow_submission?(@submission)
+     rate_limit = @assignment.rate_limit?(@submission)
+     staff_override = true_user.course_staff?(@course)
+     %>
+  <%= render "common", f: f, type: {noun: "submission", verb: "submit", gerund: "submitting" },
+                       allowed: allowed, rate_limit: rate_limit, staff_override: staff_override %>
 
+<% if (allowed && !rate_limit) || staff_override %>
 <% if @assignment.request_time_taken %>
 <div class="form-group">
   <%= f.label :time_taken, "How many hours have you worked on this assignment?" %>
@@ -24,5 +30,4 @@
   <%= f.submit nil, class: "btn btn-primary" %>
 </div>
 <% end %>
-
-
+<% end %>
