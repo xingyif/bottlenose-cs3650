@@ -1,7 +1,6 @@
 <% @page_title = "#{@course.name} / #{@gradesheet.assignment.name}" %>
 
 <% cur_reg = current_user.registration_for(@course) %>
-<% if cur_reg.student? then debugger end %>
 <% if cur_reg.professor? %>
 <p class="pull-right">
   <%= link_to "Edit Assignment", 

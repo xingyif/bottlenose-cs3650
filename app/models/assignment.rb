@@ -102,7 +102,7 @@ class Assignment < ActiveRecord::Base
     user = User.find(blame_id)
 
     if @assignment_file_data.nil?
-      debugger
+      return
     else
       unless assignment_upload_id.nil?
         Audit.log("Assn #{id}: Orphaning assignment upload " +
