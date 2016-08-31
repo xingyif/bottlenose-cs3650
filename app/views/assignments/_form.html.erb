@@ -81,7 +81,6 @@
           [["<none>", nil]] + (@course.assignments.where.not(id: @assignment.id).to_a.map do |a|
             [a.name, a.id]
           end) %>
-      Skipped <%= @assignment.id %>
     </div>
   </div>
 
