@@ -85,8 +85,13 @@ class AssignmentsController < CoursesController
       return
     end
 
-    if @assignment.update_attributes(assignment_params)
-      @assignment.save_uploads! if params[:assignment][:assignment_file]
+    ap = assignment_params
+    if params[:assignment][:removefile]
+      ap[:assignment_file] = nil
+      @assignment.assignment_upload_id = nil
+    end
+    if @assignment.update_attributes(ap)
+      @assignment.save_uploads! if ap[:assignment_file]
       redirect_to course_assignment_path(@course, @assignment), notice: 'Assignment was successfully updated.'
     else
       render action: "edit"

@@ -64,11 +64,29 @@
           Browse <%= f.file_field :assignment_file, id: "assignment-file", style: "display: none;" %>
         </label>
         <span id="current_file" class="btn">Current file:
-          <%= @assignment.assignment_file.empty? ? "nothing" : @assignment.assignment_file %></span>
+          <%= @assignment.assignment_file.empty? ? "nothing" :
+              @assignment.assignment_file %></span>
+        <%= f.hidden_field "removefile", value: "" %>
+        <button type="button"
+                <% if @assignment.assignment_file.empty? %>
+                disabled  class="btn btn-default pull-right"
+                <% else %>
+                class="btn btn-warning pull-right"
+                <% end %>
+                id="remove-assignment-file">Clear assignment file</button>
         <script>
           $("#assignment-file").change(function() {
             var label = $(this).val().replace(/\\/g, '/').replace(/.*\//, '');
             $("#current_file").text("New file: " + label);
+            $("#remove-assignment-file").prop('disabled', false).removeClass("btn-default").addClass("btn-warning");
+            $("input#assignment_removefile").val('');
+          });
+          $("#remove-assignment-file").click(function() {
+            $("input[name='assignment_file']").replaceWith(
+              $("input[name='assignment_file']").val("<nothing>").clone(true));
+            $(this).prop('disabled', true).addClass("btn-default").removeClass("btn-warning");
+            $("#current_file").text("New file: <nothing>");
+            $("input#assignment_removefile").val('remove');
           });
         </script>
       </p>
