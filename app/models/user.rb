@@ -74,7 +74,7 @@ class User < ActiveRecord::Base
 
   def display_name
     if self.first_name && self.last_name
-      if self.nickname
+      if !self.nickname.to_s.empty?
         disp = "#{self.first_name} (#{self.nickname}) #{self.last_name}"
       else
         disp = "#{self.first_name} #{self.last_name}"
