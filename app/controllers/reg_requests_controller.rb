@@ -27,6 +27,7 @@ class RegRequestsController < CoursesController
 
   def accept
     @request = RegRequest.find(params[:id])
+    @course = Course.find(params[:course_id])
     errs = accept_help(@request)
     if errs
       redirect_to back_or_else(course_registrations_path(@course)), alert: errs
@@ -45,6 +46,7 @@ class RegRequestsController < CoursesController
       end
       count = count + 1
     end
+    @course = Course.find(params[:course_id])
     redirect_to back_or_else(course_registrations_path(@course)), notice: "#{plural(count, 'registration')} added"
   end
 
@@ -69,11 +71,13 @@ class RegRequestsController < CoursesController
 
   def reject
     RegRequest.find(params[:id]).delete
+    @course = Course.find(params[:course_id])
     redirect_to back_or_else(course_registrations_path(@course))
   end
 
   def reject_all
     RegRequest.where(course_id: params[:course_id]).delete_all # No dependents, so deletion is fine
+    @course = Course.find(params[:course_id])
     redirect_to back_or_else(course_registrations_path(@course))
   end
 
