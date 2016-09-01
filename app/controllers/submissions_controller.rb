@@ -323,6 +323,7 @@ class SubmissionsController < CoursesController
       @submission.type = "Questions"
       @submission.save
       @submission.set_used_sub!
+      @submission.autograde!
       path = course_assignment_submission_path(@course, @assignment, @submission)
       redirect_to(path, notice: 'Response was successfully created.')
     else
@@ -331,7 +332,8 @@ class SubmissionsController < CoursesController
     end
   end
   def create_Exam
-    
+    # No graders are created here, because we shouldn't ever get to this code
+    # The graders are configured in the GradersController, in update_exam_grades
   end
 
   
