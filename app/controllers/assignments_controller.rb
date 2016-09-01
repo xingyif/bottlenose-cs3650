@@ -555,7 +555,7 @@ class AssignmentsController < CoursesController
         else
           AssignmentGrader
             .find_or_initialize_by(assignment_id: @assignment.id)
-            .update(order: max_order, grader_config_id: c.id))
+            .update(order: max_order, grader_config_id: c.id)
           max_order += 1
         end
       end
