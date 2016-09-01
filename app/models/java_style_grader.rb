@@ -25,9 +25,17 @@ class JavaStyleGrader < GraderConfig
 
     grader_dir.mkpath
 
-    Audit.log("Running JavaStyle checker.  Command line: java -jar #{Rails.root.join('lib/assets/StyleChecker.jar').to_s} #{files_dir.to_s} -maxPoints #{self.avail_score.to_s}\n")
-    output, err, status = Open3.capture3("java", "-jar", Rails.root.join("lib/assets/StyleChecker.jar").to_s,
-                 files_dir.to_s, "-maxPoints", self.avail_score.to_s)
+    if self.upload.submission_path and File.file?(self.upload.submission_path)
+      Audit.log("Running JavaStyle checker.  Command line: java -jar #{Rails.root.join('lib/assets/StyleChecker.jar').to_s} #{files_dir.to_s} +config #{self.upload.submission_path} -maxPoints #{self.avail_score.to_s}\n")
+      output, err, status = Open3.capture3("java", "-jar", Rails.root.join("lib/assets/StyleChecker.jar").to_s,
+                                           files_dir.to_s,
+                                           "+config", self.upload.submission_path,
+                                           "-maxPoints", self.avail_score.to_s)
+    else
+      Audit.log("Running JavaStyle checker.  Command line: java -jar #{Rails.root.join('lib/assets/StyleChecker.jar').to_s} #{files_dir.to_s} -maxPoints #{self.avail_score.to_s}\n")
+      output, err, status = Open3.capture3("java", "-jar", Rails.root.join("lib/assets/StyleChecker.jar").to_s,
+                                           files_dir.to_s, "-maxPoints", self.avail_score.to_s)
+    end
     File.open(grader_dir.join("style.tap"), "w") do |style|
       style.write(Upload.upload_path_for(output))
       g.grading_output = style.path
