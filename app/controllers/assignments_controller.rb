@@ -86,7 +86,7 @@ class AssignmentsController < CoursesController
     end
 
     ap = assignment_params
-    if params[:assignment][:removefile]
+    if params[:assignment][:removefile] == "remove"
       ap[:assignment_file] = nil
       @assignment.assignment_upload_id = nil
     end
