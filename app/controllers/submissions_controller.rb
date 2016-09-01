@@ -171,6 +171,7 @@ class SubmissionsController < CoursesController
                 else
                   "text/unknown"
                 end,
+          href: "#file_#{@submission_files.count + 1}",
           lineComments: @lineCommentsByFile[item[:public_link].to_s] || {}
           })
         { text: item[:path], href: "#file_#{@submission_files.count}" }
@@ -319,6 +320,7 @@ class SubmissionsController < CoursesController
         @submission.upload_file = uploadfile
         @submission.save_upload
       end
+      @submission.type = "Questions"
       @submission.save
       @submission.set_used_sub!
       path = course_assignment_submission_path(@course, @assignment, @submission)

@@ -7,12 +7,16 @@
        part_ans = part_ans[part_i] if part_ans %>
     <% if part["codeTag"] %>
     <p><%= sanitize(part["codeTag"], tags: %w(b strong i em)) %></p>
+    <% if part_ans['file'] == "<none>" %>
+    <span class="btn btn-default btn-sm btn-disabled">&lt;none&gt;</span>
+    <% else %>
+    <% sub_file = @submission_files.find{|f| f[:link] == part_ans['file']} %>
     <span class="btn btn-default btn-sm btn-disabled"
           data-on="click" data-call="showFile"
-          data-args="<%= [@submission_dirs.find(link: part_ans['file']).first[:href], 
-                     part_ans['line'].to_i] %>">
-      <%= @submission_files.find(link: part_ans["file"]).first[:name] %>, line <%= part_ans["line"] %>
+          data-args="<%= [sub_file[:href], part_ans['line'].to_i] %>">
+      <%= sub_file[:name] %>, line <%= part_ans["line"] %>
     </span>
+    <% end %>
     <% elsif part["text"] %>
     <p><%= sanitize(part["text"], tags: %w(b strong i em)) %></p>
     <textarea disabled class="form-control" rows="5"

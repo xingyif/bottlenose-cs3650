@@ -47,25 +47,26 @@
 <table class="table table-striped row-vcenter">
   <% grades = @gradesheet.grades[:grades].find(sub: @submission).first
      all_scores = if cur_reg.staff? then grades[:staff_scores] else grades[:blind_scores] end
-     if @gradesheet.graders[@submission.id].nil?
+     graders = @gradesheet.graders[@submission.id]
+     if graders.nil?
        unavailable = true
        available = false
      else
-       unavailable = !(@gradesheet.graders[@submission.id].all?(&:available))
-       complete = @gradesheet.graders[@submission.id].all?(&:complete?)
+       unavailable = !(graders.all?(&:available))
+       complete = graders.all?(&:complete?)
      end
      @gradesheet.configs.each_with_index do |c, i|
        scores = all_scores[:scores][i]
-       grader = @gradesheet.graders[@submission.id].find{|gr| gr.grader_config_id == c.id}
+       grader = graders and graders.find{|gr| gr.grader_config_id == c.id}
      %>
   <tr>
     <td><%= c.type %></td>
     <td>
       <% if scores.kind_of?(Array) %>
-      <%= show_score(scores[0], @gradesheet.assignment, cur_reg.staff?) %>&nbsp;/&nbsp;<%= to_fixed(scores[1]) %>
-      <% if scores[-1] == "hidden" %> (hidden) <% end %>
+        <%= show_score(scores[0], @gradesheet.assignment, cur_reg.staff?) %>&nbsp;/&nbsp;<%= to_fixed(scores[1]) %>
+        <% if scores[-1] == "hidden" %> (hidden) <% end %>
       <% else %>
-      <%= scores %>
+        <%= scores %>
       <% end %>
     </td>
     <td>
