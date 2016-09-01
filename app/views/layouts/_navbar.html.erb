@@ -14,8 +14,10 @@
     <div class="collapse navbar-collapse">
       <% if current_user %>
         <ul class="nav navbar-nav">
-          <li><%= link_to current_user.nickname || current_user.first_name || current_user.name,
-                  user_path(current_user), title: "View user profile" %></li>
+          <% name = current_user.nickname
+             name = current_user.first_name if name.to_s.empty?
+             name = current_user.name if name.to_s.empty? %>
+          <li><%= link_to name, user_path(current_user), title: "View user profile" %></li>
           <li><%= link_to "Courses", courses_path %></li>
         </ul>
       <% end %>
