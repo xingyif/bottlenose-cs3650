@@ -57,6 +57,8 @@ var validKeys = {
   "ArrowRight": true,
   "Backspace": true,
   "Delete": true,
+  "End": true,
+  "Home": true,
   "Tab": true,
 };
 var validKeyCodes = {
@@ -65,9 +67,11 @@ var validKeyCodes = {
 
 function validateNumericInput(e) {
   if (validKeys[e.key] || validKeyCodes[e.keyCode]) return;
+  if (e.key.match(/^F\d+$/)) return;
   if (!Number.isNaN(Number.parseInt(e.key))) return;
-  if (e.key == "." && e.currentTarget.value.indexOf(".") < 0) return;
-  if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+  if (e.key === "." && e.currentTarget.value.indexOf(".") < 0) return;
+  if (e.key === "-" && e.currentTarget.value.indexOf("-") < 0 && e.currentTarget.selectionStart === 0) return;
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
   e.preventDefault();
 };
 
