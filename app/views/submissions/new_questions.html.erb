@@ -2,8 +2,13 @@
 <% content_for :wide_content do %>
 
 <%= form_for [@course, @assignment, @submission] do |f| %>
+  <% allowed = @assignment.sub_allow_submission?(@submission)
+     rate_limit = @assignment.rate_limit?(@submission)
+     staff_override = true_user.course_staff?(@course)
+     %>
 <div class="container">
-  <%= render "common", f: f, type: {noun: "response", verb: "respond", gerund: "responding" } %>
+  <%= render "common", f: f, type: {noun: "response", verb: "respond", gerund: "responding" },
+                       allowed: allowed, rate_limit: rate_limit, staff_override: staff_override %>
 </div>
 
 <% if @assignment.related_assignment_id %>
