@@ -57,7 +57,7 @@
      end
      @gradesheet.configs.each_with_index do |c, i|
        scores = all_scores[:scores][i]
-       grader = graders and graders.find{|gr| gr.grader_config_id == c.id}
+       grader = (graders and graders.find{|gr| gr.grader_config_id == c.id})
      %>
   <tr>
     <td><%= c.type %></td>
