@@ -467,8 +467,8 @@ class AssignmentsController < CoursesController
         @assignment.errors.add(:graders, "Could not create grader #{c.to_s}")
       else
         AssignmentGrader
-          .find_or_initialize_by(assignment_id: @assignment.id, grader_config_id: c.id)
-          .update(order: 1)
+          .find_or_initialize_by(assignment_id: @assignment.id)
+          .update(order: 1, grader_config_id: c.id)
       end
     end
     return @no_problems
@@ -554,8 +554,8 @@ class AssignmentsController < CoursesController
           raise ActiveRecord::Rollback
         else
           AssignmentGrader
-            .find_or_initialize_by(assignment_id: @assignment.id, grader_config_id: c.id)
-            .update(order: max_order)
+            .find_or_initialize_by(assignment_id: @assignment.id)
+            .update(order: max_order, grader_config_id: c.id))
           max_order += 1
         end
       end
