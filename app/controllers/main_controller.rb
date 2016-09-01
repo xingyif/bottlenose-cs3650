@@ -2,7 +2,7 @@ class MainController < ApplicationController
   # GET /
   def home
     if current_user
-      if (current_user.sign_in_count == 1 and (current_user.profile == "" or current_user.nickname == ""))
+      if (current_user.sign_in_count == 1 and (current_user.profile.to_s.empty? or current_user.nickname.to_s.empty?))
         redirect_to edit_user_path(current_user), notice: profile_notice
       else
         render "dashboard"
