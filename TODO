@@ -22,6 +22,7 @@
    [X] profile picture
    [X] nickname
    [X] initial login experience
+   [ ] fix profile pictures on initial select?  (could be a DoS attack, though)
 [ ] clone course
    [ ] deep-clone assignments
 [ ] backup database
@@ -56,3 +57,4 @@
    [X] in export
    [X] in course creation
 [ ] sub-assignments (i.e. assignments in parts)
+[ ] why are the status icons all weird, and when are grades nil versus 0?
