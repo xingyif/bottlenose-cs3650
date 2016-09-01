@@ -62,7 +62,7 @@
   <script>
     $(function() {
       $("#nick_is_name").change(function() {
-        $("#user_nickname").prop('disabled', $(this).prop('checked'));
+        $("#user_nickname").prop('readonly', $(this).prop('checked'));
         if ($(this).prop('checked'))
           $("#user_nickname").val($("#user_first_name").val());
       });
