@@ -16,15 +16,6 @@ class GradersController < ApplicationController
   end
 
   def show
-    if @grader.grading_output
-      @grading_output = File.read(@grader.grading_output)
-      begin
-        tap = TapParser.new(@grading_output)
-        @grading_output = tap
-      rescue Exception
-      end
-    end
-    
     self.send("show_#{@grader.grader_config.type}")
   end
 
@@ -266,12 +257,18 @@ class GradersController < ApplicationController
   # JunitGrader
   def show_JunitGrader
     if @grader.grading_output
-      @grading_output = File.read(@grader.grading_output)
       begin
-        tap = TapParser.new(@grading_output)
-        @grading_output = tap
-        @tests = tap.tests
-      rescue Exception
+        @grading_output = File.read(@grader.grading_output)
+        begin
+          tap = TapParser.new(@grading_output)
+          @grading_output = tap
+          @tests = tap.tests
+        rescue Exception
+          @tests = []
+        end
+      rescue Errno::ENOENT
+        @grading_output = "Grading output file is missing or could not be read"
+        @tests = []
       end
     end
 
@@ -300,12 +297,18 @@ class GradersController < ApplicationController
   # CheckerGrader
   def show_CheckerGrader
     if @grader.grading_output
-      @grading_output = File.read(@grader.grading_output)
       begin
-        tap = TapParser.new(@grading_output)
-        @grading_output = tap
-        @tests = tap.tests
-      rescue Exception
+        @grading_output = File.read(@grader.grading_output)
+        begin
+          tap = TapParser.new(@grading_output)
+          @grading_output = tap
+          @tests = tap.tests
+        rescue Exception
+          @tests = []
+        end
+      rescue Errno::ENOENT
+        @grading_output = "Grading output file is missing or could not be read"
+        @tests = []
       end
     end
 
