@@ -61,6 +61,7 @@
   </div>
   <script>
     $(function() {
+      $("input.numeric").on("keydown", validateNumericInput);
       $("#nick_is_name").change(function() {
         $("#user_nickname").prop('readonly', $(this).prop('checked'));
         if ($(this).prop('checked'))
