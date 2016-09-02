@@ -80,17 +80,19 @@
         <td class="text-right">
           <form method="link"
                 action="<%= course_assignment_submission_path(@course, @gradesheet.assignment, sub) %>">
-            <div class="btn-group">
+            <div class="btn-group" style="white-space: nowrap;">
               <%= link_to "View",
                   course_assignment_submission_path(@course, @gradesheet.assignment, sub),
-                  class: "btn btn-sm btn-default" %>
-              <button type="button" class="btn btn-sm btn-default dropdown-toggle"
+                  class: "btn btn-sm btn-default",
+                  style: "float: unset;"%><% #
+              %><button type="button" class="btn btn-sm btn-default dropdown-toggle"
+                      style="float: unset;"
                       data-toggle="dropdown"
                       aria-haspopup="true" aria-expanded="false">
                 <span class="caret"></span>
                 <span class="sr-only">Toggle Dropdown</span>
-              </button>
-              <ul class="dropdown-menu">
+              </button><% #
+              %><ul class="dropdown-menu">
                 <li><%= link_to "View active", 
                         course_assignment_submission_path(@course, @gradesheet.assignment, sub), 
                         class: "dropdown-item" %></li>
