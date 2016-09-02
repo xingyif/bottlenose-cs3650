@@ -122,10 +122,11 @@ class AssignmentsController < CoursesController
       redirect_to back_or_else(root_path), alert: "Must be logged in"
       return
     elsif current_user_site_admin? || current_user_prof_for?(@course)
-      # nothing
+      # nothing --- but should this be current_user_staff_for instead?
     elsif current_user.id != params[:user_id].to_i
       redirect_to back_or_else(course_assignment_path(@course, assignment)),
                   alert: "Not permitted to see submissions for other students"
+      return
     end
     
     @user = User.find(params[:user_id])
