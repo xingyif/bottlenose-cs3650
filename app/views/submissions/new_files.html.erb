@@ -29,5 +29,8 @@
 <div class="form-group">
   <%= f.submit nil, class: "btn btn-primary" %>
 </div>
+<script>
+  $("form").submit(ensureValidNumericInputOnSubmit);
+</script>
 <% end %>
 <% end %>

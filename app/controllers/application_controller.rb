@@ -93,4 +93,49 @@ class ApplicationController < ActionController::Base
       ans
     end
   end
+
+
+  
+  def get_submission_files(sub, line_comments = nil)
+    show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
+    @lineCommentsByFile = line_comments || sub.grader_line_comments(nil, show_hidden)
+    @submission_files = []
+    def with_extracted(item)
+      if item[:public_link]
+        @submission_files.push({
+          link: item[:public_link],
+          name: item[:public_link].sub(/^.*extracted\//, ""),
+          contents: File.read(item[:full_path].to_s),
+          type: case File.extname(item[:full_path].to_s)
+                when ".java"
+                  "text/x-java"
+                when ".arr"
+                  "pyret"
+                when ".rkt", ".ss"
+                  "scheme"
+                when ".jpg", ".jpeg", ".png"
+                  "image"
+                when ".jar"
+                  "jar"
+                when ".zip"
+                  "zip"
+                else
+                  "text/unknown"
+                end,
+          href: "#file_#{@submission_files.count + 1}",
+          lineComments: @lineCommentsByFile[item[:public_link].to_s] || {}
+          })
+        { text: item[:path], href: "#file_#{@submission_files.count}" }
+      else
+        {
+          text: item[:path] + "/",
+          state: {selectable: false},
+          nodes: item[:children].map{|i| with_extracted(i)}
+        }
+      end
+    end
+    
+    @submission_dirs = sub.upload.extracted_files.map{|i| with_extracted(i)}
+  end
+
 end

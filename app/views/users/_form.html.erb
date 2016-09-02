@@ -67,8 +67,10 @@
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") { return; }
         var curVal = $(this).val();
         var newVal = curVal.slice(0, this.selectionStart) + e.key + curVal.slice(this.selectionEnd, curVal.length);
-        newVal = parseFloat(newVal, 10);
-        if (newVal < 0 || newVal > 999999999) { e.preventDefault(); }
+        newVal = Number(newVal);
+        if (Number.isNaN(newVal) || newVal < 0 || newVal > 999999999 || newVal != Number.parseInt(newVal)) {
+          e.preventDefault();
+        }
       }).bind("paste", function(e) { e.preventDefault(); }); 
       $("#nick_is_name").change(function() {
         $("#user_nickname").prop('readonly', $(this).prop('checked'));
@@ -76,5 +78,6 @@
           $("#user_nickname").val($("#user_first_name").val());
       });
     });
+    $("form").submit(ensureValidNumericInputOnSubmit);
   </script>
 <% end %>

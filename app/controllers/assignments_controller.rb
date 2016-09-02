@@ -58,6 +58,17 @@ class AssignmentsController < CoursesController
   end
 
   def update_weights
+    no_problems = true
+    params[:weight].each do |kv|
+      if !(Float(kv[1]) rescue false)
+        @course.errors.add(:base, "#{Assignment.find(kv[0]).name} has non-numeric weight `#{kv[1]}`")
+        no_problems = false
+      end
+    end
+    unless no_problems
+      render action: "edit_weights"
+      return
+    end
     params[:weight].each do |kv|
       Assignment.find(kv[0]).update_attribute(:points_available, kv[1])
     end

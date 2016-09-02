@@ -248,7 +248,39 @@ class GradersController < ApplicationController
 
   # JavaStyleGrader
   def show_JavaStyleGrader
-    redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
+    get_submission_files(@submission)
+    if @grader.grading_output
+      begin
+        @grading_output = File.read(@grader.grading_output)
+        begin
+          tap = TapParser.new(@grading_output)
+          @grading_output = tap
+          @tests = tap.tests
+        rescue Exception
+          @tests = []
+        end
+      rescue Errno::ENOENT
+        @grading_output = "Grading output file is missing or could not be read"
+        @tests = []
+      end
+    end
+    num_comments = @grader.inline_comments.count
+    if @tests.count != num_comments
+      @error_header = <<HEADER.html_safe
+<p>There seems to be a problem displaying the style-checker's feedback on this submission.</p>
+<p>Please email the professor, with the following information:</p>
+<ul>
+<li>Course: #{@course.id}</li>
+<li>Assignment: #{@assignment.id}</li>
+<li>Submission: #{@submission.id}</li>
+<li>Grader: #{@grader.id}</li>
+<li>User: #{current_user.name} (#{current_user.id})</li>
+</li>
+HEADER
+    end
+    render "show_JavaStyleGrader"
+    # debugger
+    # redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
   end
   def edit_JavaStyleGrader
     redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
@@ -365,7 +397,7 @@ class GradersController < ApplicationController
   def edit_ManualGrader
     show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
     @lineCommentsByFile = @submission.grader_line_comments(current_user, show_hidden)
-    get_submission_files(@submission)
+    get_submission_files(@submission, @lineCommentsByFile)
     render "edit_ManualGrader"
   end
   def show_ManualGrader
@@ -457,43 +489,4 @@ class GradersController < ApplicationController
     end
   end
 
-  def get_submission_files(sub)
-    @submission_files = []
-    @lineCommentsByFile ||= {}
-    def with_extracted(item)
-      if item[:public_link]
-        @submission_files.push({
-                                 link: item[:public_link],
-                                 name: item[:public_link].sub(/^.*extracted\//, ""),
-                                 contents: File.read(item[:full_path].to_s),
-                                 type: case File.extname(item[:full_path].to_s)
-                                       when ".java"
-                                         "text/x-java"
-                                       when ".arr"
-                                         "pyret"
-                                       when ".rkt", ".ss"
-                                         "scheme"
-                                       when ".jpg", ".jpeg", ".png"
-                                         "image"
-                                       when ".jar"
-                                         "jar"
-                                       when ".zip"
-                                         "zip"
-                                       else
-                                         "text/unknown"
-                                       end,
-                                 lineComments: @lineCommentsByFile[item[:public_link].to_s] || {}
-                               })
-        { text: item[:path], href: "#file_#{@submission_files.count}" }
-      else
-        {
-          text: item[:path] + "/",
-          state: {selectable: false},
-          nodes: item[:children].map{|i| with_extracted(i)}
-        }
-      end
-    end
-    @submission_dirs = sub.upload.extracted_files.map{|i| with_extracted(i)}
-  end
-  
 end

@@ -19,6 +19,7 @@ class User < ActiveRecord::Base
   validates :email, :format => { :with => /\@.*\./ }, :allow_nil => true
 
   validates :name,  length: { in: 2..30 }
+  validates :nuid, numericality: {only_integer: true}, :allow_blank => true
 
   def self.pepper
     Devise.pepper

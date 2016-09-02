@@ -3,6 +3,7 @@ require 'tap_parser'
 class Grader < ActiveRecord::Base
   belongs_to :submission
   belongs_to :grader_config
+  has_many :inline_comments
 
   def complete?
     !self.score.nil?

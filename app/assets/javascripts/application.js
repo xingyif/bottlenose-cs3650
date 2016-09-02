@@ -68,12 +68,28 @@ var validKeyCodes = {
 function validateNumericInput(e) {
   if (validKeys[e.key] || validKeyCodes[e.keyCode]) return;
   if (e.key.match(/^F\d+$/)) return;
-  if (!Number.isNaN(Number.parseInt(e.key))) return;
+  if (!Number.isNaN(Number(e.key)) && (Number(e.key) == Number.parseInt(e.key))) return;
   if (e.key === "." && e.currentTarget.value.indexOf(".") < 0) return;
   if (e.key === "-" && e.currentTarget.value.indexOf("-") < 0 && e.currentTarget.selectionStart === 0) return;
   if (e.ctrlKey || e.altKey || e.metaKey) return;
   e.preventDefault();
 };
+
+function ensureValidNumericInputOnSubmit(e) {
+  var problems = false;
+  $("input.numeric").each(function(elt) {
+    if (Number.isNaN(Number($(this).val()))) {
+      problems = true;
+      $(this)
+        .addClass("badAnswer")
+        .one("focus", function() { $(this).removeClass("badAnswer"); });
+    }
+  });
+  if (problems) {
+    e.preventDefault();
+    alert("There are invalid values for some of the fields; please correct them before submitting.");
+  }
+}
 
 $(function() {
   $('[data-toggle="tooltip"]').tooltip()
