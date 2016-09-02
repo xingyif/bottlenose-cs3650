@@ -194,7 +194,10 @@ function activateSpinner(obj, options) {
 }
 
 function makeSpinner(options) {
-  var input = $("<input>").addClass("form-control numeric").val(options.val || 0);
+  var input = $("<input>")
+      .addClass("form-control numeric")
+      .val(options.val || 0)
+      .bind("paste", function(e) { e.preventDefault(); });
   if (options.klass !== undefined)
     input.addClass(options.klass);
   if (options.max !== undefined)   input.data("max", options.max);

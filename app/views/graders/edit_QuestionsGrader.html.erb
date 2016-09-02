@@ -69,6 +69,7 @@
 <% end %>
 <%= render "submissions/render_questions" %>
 <%= f.submit "Submit grade", id: "completed", class: "btn btn-success" %>
+<script>$("form").submit(ensureValidNumericInputOnSubmit);</script>
 </div>
 <% end %>
 <% end %>
