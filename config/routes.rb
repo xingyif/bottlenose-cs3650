@@ -83,6 +83,7 @@ Bottlenose::Application.routes.draw do
 
 
   Bottlenose::Application.routes.draw do
+    match "/500", :to => "errors#internal_server_error", :via => :all
     get "*any", via: :all, to: "errors#not_found"
   end
 end
