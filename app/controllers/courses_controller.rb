@@ -25,6 +25,13 @@ class CoursesController < ApplicationController
   def edit
     prep_sections
   end
+
+  def facebook
+    prep_sections
+    @students = @course.students
+                .select("users.*", "registrations.dropped_date", "registrations.section_id")
+                .order("users.last_name", "users.first_name")
+  end
   def prep_sections
     @sections = CourseSection.where(course: @course).to_a
     if @sections.count == 0

@@ -73,6 +73,7 @@ Bottlenose::Application.routes.draw do
     member do
       get :public
       get :gradesheet
+      get :facebook
       delete :withdraw
     end
   end
