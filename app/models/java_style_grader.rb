@@ -25,7 +25,7 @@ class JavaStyleGrader < GraderConfig
 
     grader_dir.mkpath
 
-    if self.upload.submission_path and File.file?(self.upload.submission_path)
+    if self.upload and self.upload.submission_path and File.file?(self.upload.submission_path)
       Audit.log("Running JavaStyle checker.  Command line: java -jar #{Rails.root.join('lib/assets/StyleChecker.jar').to_s} #{files_dir.to_s} +config #{self.upload.submission_path} -maxPoints #{self.avail_score.to_s}\n")
       output, err, status = Open3.capture3("java", "-jar", Rails.root.join("lib/assets/StyleChecker.jar").to_s,
                                            files_dir.to_s,

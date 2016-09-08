@@ -265,7 +265,7 @@ class GradersController < ApplicationController
       end
     end
     num_comments = @grader.inline_comments.count
-    if @tests.count != num_comments
+    if @tests.nil? or @tests.count != num_comments
       @error_header = <<HEADER.html_safe
 <p>There seems to be a problem displaying the style-checker's feedback on this submission.</p>
 <p>Please email the professor, with the following information:</p>
