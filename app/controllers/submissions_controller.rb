@@ -68,6 +68,7 @@ class SubmissionsController < CoursesController
   end
 
   def recreate_grader
+    @grader_config = GraderConfig.find(params[:grader_config_id])
     if @submission.recreate_missing_grader(@grader_config)
       @submission.compute_grade! if @submission.grade_complete?
       redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission))

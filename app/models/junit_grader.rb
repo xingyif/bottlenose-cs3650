@@ -37,11 +37,20 @@ class JunitGrader < GraderConfig
         # build_dir = grader_dir.join("build")
         # build_dir.mkpath
           Audit.log("#{prefix}: Grading in #{build_dir}")
+          if (Dir.exists?(self.upload.extracted_path.join("starter")) and
+              Dir.exists?(self.upload.extracted_path.join("testing")))
+            FileUtils.cp_r("#{self.upload.extracted_path}/starter/.", build_dir)
+          end
           FileUtils.cp_r("#{files_dir}/.", build_dir)
           FileUtils.cp("#{assets_dir}/junit-4.12.jar", build_dir)
           FileUtils.cp("#{assets_dir}/junit-tap.jar", build_dir)
           FileUtils.cp("#{assets_dir}/hamcrest-core-1.3.jar", build_dir)
-          FileUtils.cp_r("#{self.upload.extracted_path}/.", build_dir)
+          if (Dir.exists?(self.upload.extracted_path.join("starter")) and
+              Dir.exists?(self.upload.extracted_path.join("testing")))
+            FileUtils.cp_r("#{self.upload.extracted_path}/testing/.", build_dir)
+          else
+            FileUtils.cp_r("#{self.upload.extracted_path}/.", build_dir)
+          end
           # details.write "Contents of temp directory are:\n"
           # output, status = Open3.capture2("ls", "-R", build_dir.to_s)
           # details.write output

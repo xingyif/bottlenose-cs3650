@@ -7,6 +7,7 @@ import java.util.Collections;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Computer;
 import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
 import org.junit.internal.Classes;
 
 public class TAPRunner {
@@ -25,11 +26,17 @@ public class TAPRunner {
       }
     }
 
-    boolean fail = false;
-    for (Class<?> c : classes) {
-      Result result = core.run(c);
-      if (!result.wasSuccessful()) fail = true;
+    try {
+      boolean fail = false;
+      for (Class<?> c : classes) {
+        Result result = core.run(c);
+        if (!result.wasSuccessful()) fail = true;
+      }
+      System.exit(0);
+    } catch (Exception e) {
+      System.err.println("A test unexpectedly errored, instead of passed or failed:");
+      System.err.println(e.toString());
+      System.exit(1);
     }
-    System.exit(fail ? 0 : 1);
   }
 }

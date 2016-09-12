@@ -1,8 +1,9 @@
 class CourseSection < ActiveRecord::Base
   belongs_to :course
   belongs_to :instructor, :class_name => "User", :foreign_key => "instructor_id", :primary_key => "id"
+  delegate :term, to: :course
 
-  validates :crn, presence: true
+  validates :crn, presence: true, uniqueness: true # TODO: scope it per term?
   validates :instructor, presence: true
   validates :meeting_time, length: { minimum: 3 }
   
