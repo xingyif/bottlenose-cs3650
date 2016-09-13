@@ -17,12 +17,16 @@
   
 
 <div id="students" class="row">
-  <% @students.each do |s| %>
-  <div class="col-md-2 text-center sec_<%= s.section_id %>">
-    <%= image_tag Upload.upload_path_for(s.profile || "silhouette.jpg"), 
-        alt: s.display_name, style: "max-height: 200px; max-width: 100%;" %>
-    <p><%= link_to s.display_name, user_path(s) %></p>
-    <% if s.dropped_date %><p>(withdrawn <%= s.dropped_date %>)</p><% end %>
+  <% @students.each_slice(6) do |row| %>
+  <div class="row">
+    <% row.each do |s| %>
+    <div class="col-md-2 text-center sec_<%= s.section_id %>">
+      <%= image_tag Upload.upload_path_for(s.profile || "silhouette.jpg"), 
+          alt: s.display_name, style: "max-height: 200px; max-width: 100%;" %>
+      <p><%= link_to s.display_name, user_path(s) %></p>
+      <% if s.dropped_date %><p>(withdrawn <%= s.dropped_date %>)</p><% end %>
+    </div>
+    <% end %>
   </div>
   <% end %>
 </div>
