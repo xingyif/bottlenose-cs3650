@@ -6,7 +6,9 @@ $(function() {
   });
   $('.spinner').each(function() { activateSpinner(this, {precision: 2}) });
   $('select.pick-file').change(function() {
-    selectTreeviewFileByIndex(this.selectedIndex - 1);
+    // -1 for the "--select a file--" option, -1 for the "<none>" option
+    selectTreeviewFileByIndex(this.selectedIndex - 2);
+    $(this).next("input").prop('disabled', this.selectedIndex === 1);
   });
 });
 $(function() {
@@ -46,6 +48,11 @@ $(function() {
       }
     })(i);
   }
+  $('select.pick-file').each(function() {
+    // index 1 is the "<none>" option
+    if (this.selectedIndex === 1)
+      $(this).next("input").prop('disabled', true).removeClass("unanswered");
+  });
   
   $("form").submit(function(e) {
     try {

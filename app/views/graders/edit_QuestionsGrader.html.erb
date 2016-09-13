@@ -44,6 +44,11 @@
   on each one to show that file's content.</p>
 <p>Student responses are shown inline with the questions.  The
   grading rubrics for each question follow.</p>
+
+<% unless @answers_are_newer %>
+<h3>These responses are for an outdated submission!</h3>
+<% end %>
+
 <% end %>
 
 <% content_for :wide_content do %>

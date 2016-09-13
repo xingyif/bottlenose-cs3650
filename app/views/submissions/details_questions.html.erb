@@ -9,6 +9,11 @@
 <h1>Response</h1>
 
 <%= render :partial => 'submissions/sub_info' %>
+
+<% unless @answers_are_newer %>
+<h3>These responses are for an outdated submission!</h3>
+<% end %>
+
 <% end %>
 
 <% content_for :wide_content do %>

@@ -261,7 +261,7 @@ class SubmissionsController < CoursesController
           else
             q[type]["parts"].zip(a["parts"]).each_with_index do |(qp, ap), j|
               if qp["codeTag"]
-                if ap["file"].to_s.empty? or (ap["file"] != "<none>" and !(Integer(ap["line"]) rescue false))
+                if ap["file"] != "<none>" and (ap["file"].to_s.empty? or !(Integer(ap["line"]) rescue false))
                   @submission.errors.add(:base, "Question #{i + 1} part #{j + 1} has an invalid code-tag")
                   no_problems = false
                 end
@@ -317,14 +317,17 @@ class SubmissionsController < CoursesController
     @answers = YAML.load(File.open(@submission.upload.submission_path))
     @submission_dirs = []
     if @assignment.related_assignment
-      related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
-      if related_sub.nil?
+      @related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
+      if @related_sub.nil?
         @submission_files = []
+        @answers_are_newer = true
       else
-        get_submission_files(related_sub)
+        get_submission_files(@related_sub)
+        @answers_are_newer = (@related_sub.created_at < @submission.created_at)
       end
     else
       @submission_files = []
+      @answers_are_newer = true
     end
   end
   def show_Exam
@@ -367,14 +370,17 @@ class SubmissionsController < CoursesController
     @grades = @grades.select(:line, :name, :weight, :comment).joins(:user).sort_by(&:line).to_a
     @submission_dirs = []
     if @assignment.related_assignment
-      related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
-      if related_sub.nil?
+      @related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
+      if @related_sub.nil?
         @submission_files = []
+        @answers_are_newer = true
       else
-        get_submission_files(related_sub)
+        get_submission_files(@related_sub)
+        @answers_are_newer = (@related_sub.created_at < @submission.created_at)
       end
     else
       @submission_files = []
+      @answers_are_newer = true
     end
   end
   def details_Exam
