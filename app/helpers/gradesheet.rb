@@ -24,7 +24,7 @@ class Gradesheet
     @max_score = @configs.sum(&:avail_score)
     raw_graders = Grader.where(submission_id: @submissions.map(&:id))
     @graders = raw_graders.group_by(&:submission_id)
-    @missing_graders = (raw_graders.count != @configs.count * @submissions.count)
+    @missing_graders = (raw_graders.count < @configs.count * @submissions.count)
 
     @raw_score = 0
     @grades = {names: @configs.map(&:type), grades: []}
