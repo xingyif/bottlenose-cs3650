@@ -20,10 +20,25 @@ class JunitGrader < GraderConfig
   end
   
   protected
+  def copy_srctest_from_to(from, to)
+    # preserves when the submission contains src/ and test/ directories
+    # or creates them if only sources are submitted
+    to.join("src").mkpath
+    to.join("test").mkpath
+    
+    if Dir.exists?(from.join("src")) and Dir.exists?(from.join("test"))
+      Audit.log("From = #{from} and contains src/ and test/")
+      FileUtils.cp_r("#{from.join('src')}/.", "#{to.join('src')}/")
+      FileUtils.cp_r("#{from.join('test')}/.", "#{to.join('test')}/")
+    else
+      Audit.log("From = #{from} and does not contain src/ and test/")
+      FileUtils.cp_r("#{from}/.", "#{to.join('src')}/")
+    end
+  end
+  
   def do_grading(assignment, sub)
     g = self.grader_for sub
     u = sub.upload
-    files_dir = u.extracted_path
     grader_dir = u.grader_path(g)
 
     grader_dir.mkpath
@@ -39,27 +54,29 @@ class JunitGrader < GraderConfig
           Audit.log("#{prefix}: Grading in #{build_dir}")
           if (Dir.exists?(self.upload.extracted_path.join("starter")) and
               Dir.exists?(self.upload.extracted_path.join("testing")))
-            FileUtils.cp_r("#{self.upload.extracted_path}/starter/.", build_dir)
+            copy_srctest_from_to(self.upload.extracted_path.join("starter"), build_dir)
           end
-          FileUtils.cp_r("#{files_dir}/.", build_dir)
+          copy_srctest_from_to(u.extracted_path, build_dir)
           FileUtils.cp("#{assets_dir}/junit-4.12.jar", build_dir)
           FileUtils.cp("#{assets_dir}/junit-tap.jar", build_dir)
           FileUtils.cp("#{assets_dir}/hamcrest-core-1.3.jar", build_dir)
           if (Dir.exists?(self.upload.extracted_path.join("starter")) and
               Dir.exists?(self.upload.extracted_path.join("testing")))
-            FileUtils.cp_r("#{self.upload.extracted_path}/testing/.", build_dir)
+            copy_srctest_from_to(self.upload.extracted_path.join("testing"), build_dir)
           else
-            FileUtils.cp_r("#{self.upload.extracted_path}/.", build_dir)
+            copy_srctest_from_to(self.upload.extracted_path, build_dir)
           end
-          # details.write "Contents of temp directory are:\n"
-          # output, status = Open3.capture2("ls", "-R", build_dir.to_s)
-          # details.write output
+          details.write "Contents of temp directory are:\n"
+          output, status = Open3.capture2("ls", "-R", build_dir.to_s)
+          details.write output
+
+          classpath = "junit-4.12.jar:junit-tap.jar:hamcrest-core-1.3.jar:test:src:."
           
           FileUtils.cd(build_dir) do
             any_problems = false
             Dir.glob("**/*.java").each do |file|
               Audit.log "#{prefix}: Compiling #{file}"
-              comp_out, comp_err, comp_status = Open3.capture3("javac", "-cp", ".:./*", file)
+              comp_out, comp_err, comp_status = Open3.capture3("javac", "-cp", classpath, file)
               details.write("Compiling #{file}: (exit status #{comp_status})\n")
               details.write(comp_out)
               if !comp_status.success?
@@ -76,7 +93,7 @@ class JunitGrader < GraderConfig
 
             Audit.log("#{prefix}: Running JUnit")
             test_out, test_err, test_status =
-                                Open3.capture3("java", "-cp", ".:./*", "edu.neu.TAPRunner", self.params)
+                                Open3.capture3("java", "-cp", classpath, "edu.neu.TAPRunner", self.params)
             details.write("JUnit output: (exit status #{test_status})\n")
             details.write(test_out)
             if !test_status.success?
