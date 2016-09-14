@@ -40,7 +40,7 @@
               title="This submission is used for grading"></span>
         <% end %>
       </td>
-      <td><%= sub.user.name %></td>
+      <td><%= if cur_reg.staff? then link_to sub.user.name, user_path(sub.user) else sub.user.name end %></td>
       <td><%= sub.team %></td>
       <td><span class="local-time"><%= sub.created_at %></span></td>
       <% scores = if cur_reg.staff? then grade[:staff_scores] else grade[:blind_scores] end %>

@@ -1,26 +1,52 @@
+<% if role == :student %>
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title"><%= header %></h3>
-    </div>
+  <div class="panel-heading">
+    <h3 class="panel-title"><%= header %></h3>
+  </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>&nbsp;</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% users.sort_by(&:name).each do |user| %>
-                <tr>
-                    <td><%= user.name %></td>
-                    <td><%= user.email %></td>
-                    <td><% if role == :student %>
-                      <%= link_to 'Impersonate', impersonate_user_path(user), method: 'post'%>
-                      <% else %>&nbsp;<% end %></td>
-                </tr>
-            <% end %>
-        </tbody>
-    </table>
+  <table class="table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Name</th>
+        <th>&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.sort_by(&:name).each do |user| %>
+      <tr>
+        <td width="1em"><%= mail_to "#{user.name} <#{user.email}>", "@" %></td>
+        <td><%= link_to user.name, user_path(user) %></td>
+        <td><%= link_to 'Impersonate', impersonate_user_path(user), method: 'post'%></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
 </div>
+<% else
+   staff = @course.registrations.to_a %>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title"><%= header %></h3>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Role</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.sort_by(&:name).each do |user| %>
+      <tr>
+        <td width="1em"><%= mail_to "#{user.name} <#{user.email}>", "@" %></td>
+        <td><%= user.name %></td>
+        <td><%= staff.detect{|u| u.user_id == user.id}.role.humanize %></td>
+      </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<% end %>   

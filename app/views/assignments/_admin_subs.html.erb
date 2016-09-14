@@ -55,7 +55,7 @@
       <% else %>
       <tr>
       <% end %>
-        <td><%= sub.user.name %></td>
+        <td><%= link_to sub.user.name, user_path(sub.user) %></td>
         <td><span class="local-time"><%= sub.created_at %></span></td>
         <% scores = grade[:staff_scores] %>
         <td><%= status_image(sub, scores[:raw_score] / @gradesheet.max_score) %></td>
