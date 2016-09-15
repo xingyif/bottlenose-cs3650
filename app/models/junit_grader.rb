@@ -21,6 +21,12 @@ class JunitGrader < GraderConfig
   
   protected
   def copy_srctest_from_to(from, to)
+    if to.kind_of? String
+      to = Pathname.new(to)
+    end
+    if from.kind_of? String
+      from = Pathname.new(from)
+    end
     # preserves when the submission contains src/ and test/ directories
     # or creates them if only sources are submitted
     to.join("src").mkpath
@@ -75,7 +81,7 @@ class JunitGrader < GraderConfig
           FileUtils.cd(build_dir) do
             any_problems = false
             Dir.glob("**/*.java").each do |file|
-              next if file.ascend.any? {|c| c.basename.to_s == "__MACOSX" || c.basename.to_s == ".DS_STORE" }
+              next if Pathname.new(file).ascend.any? {|c| c.basename.to_s == "__MACOSX" || c.basename.to_s == ".DS_STORE" }
               Audit.log "#{prefix}: Compiling #{file}"
               comp_out, comp_err, comp_status = Open3.capture3("javac", "-cp", classpath, file)
               details.write("Compiling #{file}: (exit status #{comp_status})\n")

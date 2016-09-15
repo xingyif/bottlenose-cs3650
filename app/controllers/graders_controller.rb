@@ -316,7 +316,7 @@ HEADER
         @grading_header = "Errors running tests"
       elsif @grading_output.passed_count == @grading_output.test_count
         @grading_header = "Test results"
-        @tests = @grading_output.tets
+        @tests = @grading_output.tests
       else
         @grading_header = "Selected test results"
         @tests = @grading_output.tests.delete_if{|t| t[:passed]}.shuffle.take(3)

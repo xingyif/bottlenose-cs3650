@@ -94,13 +94,18 @@ class Submission < ActiveRecord::Base
 
     up = Upload.new
     up.user_id = user.id
-    up.store_upload!(data, {
-      type:       "Submission",
-      user:       "#{user.name} (#{user.id})",
-      course:     "#{course.name} (#{course.id})",
-      assignment: "#{assignment.name} (#{assignment.id})",
-      date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
-    })
+    begin
+      up.store_upload!(data, {
+        type:       "Submission",
+        user:       "#{user.name} (#{user.id})",
+        course:     "#{course.name} (#{course.id})",
+        assignment: "#{assignment.name} (#{assignment.id})",
+        date:       Time.now.strftime("%Y/%b/%d %H:%M:%S %Z")
+      })
+    rescue Exception => e
+      errors[:base] << e.message
+      return
+    end
     if up.save
       self.upload_id = up.id
       

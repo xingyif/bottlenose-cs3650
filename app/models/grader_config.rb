@@ -9,7 +9,7 @@ class GraderConfig < ActiveRecord::Base
 
   def grade(assignment, submission)
     ans = do_grading(assignment, submission)
-    submission.compute_grade! if submission.grader_complete?
+    submission.compute_grade! if submission.grade_complete?
     ans
   end
 

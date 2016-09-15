@@ -128,7 +128,7 @@ class ApplicationController < ActionController::Base
           })
         { text: item[:path], href: "#file_#{@submission_files.count}" }
       else
-        return nil if item[:full_path].basename.to_s == "__MACOSX"
+        return nil if item[:path] == "__MACOSX"
         {
           text: item[:path] + "/",
           state: {selectable: false},
