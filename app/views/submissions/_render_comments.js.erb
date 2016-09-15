@@ -2,11 +2,12 @@ function renderComments(lineComments) {
   $(".CodeMirror").each(function(index) {
     var cm = this.CodeMirror;
     cm.operation(function() {
-      var theseComments = lineComments[index];
+      var theseComments = lineComments[index] || {};
+      if (theseComments["noCommentsFor"]) return;
       Object.keys(theseComments).forEach(function(type, _) {
-        var commentsByType = theseComments[type];
+        var commentsByType = theseComments[type] || {};
         Object.keys(commentsByType).forEach(function(line, _) {
-          var commentsOnLine = commentsByType[line];
+          var commentsOnLine = commentsByType[line] || {};
           commentsOnLine.forEach(function(comment, _) {
             renderComment(cm, type, line, comment);
           });

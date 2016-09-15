@@ -75,6 +75,7 @@ class JunitGrader < GraderConfig
           FileUtils.cd(build_dir) do
             any_problems = false
             Dir.glob("**/*.java").each do |file|
+              next if file.ascend.any? {|c| c.basename.to_s == "__MACOSX" || c.basename.to_s == ".DS_STORE" }
               Audit.log "#{prefix}: Compiling #{file}"
               comp_out, comp_err, comp_status = Open3.capture3("javac", "-cp", classpath, file)
               details.write("Compiling #{file}: (exit status #{comp_status})\n")

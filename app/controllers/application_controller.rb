@@ -102,6 +102,7 @@ class ApplicationController < ActionController::Base
     @submission_files = []
     def with_extracted(item)
       if item[:public_link]
+        return nil if File.basename(item[:full_path].to_s) == ".DS_Store"
         @submission_files.push({
           link: item[:public_link],
           name: item[:public_link].sub(/^.*extracted\//, ""),
@@ -123,19 +124,20 @@ class ApplicationController < ActionController::Base
                   "text/unknown"
                 end,
           href: "#file_#{@submission_files.count + 1}",
-          lineComments: @lineCommentsByFile[item[:public_link].to_s] || {}
+          lineComments: @lineCommentsByFile[item[:public_link].to_s] || {noCommentsFor: item[:public_link].to_s}
           })
         { text: item[:path], href: "#file_#{@submission_files.count}" }
       else
+        return nil if item[:full_path].basename.to_s == "__MACOSX"
         {
           text: item[:path] + "/",
           state: {selectable: false},
-          nodes: item[:children].map{|i| with_extracted(i)}
+          nodes: item[:children].map{|i| with_extracted(i)}.compact
         }
       end
     end
     
-    @submission_dirs = sub.upload.extracted_files.map{|i| with_extracted(i)}
+    @submission_dirs = sub.upload.extracted_files.map{|i| with_extracted(i)}.compact
   end
 
 end
