@@ -84,6 +84,8 @@ public class TAPListener extends RunListener {
   }
 
   protected String escapeString(String s) {
+    if (s == null)
+      return "<null>";
     return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
   }
   
@@ -92,8 +94,13 @@ public class TAPListener extends RunListener {
     getWriter().println(String.format("  header: \"%s\"", escapeString(f.getTestHeader())));
     getWriter().println(String.format("  message: \"%s\"", escapeString(f.getMessage())));
     getWriter().println(String.format("  stack: ["));
-    for (String line : f.getTrace().split("\n")) {
-      getWriter().println(String.format("    \"%s\",", escapeString(line)));
+    String trace = f.getTrace();
+    if (trace == null) {
+      getWriter().println(String.format("    \"<no trace available>\","));
+    } else {
+      for (String line : f.getTrace().split("\n")) {
+        getWriter().println(String.format("    \"%s\",", escapeString(line)));
+      }
     }
     getWriter().println(String.format("    ]"));
   }

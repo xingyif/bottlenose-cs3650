@@ -24,8 +24,8 @@ public class TAPRunner {
     ByteArrayOutputStream delayedStdout = new ByteArrayOutputStream();
     PrintStream origStdout = System.out;
     
-    core.addListener(new TAPListener(new PrintStream(tapOut)));
-    System.setOut(new PrintStream(delayedStdout));
+    core.addListener(new TAPListener(new PrintStream(tapOut, true)));
+    System.setOut(new PrintStream(delayedStdout, true));
 
     List<Class<?>> classes = new ArrayList<Class<?>>();
     for (String arg : args) {
@@ -49,6 +49,7 @@ public class TAPRunner {
         Result result = core.run(c);
         if (!result.wasSuccessful()) fail = true;
       }
+      System.out.flush();
       System.setOut(origStdout);
       String[] tapLines = tapOut.toString().split("\n");
       System.out.println(tapLines[0]);
