@@ -40,18 +40,43 @@ class JavaStyleGrader < GraderConfig
       style.write(Upload.upload_path_for(output))
       g.grading_output = style.path
     end
-    tap = TapParser.new(output)
-    Audit.log "JavaStyle checker results: Tap: #{tap.points_earned}\n"
+    if !status.success?
+      InlineComment.where(submission: sub, grader: g).destroy_all
+      
+      g.score = 0
+      g.out_of = self.avail_score
+      g.updated_at = DateTime.now
+      g.available = true
+      g.save!
 
-    g.score = tap.points_earned
-    g.out_of = tap.points_available
-    g.updated_at = DateTime.now
-    g.available = true
-    g.save!
+      InlineComment.create!(
+        submission: sub,
+        title: "Compilation errors",
+        filename: sub.upload.extracted_path.to_s,
+        line: 0,
+        grader: g,
+        user: nil,
+        label: "general",
+        severity: InlineComment::severities["error"],
+        weight: self.avail_score,
+        comment: "Could not parse your program, so could not compute any style points at all",
+        suppressed: false)
 
-    upload_inline_comments(tap, sub)
-    
-    return self.avail_score.to_f * (tap.points_earned.to_f / tap.points_available.to_f)
+      return 0
+    else
+      tap = TapParser.new(output)
+      Audit.log "JavaStyle checker results: Tap: #{tap.points_earned}\n"
+
+      g.score = tap.points_earned
+      g.out_of = tap.points_available
+      g.updated_at = DateTime.now
+      g.available = true
+      g.save!
+
+      upload_inline_comments(tap, sub)
+
+      return self.avail_score.to_f * (tap.points_earned.to_f / tap.points_available.to_f)
+    end
   end
   
   def upload_inline_comments(tap, sub)
