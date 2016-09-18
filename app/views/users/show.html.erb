@@ -24,7 +24,7 @@
       
       <tr>
         <td>Email:</td>
-        <td><%= @user.email %></td>
+        <td><%= mail_to "#{@user.name} <#{@user.email}>", @user.email %></td>
       </tr>
       <tr>
         <td>NUID:</td>
