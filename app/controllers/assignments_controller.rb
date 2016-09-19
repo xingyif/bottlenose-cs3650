@@ -1,4 +1,5 @@
 class AssignmentsController < CoursesController
+  prepend_before_action :find_assignment, except: [:index, :new, :create]
   before_action :require_valid_course
   before_action :require_admin_or_prof, only: [:edit, :edit_weights, :update, :update_weights,
                                                :new, :create, :destroy,
@@ -6,8 +7,6 @@ class AssignmentsController < CoursesController
   before_action :require_admin_or_staff, only: [:tarball, :publish]
   
   def show
-    @assignment = Assignment.find_by(id: params[:id])
-
     admin_view = current_user_site_admin? || current_user_staff_for?(@course)
     if admin_view
       submissions = @assignment.used_submissions.includes(:user).order(created_at: :desc).to_a
@@ -43,15 +42,6 @@ class AssignmentsController < CoursesController
   end
 
   def edit
-    @assignment = Assignment.find_by(id: params[:id])
-    if @assignment.nil?
-      redirect_to back_or_else(course_assignments_path), alert: "No such assignment"
-      return
-    end
-    if @assignment.course_id != params[:course_id].to_i
-      redirect_to back_or_else(course_assignments_path), alert: "No such assignment for this course"
-      return
-    end
   end
 
   def edit_weights
@@ -90,7 +80,6 @@ class AssignmentsController < CoursesController
   end
 
   def update
-    @assignment = Assignment.find(params[:id])
     unless set_lateness_config and set_grader_configs
       render action: "edit"
       return
@@ -110,8 +99,6 @@ class AssignmentsController < CoursesController
   end
   
   def destroy
-    @assignment = Assignment.find(params[:id])
-
     @assignment.destroy
     redirect_to @course, notice: "Assignment #{params[:id]} has been deleted."
   end
@@ -143,7 +130,6 @@ class AssignmentsController < CoursesController
   end
 
   def publish
-    @assignment = Assignment.find(params[:id])
     used = @assignment.used_submissions
     used.each do |u|
       u.graders.where(score: nil).each do |g| g.grader_config.grade(@assignment, u) end
@@ -156,7 +142,6 @@ class AssignmentsController < CoursesController
   end
 
   def recreate_graders
-    @assignment = Assignment.find(params[:id])
     count = do_recreate_graders @assignment
     redirect_to back_or_else(course_assignment_path(@course, @assignment)),
                 notice: "#{plural(count, 'grader')} created"
@@ -579,4 +564,16 @@ class AssignmentsController < CoursesController
     return no_problems
   end
 
+
+  def find_assignment
+    @assignment = Assignment.find_by(id: params[:id])
+    if @assignment.nil?
+      redirect_to back_or_else(course_assignments_path), alert: "No such assignment"
+      return
+    end
+    if @assignment.course_id != params[:course_id].to_i
+      redirect_to back_or_else(course_assignments_path), alert: "No such assignment for this course"
+      return
+    end
+  end
 end
