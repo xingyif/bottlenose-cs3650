@@ -17,6 +17,8 @@
     <% end %>
   </div>
 </div>
+<%= render "lateness_summary", assignments: @course.assignments,
+    for_user: current_user, show_all: current_user.course_professor?(@course) %>
 <div class="row">
   <%= link_to "Withdraw from this course", withdraw_course_path(@course),
       method: :delete,

@@ -7,7 +7,7 @@ class FixedDaysConfig < LatenessConfig
     max_late_days = assignment.course.total_late_days
     return true if max_late_days.nil?
     submission.users.all? do |u|
-      (u.late_days_used + late_days <= max_late_days)
+      (u.late_days_used(assignment.course.assignments) + late_days <= max_late_days)
     end
   end
 

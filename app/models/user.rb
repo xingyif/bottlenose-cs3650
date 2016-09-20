@@ -109,14 +109,18 @@ class User < ActiveRecord::Base
     self.email
   end
 
-  def late_days_used
-    SubsForGrading.where(user: self).reduce(0) do |acc, s|
+  def late_days_used(assignments)
+    self.used_submissions_for(assignments).reduce(0) do |acc, s|
       acc + s.submission.days_late
     end
   end
 
   def submissions_for(assn)
     assn.submissions_for(self)
+  end
+
+  def used_submissions_for(assignments)
+    SubsForGrading.where(user: self, assignment_id: assignments.pluck(:id)).joins(:submission)
   end
 
   def course_staff?(course)
