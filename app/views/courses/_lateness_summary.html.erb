@@ -35,8 +35,13 @@
           <% used = used_subs.detect{|u| u.assignment_id == assignment.id} %>
           <tr>
             <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
+            <% if used.nil? %>
+            <td></td>
+            <td>0</td>
+            <% else %>
             <td><span class="local-time"><%= used.created_at %></span></td>
             <td><%= used.submission.days_late %></td>
+            <% end %>
           </tr>
           <% end %>
         </tbody>
