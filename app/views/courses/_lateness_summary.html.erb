@@ -32,14 +32,11 @@
         </thead>
         <tbody>
           <% assns.order(due_date: :desc, available: :desc).each do |assignment| %>
-          <%
-             used = used_subs.detect{|u| u.assignment_id = assignment.id}
-             latedays = used.submission.days_late
-             %>
+          <% used = used_subs.detect{|u| u.assignment_id == assignment.id} %>
           <tr>
             <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
             <td><span class="local-time"><%= used.created_at %></span></td>
-            <td><%= latedays %></td>
+            <td><%= used.submission.days_late %></td>
           </tr>
           <% end %>
         </tbody>
