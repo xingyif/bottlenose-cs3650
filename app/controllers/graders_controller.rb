@@ -378,7 +378,7 @@ HEADER
         @answers_are_newer = true
       else
         get_submission_files(related_sub)
-        @answers_are_newer = (@related_sub.created_at < @submission.created_at)        
+        @answers_are_newer = (related_sub.created_at < @submission.created_at)        
       end
     else
       @submission_files = []
