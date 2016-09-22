@@ -1,5 +1,5 @@
 class AssignmentsController < CoursesController
-  prepend_before_action :find_assignment, except: [:index, :new, :create]
+  prepend_before_action :find_assignment, except: [:index, :new, :create, :edit_weights, :update_weights]
   before_action :require_valid_course
   before_action :require_admin_or_prof, only: [:edit, :edit_weights, :update, :update_weights,
                                                :new, :create, :destroy,

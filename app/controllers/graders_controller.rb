@@ -375,11 +375,14 @@ HEADER
       related_sub = @assignment.related_assignment.used_sub_for(@submission.user)
       if related_sub.nil?
         @submission_files = []
+        @answers_are_newer = true
       else
         get_submission_files(related_sub)
+        @answers_are_newer = (@related_sub.created_at < @submission.created_at)        
       end
     else
       @submission_files = []
+      @answers_are_newer = true
     end
     show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
     @grades = @submission.inline_comments(current_user)

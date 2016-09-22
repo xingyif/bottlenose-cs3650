@@ -81,7 +81,7 @@ class TapParser
       if lines.length > 0
         mm = lines[0].match(/^(\s+)---\s*$/)
         if mm
-          test[:info] = parse_info(lines, mm[1])
+          test[:info] = parse_info(lines, mm[1]) || {}
         end
       end
       @tests.push test
@@ -120,7 +120,7 @@ class TapParser
     if total_points == false
       total_points = 0
       @tests.each do |t|
-        total_points += t[:info]["weight"]
+        total_points += t[:info]["weight"] || 1
       end
     end
 
@@ -142,13 +142,13 @@ class TapParser
       @tests.each do |t|
         next if t[:passed] == false # skip the failed tests; they don't add anything
         next if t[:info]["suppressed"] # skip the suppressed tests
-        total_points += t[:info]["weight"]
+        total_points += t[:info]["weight"] || 1
       end
     else
       @tests.each do |t|
         next if t[:passed] # skip the passed tests; they don't deduct anything
         next if t[:info]["suppressed"] # skip the suppressed tests
-        total_points -= t[:info]["weight"]
+        total_points -= t[:info]["weight"] || 1
       end
     end
     # Return the resulting points

@@ -37,7 +37,7 @@
       <div class="alert alert-success">
         <p>
           <% if cur_reg.staff? %>
-          <span class="pull-right">Weight: <%= t[:info]["weight"] %></span>
+          <span class="pull-right">Weight: <%= t[:info]["weight"] || 1 %></span>
           <% end %>
           <b>Passed:</b> <%= t[:comment] %>
         </p>
@@ -46,7 +46,7 @@
       <div class="alert alert-danger">
         <p>
           <% if cur_reg.staff? %>
-          <span class="pull-right">Weight: <%= t[:info]["weight"] %></span>
+          <span class="pull-right">Weight: <%= t[:info]["weight"]  %></span>
           <% end %>
           <b>Failed:</b> <%= t[:info]["header"] %>
         </p>

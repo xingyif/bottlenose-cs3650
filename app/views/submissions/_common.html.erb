@@ -60,7 +60,7 @@
       too many times in the past hour.  Please wait a while before
       trying again.</p>
   </div> 
-  <% elsif !allowed && staff_override %>
+  <% elsif DateTime.current > @assignment.due_date && staff_override %>
   <div class="alert alert-info">
     <p>You are <%= type[:gerund] %> on behalf of a student.  Should
       this <%= type[:noun] %>

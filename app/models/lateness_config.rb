@@ -7,7 +7,8 @@ class LatenessConfig < ActiveRecord::Base
   end
 
   def late?(assignment, submission)
-    (submission.created_at || DateTime.current) > assignment.due_date
+    (!submission.ignore_late_penalty) and
+      ((submission.created_at || DateTime.current) > assignment.due_date)
   end
 
   def allow_submission?(assignment, submission)
