@@ -118,7 +118,9 @@ class GradersController < ApplicationController
   end
 
   def autosave_comments(cp, cp_to_comment)
-    comments = cp.map do |c| self.send(cp_to_comment, c) end
+    comments = InlineComment.transaction do
+      cp.map do |c| self.send(cp_to_comment, c) end
+    end
     data = cp.zip(comments).map do |c, comm| [c["id"], comm.id] end.to_h
     render :json => data
   end
@@ -129,7 +131,9 @@ class GradersController < ApplicationController
                 .where(id: cp.select{|c| c["shouldDelete"]}.map{|c| c["id"].to_i})
     to_delete.destroy_all
     # create the others
-    comments = cp.map do |c| self.send(cp_to_comment, c) end
+    comments = InlineComment.transaction do
+      cp.map do |c| self.send(cp_to_comment, c) end
+    end
     data = cp.zip(comments).map do |c, comm| [c["id"], comm.id] end.to_h
     @grader.grader_config.grade(@assignment, @submission)
     @submission.compute_grade! if @submission.grade_complete?
