@@ -24,7 +24,7 @@ class QuestionsGrader < GraderConfig
     comments = InlineComment.where(submission: sub, grader: g, suppressed: false)
     questions = assignment.flattened_questions
     score = comments.pluck(:weight).zip(questions).reduce(0) do |sum, (w, q)|
-      sum + (w * q["weight"].clamp(0, 1))
+      sum + (w.clamp(0, 1) * q["weight"])
     end
     
     g.out_of = self.avail_score
