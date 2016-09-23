@@ -189,4 +189,22 @@ class Assignment < ActiveRecord::Base
       nil
     end
   end
+
+  def flattened_questions
+    qs = self.questions
+    return nil if qs.nil?
+
+    flat = []
+    qs.each do |section|
+      section.each do |name, qs|
+        qs.each do |question|
+          question.each do |type, q|
+            q["type"] = type;
+            flat.push q
+          end
+        end
+      end
+    end
+    flat
+  end
 end
