@@ -4,6 +4,7 @@ class SubsForGrading < ActiveRecord::Base
   belongs_to :assignment
 
   delegate :created_at, to: :submission
+  delegate :graders, to: :submission
 
   validate :submission_matches_assignment
 

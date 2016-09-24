@@ -4,21 +4,29 @@
   <div class="col-md-6">
     <%= render "assignments/table", assignments: @course.assignments,
         for_user: current_user, show_all: current_user.course_professor?(@course) %>
+    <%= render "lateness_summary", assignments: @course.assignments,
+        for_user: current_user, show_all: current_user.course_professor?(@course) %>
   </div>
   <div class="col-md-6">
-    <h2>Current Team</h2>
-    <% active_team = current_user.active_team_for(@course) %>
-    <% if active_team %>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Current Team</h3>
+      </div>
+      <% active_team = current_user.active_team_for(@course) %>
+      <% if active_team %>
       <%= link_to course_team_path(@course, active_team) do %>
-        <span><%= active_team %></span>
+      <div class="panel-body"><span><%= active_team %></span></div>
       <% end %>
-    <% else %>
-      No active team.
+      <% else %>
+      <div class="panel-body">No active team.</div>
+      <% end %>
+    </div>
+    <% if current_user.course_staff?(@course) %>
+    <%= render "grading_due", assignments: @course.assignments,
+        show_all: current_user.course_professor?(@course) %>
     <% end %>
   </div>
 </div>
-<%= render "lateness_summary", assignments: @course.assignments,
-    for_user: current_user, show_all: current_user.course_professor?(@course) %>
 <div class="row">
   <%= link_to "Withdraw from this course", withdraw_course_path(@course),
       method: :delete,

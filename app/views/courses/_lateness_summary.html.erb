@@ -6,8 +6,6 @@
    end %>
 <% used_subs = for_user.used_submissions_for(assns).to_a %>
 <% total_latedays = used_subs.reduce(0) do |acc, s| acc + s.submission.days_late end %>
-<div class="row">
-  <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">Late submissions summary</h3>
@@ -47,6 +45,4 @@
         </tbody>
       </table>
     </div>
-  </div>
-</div>
 <% end %>

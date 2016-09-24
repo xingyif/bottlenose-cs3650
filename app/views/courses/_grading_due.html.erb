@@ -1,0 +1,16 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Pending grading</h3>
+  </div>
+  <div class="panel-body">
+    <% @pending_grading.each do |assn_id, graders| %>
+    <h4><%= link_to @assignments[assn_id].name, course_assignment_path(@course, assn_id) %></h4>
+    <ul>
+      <% graders.each do |g| %>
+      <li><%= link_to g.submission.user.name,
+              edit_course_assignment_submission_grader_path(@course, assn_id, g.submission_id, g) %></li>
+      <% end %>
+    </ul>
+    <% end %>
+  </div>
+</div>

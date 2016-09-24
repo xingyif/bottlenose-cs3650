@@ -16,6 +16,28 @@ class CoursesController < ApplicationController
   end
 
   def show
+    if current_user_prof_for?(@course)
+      @pending_grading =
+        # only use submissions that are being used for grading, but this may produce duplicates for team submissions
+        # only pick submissions from this course
+        # hang on to the assignment id
+        # only keep unfinished graders
+        # sort the assignments
+        # remove duplicates
+        Grader
+        .joins("INNER JOIN subs_for_gradings ON graders.submission_id = subs_for_gradings.submission_id")
+        .joins("INNER JOIN assignments ON subs_for_gradings.assignment_id = assignments.id")
+        .where("assignments.course_id = ?", @course.id)
+        .select("graders.*", "subs_for_gradings.assignment_id")
+        .where(score: nil)
+        .order("assignments.due_date")
+        .to_a.uniq
+        .group_by{|r| r.assignment_id}
+      @assignments = Assignment.where(id: @pending_grading.keys).map{|a| [a.id, a]}.to_h
+    elsif @registration.staff?
+      @pending_grading = []
+      @assignment = []
+    end
   end
 
   def new
@@ -164,11 +186,11 @@ class CoursesController < ApplicationController
       return
     end
 
-    registration = current_user.registration_for(@course)
-    if registration.nil?
+    @registration = current_user.registration_for(@course)
+    if @registration.nil?
       redirect_to courses_url, alert: "You're not registered for that course."
       return
-    elsif registration.dropped_date
+    elsif @registration.dropped_date
       redirect_to courses_url, alert: "You've already dropped that course."
       return
     end
