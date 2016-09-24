@@ -14,9 +14,9 @@ class Registration < ActiveRecord::Base
   # Only one registration per user per course is allowed.
   validates :user_id, uniqueness: { scope: :course_id }
 
-  # Return true if the registration is a staff role (professor or assistant).
+  # Return true if the registration is a staff role (not a student)
   def staff?
-    self.role == 'professor' || self.role == 'assistant'
+    self.role == 'professor' || self.role == 'assistant' || self.role == 'grader'
   end
 
   def professor?
