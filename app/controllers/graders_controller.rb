@@ -117,24 +117,27 @@ class GradersController < ApplicationController
     end
   end
 
-  def autosave_comments(cp, cp_to_comment)
+  def do_save_comments(cp, cp_to_comment)
+    # delete the ones marked for deletion
+    deletable, commentable = cp.partition{|c| c["shouldDelete"]}
+    to_delete = InlineComment.where(user: current_user, submission_id: params[:submission_id])
+                .where(id: deletable.map{|c| c["id"].to_i})
+    to_delete.destroy_all
+    deleted = deletable.map do |c| [c["id"], "deleted"] end.to_h
+    # create the others
     comments = InlineComment.transaction do
-      cp.map do |c| self.send(cp_to_comment, c) end
+      commentable.map do |c| self.send(cp_to_comment, c) end
     end
-    data = cp.zip(comments).map do |c, comm| [c["id"], comm.id] end.to_h
-    render :json => data
+    newdata = commentable.zip(comments).map do |c, comm| [c["id"], comm.id] end.to_h
+    newdata.merge(deleted)
+  end
+  
+  def autosave_comments(cp, cp_to_comment)
+    render :json => do_save_comments(cp, cp_to_comment)
   end
 
   def save_all_comments(cp, cp_to_comment)
-    # delete the ones marked for deletion
-    to_delete = InlineComment.where(user: current_user, submission_id: params[:submission_id])
-                .where(id: cp.select{|c| c["shouldDelete"]}.map{|c| c["id"].to_i})
-    to_delete.destroy_all
-    # create the others
-    comments = InlineComment.transaction do
-      cp.map do |c| self.send(cp_to_comment, c) end
-    end
-    data = cp.zip(comments).map do |c, comm| [c["id"], comm.id] end.to_h
+    do_save_comments(cp, cp_to_comment)
     @grader.grader_config.grade(@assignment, @submission)
     @submission.compute_grade! if @submission.grade_complete?
   end

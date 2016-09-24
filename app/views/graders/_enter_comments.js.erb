@@ -55,6 +55,7 @@ $(function() {
             for (var id in data) {
               var c = commentsById[id];
               delete commentsById[id];
+              if (data[id] === "deleted") continue;
               c.id = data[id];
               commentsById[c.id] = c;
             }
@@ -159,6 +160,7 @@ $(function() {
   function deleteComment(commData) {
     commData.cmWidget.clear();
     commData.comment.shouldDelete = true
+    autosave();
     updateScore();
   }
   updateScore();
