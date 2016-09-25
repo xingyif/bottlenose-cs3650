@@ -4,7 +4,10 @@
   </div>
   <div class="panel-body">
     <% @pending_grading.each do |assn_id, graders| %>
-    <h4><%= link_to @assignments[assn_id].name, course_assignment_path(@course, assn_id) %></h4>
+    <h4><%= link_to @assignments[assn_id].name,
+            course_assignment_path(@course, assn_id) %>
+      (<%= graders.count %> remaining)
+    </h4>
     <ul>
       <% graders.each do |g| %>
       <li><%= link_to g.submission.user.name,
