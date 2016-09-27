@@ -95,7 +95,7 @@ class TapParser
       line = lines.shift
       break if line == (indent + "...")
       # nuke any ANSI escape codes
-      info.push(mm[1].gsub("\u001B", "ESC")
+      info.push(mm[1].gsub("\u001B", "ESC"))
     end
     begin
       YAML.load(info.join("\n"))
