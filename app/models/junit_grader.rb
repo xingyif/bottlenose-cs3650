@@ -64,6 +64,7 @@ class JunitGrader < GraderConfig
             copy_srctest_from_to(self.upload.extracted_path.join("starter"), build_dir)
           end
           copy_srctest_from_to(u.extracted_path, build_dir)
+          FileUtils.cp("#{assets_dir}/annotations.jar", build_dir)
           FileUtils.cp("#{assets_dir}/junit-4.12.jar", build_dir)
           FileUtils.cp("#{assets_dir}/junit-tap.jar", build_dir)
           FileUtils.cp("#{assets_dir}/hamcrest-core-1.3.jar", build_dir)
@@ -77,7 +78,7 @@ class JunitGrader < GraderConfig
           output, status = Open3.capture2("ls", "-R", build_dir.to_s)
           details.write output
 
-          classpath = "junit-4.12.jar:junit-tap.jar:hamcrest-core-1.3.jar:.:./*"
+          classpath = "junit-4.12.jar:junit-tap.jar:hamcrest-core-1.3.jar:annotations.jar:.:./*"
           
           FileUtils.cd(build_dir) do
             any_problems = false
