@@ -1,6 +1,8 @@
 <% @page_title = "#{@course.name} / #{@gradesheet.assignment.name} / Responses for #{@user.display_name}" %>
+<% cur_reg = current_user.registration_for(@course) %>
 
-<%= render 'assignment_questions_info', gradesheet: @gradesheet %>
+<%= render 'assignment_questions_info', gradesheet: @gradesheet,
+    cur_reg: cur_reg %>
 <h3>
   Responses
   <% if @user.id != current_user.id %>
