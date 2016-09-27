@@ -94,14 +94,16 @@ class TapParser
     while lines.length > 0 && (mm = lines[0].match(regex))
       line = lines.shift
       break if line == (indent + "...")
-      info.push(mm[1])
+      # nuke any ANSI escape codes
+      info.push(mm[1].gsub("\u001B", "ESC")
     end
     begin
       YAML.load(info.join("\n"))
     rescue Exception => ee
-      print "Couldn't parse YAML for:\n```\n"
+      # triple-backtick snarled things up
+      print "Couldn't parse YAML for:\n``" + "`\n"
       print info.join("\n")
-      print "```\n"
+      print "\n`" + "``\n"
       print "Error was #{ee}\n"
     end
   end
