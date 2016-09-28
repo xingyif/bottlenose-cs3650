@@ -153,6 +153,6 @@ public class TAPListener extends RunListener {
    * BaseTestRunner. Fix it.
    */
   protected String elapsedTimeAsString(long runTime) {
-    return NumberFormat.getInstance().format((double) runTime / 1000);
+    return String.format("%.3f", (double) runTime / 1000);
   }
 }
