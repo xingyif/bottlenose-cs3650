@@ -1,4 +1,5 @@
 require 'tempfile'
+require 'audit'
 
 class SubmissionsController < CoursesController
   prepend_before_action :find_submission, except: [:index, :new, :create]
@@ -158,6 +159,7 @@ class SubmissionsController < CoursesController
     if @assignment.related_assignment
       related_sub = @assignment.related_assignment.used_sub_for(current_user)
       if related_sub.nil?
+        Audit.log("User #{current_user.id} (#{current_user.name}) is viewing the self-eval for assignment #{related_sub.id} and has agreed not to submit further files to it.\n")
         @submission_files = []
       else
         get_submission_files(related_sub)
