@@ -12,7 +12,11 @@
   <% end %>
   <% if @user.id == current_user.id %>
   <%= link_to "New Response",
-         new_course_assignment_submission_path(@course, @gradesheet.assignment), class: "btn btn-success" %>
+      new_course_assignment_submission_path(@course,
+      @gradesheet.assignment), class: "btn btn-success",
+      data: {confirm: "Once you view the questions on the self-eval, " +
+                      "you are not allowed to resubmit your files. " +
+                      "Are you sure you want to continue?"} %>
   <% end %>
 </h3>
 <%= render 'user_subs', user: @user, course: @course, gradesheet: @gradesheet %>

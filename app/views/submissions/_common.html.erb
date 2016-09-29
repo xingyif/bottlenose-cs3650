@@ -43,6 +43,11 @@
     <p>Contact a professor to join a team.</p>
     <% end %>
   </div>
+  <% elsif !not_following && !staff_override %>
+    <div class="alert alert-danger">
+    <p>You are not allowed to resubmit your assignment after you've
+      already submitted to a related assignment.</p>
+  </div> 
   <% elsif !allowed && !staff_override %>
   <div class="alert alert-danger">
     <p>It's too late to submit to this assignment: you either have

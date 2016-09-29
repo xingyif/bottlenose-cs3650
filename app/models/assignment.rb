@@ -56,6 +56,14 @@ class Assignment < ActiveRecord::Base
     self.lateness_config.allow_submission?(self, sub)
   end
 
+  def sub_not_following_related?(user)
+    # Is this submission not coming *after* any submissions to related assignments?
+    related = Assignment.where(related_assignment_id: self.id)
+    return related.all? do |a|
+      a.submissions_for(user).empty?
+    end
+  end
+
   def rate_limit?(sub)
     if self.max_attempts.to_i > 0 and self.submissions.count >= self.max_attempts.to_i
       "permanent"

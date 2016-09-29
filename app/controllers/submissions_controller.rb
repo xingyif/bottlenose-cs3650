@@ -218,7 +218,7 @@ class SubmissionsController < CoursesController
       no_problems = false
     else
       questions.zip(@answers).each_with_index do |(q, a), i|
-        if a["main"].nil?
+        if a.nil? or a["main"].nil?
           @submission.errors.add(:base, "Question #{i + 1} is missing an answer")
           no_problems = false
         end
