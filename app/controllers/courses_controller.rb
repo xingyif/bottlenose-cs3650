@@ -20,6 +20,7 @@ class CoursesController < ApplicationController
       @pending_grading =
         # only use submissions that are being used for grading, but this may produce duplicates for team submissions
         # only pick submissions from this course
+        # only pick non-staff submissions
         # hang on to the assignment id
         # only keep unfinished graders
         # sort the assignments
@@ -27,9 +28,11 @@ class CoursesController < ApplicationController
         Grader
         .joins("INNER JOIN subs_for_gradings ON graders.submission_id = subs_for_gradings.submission_id")
         .joins("INNER JOIN assignments ON subs_for_gradings.assignment_id = assignments.id")
+        .joins("INNER JOIN registrations ON subs_for_gradings.user_id = registrations.user_id")
         .where("assignments.course_id = ?", @course.id)
         .select("graders.*", "subs_for_gradings.assignment_id")
         .where(score: nil)
+        .where("registrations.role": Registration::roles["student"])
         .order("assignments.due_date")
         .to_a.uniq
         .group_by{|r| r.assignment_id}
