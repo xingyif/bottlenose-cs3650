@@ -1,7 +1,19 @@
-<% def maybe_link_to(which, text, link)
-     if which then link_to(text, link) else text end
+<style>
+  #subinfo .tooltip.in { opacity: 1; filter: alpha(opacity=100); }
+</style>
+<% def maybe_link_to(which, user)
+   if which
+     link_to(user.name, user_path(user), data: {
+       toggle: "tooltip",
+       delay: {show:0, hide: 1000},
+       title: "#{image_tag(Upload.upload_path_for(user.profile || 'silhouette.jpg'), 
+                        alt: user.display_name, style: 'max-height: 300px; max-width: 300px;')}"
+     })
+   else
+     user.name
+   end
    end %>
-<table class="table row-vcenter">
+<table id="subinfo" class="table row-vcenter">
   <tr>
     <td><strong>Assignment</strong></td>
     <td><%= @submission.assignment.name %></td>
@@ -9,7 +21,7 @@
   <% if @submission.team.nil? %>
     <tr>
       <td><strong>Student</strong></td>
-      <td><%= maybe_link_to cur_reg.staff?, @submission.user.name, user_path(@submission.user) %></td>
+      <td><%= maybe_link_to cur_reg.staff?, @submission.user %></td>
     </tr>
   <% else %>
     <tr>
@@ -27,4 +39,11 @@
       <div class="prose"><%= @submission.student_notes %></div>
     </td>
   </tr>
+  <script>
+    $('a[data-toggle="tooltip"]').tooltip({
+      animated: 'fade',
+      placement: 'right',
+      html: true
+    });
+  </script>
 </table>

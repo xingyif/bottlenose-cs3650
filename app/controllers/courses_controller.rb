@@ -52,6 +52,10 @@ class CoursesController < ApplicationController
   end
 
   def facebook
+    unless current_user_site_admin? || current_user_staff_for?(@course)
+      redirect_to back_or_else(root_path), alert: "Must be an admin or professor."
+      return
+    end
     prep_sections
     @students = @course.students
                 .select("users.*", "registrations.dropped_date", "registrations.section_id")
