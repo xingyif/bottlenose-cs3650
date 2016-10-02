@@ -1,5 +1,8 @@
 <% @page_title = "JavaStyle Grader" %>
 <% cur_reg = current_user.registration_for(@course) %>
+<% def maybe_link_to(which, text, link)
+     if which then link_to(text, link) else text end
+   end %>
 <% content_for :wide_content_before do %>
 <style id="comment-styles"></style>
 
@@ -18,7 +21,7 @@
   <% if @submission.team.nil? %>
     <tr>
       <td><strong>Student</strong></td>
-      <td><%= @submission.user.name %></td>
+      <td><%= maybe_link_to cur_reg.staff?, @submission.user.name, user_path(@submission.user) %></td>
     </tr>
   <% else %>
     <tr>
