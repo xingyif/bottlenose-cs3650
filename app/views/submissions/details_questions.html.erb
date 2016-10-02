@@ -8,7 +8,7 @@
 
 <h1>Response</h1>
 
-<%= render :partial => 'submissions/sub_info' %>
+<%= render 'submissions/sub_info', cur_reg: cur_reg %>
 
 <% unless @answers_are_newer %>
 <h3>These responses are for an outdated submission!</h3>

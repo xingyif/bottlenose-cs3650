@@ -1,3 +1,6 @@
+<% def maybe_link_to(which, text, link)
+     if which then link_to(text, link) else text end
+   end %>
 <table class="table row-vcenter">
   <tr>
     <td><strong>Assignment</strong></td>
@@ -6,7 +9,7 @@
   <% if @submission.team.nil? %>
     <tr>
       <td><strong>Student</strong></td>
-      <td><%= @submission.user.name %></td>
+      <td><%= maybe_link_to cur_reg.staff?, @submission.user.name, user_path(@submission.user) %></td>
     </tr>
   <% else %>
     <tr>
