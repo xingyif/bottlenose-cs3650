@@ -112,16 +112,20 @@ class Course < ActiveRecord::Base
     self.students_with_drop_info.sort_by(&:sort_name).each do |s|
       dropped = s.dropped_date
       used = subs.select{|r| r.user_id == s.id}
+      adjust = 0
       min = used.reduce(0.0) do |tot, sub| 
         if (assn_weights[sub.assignment_id] != 0)
+          if sub.score.nil?
+            adjust += assn_weights[sub.assignment_id]
+          end
           tot + ((sub.score || 0) * assn_weights[sub.assignment_id] / 100.0) 
         else
           tot
         end
       end
-      cur = (100.0 * min) / avail
+      cur = (100.0 * min) / (avail - adjust)
       max = min + remaining
-      ans.push ({s: s, dropped: dropped, min: min, cur: cur, max: max})
+      ans.push ({s: s, dropped: dropped, min: min, cur: cur, max: max, pending: adjust})
     end
     ans
   end

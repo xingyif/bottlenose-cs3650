@@ -103,6 +103,7 @@
           <th>Min</th>
           <th>Cur</th>
           <th>Max</th>
+          <th>Pending</th>
         </tr>
       </thead>
       <tbody>
@@ -116,9 +117,10 @@
           <% end %>
             <td width="1em"><span><%= mail_to "#{info[:s].name} <#{info[:s].email}>", "@" %></span></td>
             <td><span><%= link_to info[:s].display_name, impersonate_user_path(info[:s]), method: 'post' %></span></td>
-            <td><span><%= show_score(info[:min], nil, true) %></span></td>
-            <td><span><%= show_score(info[:cur], nil, true) %></span></td>
-            <td><span><%= show_score(info[:max], nil, true) %></span></td>
+            <td><span class="<%= color_warning(info[:min]) %>"><%= show_score(info[:min], nil, true) %></span></td>
+            <td><span class="<%= color_warning(info[:cur]) %>"><%= show_score(info[:cur], nil, true) %></span></td>
+            <td><span class="<%= color_warning(info[:max]) %>"><%= show_score(info[:max], nil, true) %></span></td>
+            <td><span><%= show_score(info[:pending], nil, true) %></span></td>
           </tr>
         <% end %>
       </tbody>

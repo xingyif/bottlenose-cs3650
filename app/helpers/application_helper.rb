@@ -17,6 +17,20 @@ module ApplicationHelper
     hash
   end
 
+  def color_warning(score)
+    if score >= 90
+      return "gradeA"
+    elsif score >= 80
+      return "gradeB"
+    elsif score >= 70
+      return "gradeC"
+    elsif score >= 60
+      return "gradeD"
+    else
+      return "gradeF"
+    end
+  end
+  
   def show_score(score, assignment = nil, admin = nil)
     assignment ||= @assignment
 
