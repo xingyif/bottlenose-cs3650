@@ -1,8 +1,5 @@
 <% @page_title = "JavaStyle Grader" %>
 <% cur_reg = current_user.registration_for(@course) %>
-<% def maybe_link_to(which, text, link)
-     if which then link_to(text, link) else text end
-   end %>
 <% content_for :wide_content_before do %>
 <style id="comment-styles"></style>
 
@@ -11,36 +8,9 @@
       course_assignment_submission_path(@course, @assignment, @submission) %>
 </p>
 
-<h1>Submission</h1>
+<h1>Response</h1>
 
-<table class="table row-vcenter">
-  <tr>
-    <td><strong>Assignment</strong></td>
-    <td><%= @submission.assignment.name %></td>
-  </tr>
-  <% if @submission.team.nil? %>
-    <tr>
-      <td><strong>Student</strong></td>
-      <td><%= maybe_link_to cur_reg.staff?, @submission.user.name, user_path(@submission.user) %></td>
-    </tr>
-  <% else %>
-    <tr>
-      <td><strong>Team</strong></td>
-      <td><%= @submission.team %></td>
-    </tr>
-  <% end %>
-  <tr>
-    <td><strong>Submission Time</strong></td>
-    <td><span class="local-time"><%= @submission.created_at %></span></td>
-  </tr>
-  <tr>
-    <td><strong>Student Notes</strong></td>
-    <td>
-      <div class="prose"><%= @submission.student_notes %></div>
-    </td>
-  </tr>
-</table>
-
+<%= render 'submissions/sub_info', cur_reg: cur_reg %>
 
 <h1>Response Grading</h1>
 <p>The treeview to the left shows the files in this submission.  Click

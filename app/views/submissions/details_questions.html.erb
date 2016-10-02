@@ -3,7 +3,8 @@
 <% content_for :wide_content_before do %>
 
 <p>
-  <%= link_to "Back to Assignment: #{@assignment.name}", course_assignment_path(@course, @assignment) %>
+  <%= link_to "Back to submission",
+      course_assignment_submission_path(@course, @assignment, @submission) %>
 </p>
 
 <h1>Response</h1>
