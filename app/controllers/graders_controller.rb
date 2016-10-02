@@ -230,7 +230,7 @@ class GradersController < ApplicationController
   def update_Questions
     missing, qp = questions_params.partition{|q| q["score"].nil? or q["score"].empty? }
     missing = missing.map{|q| q["index"].to_i + 1}
-    
+
     save_all_comments(qp, :question_to_inlinecomment)
     if missing.empty?
       redirect_to course_assignment_submission_path(@course, @assignment, @submission),
@@ -392,8 +392,10 @@ HEADER
       @answers_are_newer = true
     end
     show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
-    @grades = @submission.inline_comments(current_user)
-    @grades = @grades.select(:line, :name, :weight, :comment).joins(:user).sort_by(&:line).to_a
+    pregrades = @submission.inline_comments(current_user)
+    pregrades = pregrades.select(:line, :name, :weight, :comment).joins(:user).sort_by(&:line).to_a
+    @grades = []
+    pregrades.each do |g| @grades[g["line"]] = g end
     @show_graders = true
     render "edit_QuestionsGrader"
   end
