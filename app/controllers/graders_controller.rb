@@ -121,7 +121,7 @@ class GradersController < ApplicationController
     # delete the ones marked for deletion
     deletable, commentable = cp.partition{|c| c["shouldDelete"]}
     to_delete = InlineComment.where(user: current_user, submission_id: params[:submission_id])
-                .where(id: deletable.map{|c| c["id"].to_i})
+                .where(id: deletable.map{|c| c["id"].to_i}.select{|i| i < (1 << 31)})
     to_delete.destroy_all
     deleted = deletable.map do |c| [c["id"], "deleted"] end.to_h
     # create the others
