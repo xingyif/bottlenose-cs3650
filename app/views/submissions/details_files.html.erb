@@ -1,4 +1,5 @@
 <% @page_title = "View Submission Details" %>
+<% cur_reg = current_user.registration_for(@course) %>
 <% content_for :wide_content_before do %>
 <p>
   <%= link_to "< Back to submission", course_assignment_submission_path(@course, @assignment, @submission) %>
