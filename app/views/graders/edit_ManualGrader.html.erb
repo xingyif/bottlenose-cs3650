@@ -79,15 +79,17 @@
     <% else %>
     <% @any_error = false %>
     <div>
+      <% begin
+         contents = render html: f[:contents] %>
       <textarea class="sourceCode" data-lang="<%= f[:type] %>"
                 data-source="<%= f[:link] %>"
-                id="contents_<%= i %>"><% begin %><%= render html: f[:contents] %><% rescue Exception %><% @any_error = true %><% end %></textarea>
-      <% if @any_error %>
+                id="contents_<%= i %>"><%= contents %></textarea>
+      <% rescue Exception %>
       <div id="contents_<%= i %>">
       <p>Could not render <%= f[:name] %></p>
       <p><%= link_to "Download #{f[:name]}", f[:link] %></p>
       </div>
-    <% end %>
+      <% end %>
     </div>
     <% end %>
   </div>
