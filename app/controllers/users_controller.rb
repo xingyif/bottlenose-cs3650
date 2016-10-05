@@ -11,7 +11,7 @@ class UsersController < ApplicationController
 
   def show
     unless current_user_site_admin? || current_user_has_id?(params[:id].to_i)
-      redirect_to root_path, alert: "You don't have sufficent permission to see that information"
+      redirect_to root_path, alert: "You don't have sufficient permission to see that information"
       return
     end
 
