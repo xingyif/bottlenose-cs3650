@@ -77,16 +77,18 @@
     <% elsif f[:ftype] == "zip" || f[:ftype] == "jar" %>
     <%= link_to f[:link], "Download #{f[:name]}" %>
     <% else %>
-    <% begin %>
+    <% @any_error = false %>
     <div>
       <textarea class="sourceCode" data-lang="<%= f[:type] %>"
                 data-source="<%= f[:link] %>"
-                id="contents_<%= i %>"><%= render html: f[:contents] %></textarea>
-    </div>
-    <% rescue Exception %>
-    <p>Could not render <%= f[:name] %></p>
-    <p><%= link_to "Download #{f[:name]}", f[:link] %>
+                id="contents_<%= i %>"><% begin %><%= render html: f[:contents] %><% rescue Exception %><% @any_error = true %><% end %></textarea>
+      <% if @any_error %>
+      <div id="contents_<%= i %>">
+      <p>Could not render <%= f[:name] %></p>
+      <p><%= link_to "Download #{f[:name]}", f[:link] %></p>
+      </div>
     <% end %>
+    </div>
     <% end %>
   </div>
   <% end %>
