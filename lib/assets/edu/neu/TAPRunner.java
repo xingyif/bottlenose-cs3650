@@ -50,18 +50,24 @@ public class TAPRunner {
         if (!result.wasSuccessful()) fail = true;
       }
       System.out.flush();
-      System.setOut(origStdout);
+      delayedStdout.flush();
+      // System.setOut(origStdout);
       String[] tapLines = tapOut.toString().split("\n");
-      System.out.println(tapLines[0]);
-      System.out.println(tapLines[1]);
+      origStdout.println(tapLines[0]);
+      origStdout.println(tapLines[1]);
       String testOutput = delayedStdout.toString();
       if (testOutput.length() > 0) {
-        System.out.println("# Unexpected test output:");
-        for (String line : delayedStdout.toString().split("\n"))
-          System.out.println("# " + line);
+        origStdout.println("# Unexpected test output:");
+        String[] lines = delayedStdout.toString().split("\n");
+        if (lines.length < 100) {
+          for (String line : lines)
+            origStdout.println("# " + line);
+        } else {
+          origStdout.println("# " + lines.length + " lines (elided for brevity)");
+        }
       }
       for (int i = 2; i < tapLines.length; i++)
-        System.out.println(tapLines[i]);
+        origStdout.println(tapLines[i]);
       System.exit(0);
     } catch (Exception e) {
       System.err.println("A test unexpectedly errored, instead of passed or failed:");
