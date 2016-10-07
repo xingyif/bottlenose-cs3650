@@ -103,6 +103,7 @@ class ApplicationController < ActionController::Base
     def with_extracted(item)
       if item[:public_link]
         return nil if File.basename(item[:full_path].to_s) == ".DS_Store"
+        comments = @lineCommentsByFile[item[:public_link].to_s] || {noCommentsFor: item[:public_link].to_s}
         @submission_files.push({
           link: item[:public_link],
           name: item[:public_link].sub(/^.*extracted\//, ""),
@@ -124,14 +125,38 @@ class ApplicationController < ActionController::Base
                   "text/unknown"
                 end,
           href: "#file_#{@submission_files.count + 1}",
-          lineComments: @lineCommentsByFile[item[:public_link].to_s] || {noCommentsFor: item[:public_link].to_s}
+          lineComments: comments
           })
-        { text: item[:path], href: "#file_#{@submission_files.count}" }
+        deductions =
+          if comments[:noCommentsFor]
+            nil
+          else
+            comments.reduce(0) do |sum, (type, commentsByType)|
+              if commentsByType.is_a? String
+                sum
+              else
+                commentsByType.reduce(sum) do |sum, (line, comments)|
+                  comments.reduce(sum) do |sum, comment|
+                    sum - comment[:deduction]
+                  end
+                end
+              end
+            end
+          end
+        { text:
+            if deductions
+              "#{item[:path]} (#{deductions})"
+            else
+              item[:path]
+            end,
+          href: "#file_#{@submission_files.count}",
+          #icon: @lineCommentsByFile[item[:public_link].to_s] ? "glyphicon glyphicon-flash" : ""
+        }
       else
         return nil if item[:path] == "__MACOSX"
         {
           text: item[:path] + "/",
-          state: {selectable: false},
+          state: {selectable: true},
           nodes: item[:children].map{|i| with_extracted(i)}.compact
         }
       end
