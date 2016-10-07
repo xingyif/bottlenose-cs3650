@@ -16,7 +16,7 @@
       <% @backlog.each do |b| %>
       <p><%= link_to b[:sub].user.display_name, 
              course_assignment_submission_path(b[:sub].assignment.course,
-             b[:sub].assignment, b.sub) %>,
+             b[:sub].assignment, b[:sub]) %>,
         (<%= b.wait_s %>)
       </p>
       <% end %>
