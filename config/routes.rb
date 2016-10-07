@@ -81,6 +81,7 @@ Bottlenose::Application.routes.draw do
   get   'courses/:course_id/assignments/:id/user/:user_id' => 'assignments#show_user', as: 'course_assignment_user'
   get   'courses/:course_id/assignments/:id/tarball' => 'assignments#tarball', as: 'course_assignment_tarball'
   patch 'courses/:course_id/assignments/:id/publish' => 'assignments#publish', as: 'course_assignment_publish'
+  get   'status' => 'main#status', as: 'server_status'
 
 
   Bottlenose::Application.routes.draw do

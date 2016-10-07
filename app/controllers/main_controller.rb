@@ -1,3 +1,7 @@
+require 'junit_grader'
+require 'submission'
+require 'assignment'
+
 class MainController < ApplicationController
   # GET /
   def home
@@ -31,6 +35,34 @@ class MainController < ApplicationController
   def about
   end
 
+  def status
+    if current_user.nil?
+      render "landing"
+      return
+    end
+    backlog = Delayed::Job.all.to_a
+    now = DateTime.now
+
+    @backlog = backlog.select{|b| b.is_a? Delayed::PerformableMethod}.map do |b|
+      job_info = YAML.load(b.handler)
+      w = now.to_time - b.created_at.to_time
+      {
+        sub: job_info.object,
+        job_start: b.created_at,
+        wait: w,
+        wait_s: "#{(w / 60).to_i} minutes, #{(w % 60).to_i} seconds",
+        method: job_info.method_name
+      }
+    end
+    waits = @backlog.reduce(0) do |acc, b| acc + b[:wait] end
+    if @backlog.length == 0
+      avg_wait = 0
+    else
+      avg_wait = waits / @backlog.length
+    end
+    @avg_wait = "#{(avg_wait / 60).to_i} minutes, #{(avg_wait % 60).to_i} seconds"
+  end
+  
   protected
 
   def profile_notice
