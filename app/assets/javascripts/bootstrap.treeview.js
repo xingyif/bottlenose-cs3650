@@ -353,12 +353,21 @@
 			}, this));
 	};
 
+  Tree.prototype._zeroPad = function zeroFill( number, width ) {
+    width -= number.toString().length;
+    if ( width > 0 ) {
+      return '0'.repeat(width) + number;
+    }
+    return number + "";
+  }
+
 	Tree.prototype._setInitialState = function (node, level, done) {
 		if (!node.nodes) return;
 		level += 1;
 		done = done || [];
 
-		var parent = node;
+	        var parent = node;
+                var width = ("" + node.nodes.length).length;
 		$.each(node.nodes, $.proxy(function (index, node) {
 			var deferred = new $.Deferred();
 			done.push(deferred.promise());
@@ -371,8 +380,8 @@
 
 			// nodeId : unique, hierarchical identifier
 			node.nodeId = (parent && parent.nodeId) ?
-											parent.nodeId + '.' + node.index :
-											(level - 1) + '.' + node.index;
+                                        parent.nodeId + '.' + this._zeroPad(node.index, width) :
+                                        (level - 1) + '.' + this.zeroPad(node.index, width);
 
 			// parentId : transversing up the tree
 			node.parentId = parent.nodeId;
