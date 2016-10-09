@@ -2,7 +2,7 @@
 <% cur_reg = current_user.registration_for(@course) %>
     <div class="page-header">
         <h1>
-          <%= @course.name %>
+          <%= link_to @course.name, course_path(@course) %>
           <br/>
           <small><%= @course.term.name %><% if cur_reg %>, Section <%= cur_reg.section.to_s %><% end %></small>
         </h1>
