@@ -381,7 +381,7 @@
 			// nodeId : unique, hierarchical identifier
 			node.nodeId = (parent && parent.nodeId) ?
                                         parent.nodeId + '.' + this._zeroPad(node.index, width) :
-                                        (level - 1) + '.' + this.zeroPad(node.index, width);
+                                        (level - 1) + '.' + this._zeroPad(node.index, width);
 
 			// parentId : transversing up the tree
 			node.parentId = parent.nodeId;
