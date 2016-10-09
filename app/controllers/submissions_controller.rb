@@ -356,7 +356,7 @@ class SubmissionsController < CoursesController
 
   # DETAILS
   def details_Files
-    get_submission_files(@submission)
+    get_submission_files(@submission, nil, true)
   end
   def details_Questions
     @questions = @assignment.questions

@@ -96,10 +96,11 @@ class ApplicationController < ActionController::Base
 
 
   
-  def get_submission_files(sub, line_comments = nil)
+  def get_submission_files(sub, line_comments = nil, show_deductions = false)
     show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
     @lineCommentsByFile = line_comments || sub.grader_line_comments(nil, show_hidden)
     @submission_files = []
+    @show_deductions = show_deductions
     def with_extracted(item)
       if item[:public_link]
         return nil if File.basename(item[:full_path].to_s) == ".DS_Store"
@@ -130,14 +131,16 @@ class ApplicationController < ActionController::Base
         deductions =
           if comments[:noCommentsFor]
             nil
-          else
-            comments.reduce(0) do |sum, (type, commentsByType)|
+          elsif @show_deductions
+            comments.reduce(nil) do |sum, (type, commentsByType)|
               if commentsByType.is_a? String
+                sum
+              elsif @show_deductions.is_a? String and @show_deductions != type
                 sum
               else
                 commentsByType.reduce(sum) do |sum, (line, comments)|
                   comments.reduce(sum) do |sum, comment|
-                    sum - comment[:deduction]
+                    (sum || 0) - comment[:deduction]
                   end
                 end
               end

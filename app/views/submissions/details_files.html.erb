@@ -1,6 +1,12 @@
 <% @page_title = "View Submission Details" %>
 <% cur_reg = current_user.registration_for(@course) %>
 <% content_for :wide_content_before do %>
+<% if @commentType %>
+<style>
+  div.CodeMirror-linewidget > div { display: none; }
+  div.CodeMirror-linewidget > div.<%= @commentType %> { display: block; }
+</style>
+<% end %>
 <p>
   <%= link_to "< Back to submission", course_assignment_submission_path(@course, @assignment, @submission) %>
 </p>
@@ -17,12 +23,12 @@
   </div>
 </div>
 <div class="col-sm-9 tab-content">
-  <%= render "files", sub_files: @submission_files %>
+  <%= render "submissions/files", sub_files: @submission_files %>
 </div>
 
 <script>
   var lineComments = <%= raw(JSON.pretty_generate(@submission_files.map{|s| s[:lineComments]})) %>;
-  <%= render :partial => 'submissions/render_comments.js' %>
+  <%= render 'submissions/render_comments.js' %>
   $(function() { renderComments(lineComments); });
 </script>
 <% end %>

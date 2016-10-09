@@ -255,7 +255,8 @@ class GradersController < ApplicationController
 
   # JavaStyleGrader
   def show_JavaStyleGrader
-    get_submission_files(@submission)
+    get_submission_files(@submission, nil, "JavaStyleGrader")
+    @commentType = "JavaStyleGrader"
     if @grader.grading_output
       begin
         @grading_output = File.read(@grader.grading_output)
@@ -413,7 +414,10 @@ HEADER
     render "edit_ManualGrader"
   end
   def show_ManualGrader
-    redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
+    get_submission_files(@submission, nil, "ManualGrader")
+    @commentType = "ManualGrader"
+    render "submissions/details_files"
+#    redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
   end
 
   # ExamGrader

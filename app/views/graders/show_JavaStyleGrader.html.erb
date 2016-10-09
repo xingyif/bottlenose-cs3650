@@ -1,6 +1,12 @@
 <% @page_title = "JavaStyle Grader" %>
 <% cur_reg = current_user.registration_for(@course) %>
 <% content_for :wide_content_before do %>
+<% if @commentType %>
+<style>
+  div.CodeMirror-linewidget > div { display: none; }
+  div.CodeMirror-linewidget > div.<%= @commentType %> { display: block; }
+</style>
+<% end %>
 <p>
   <%= link_to "Back to Assignment: #{@assignment.name}",
       course_assignment_path(@course, @assignment) %>
