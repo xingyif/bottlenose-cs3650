@@ -70,10 +70,12 @@
       var target = $(e.target).attr("href") // activated tab
       $("#<%= f_late.object_name %>_type").val(target.substr(1));
     });
-    <% if @assignment && @assignment.lateness_config %>
-    $("[href='#<%= f_late.object_name %>_<%= @assignment.lateness_config.type %>']").tab('show');
-    <% elsif within_course %>
-    $("[href='#<%= f_late.object_name %>_UseCourseDefaultConfig']").tab('show');
+    <% if within_course %>
+      <% if @assignment && @assignment.lateness_config && @assignment.lateness_config != @course.lateness_config %>
+      $("[href='#<%= f_late.object_name %>_<%= @assignment.lateness_config.type %>']").tab('show');
+      <% else %>
+      $("[href='#<%= f_late.object_name %>_UseCourseDefaultConfig']").tab('show');
+      <% end %>
     <% else %>
     $("[href='#<%= f_late.object_name %>_LatePerDayConfig']").tab('show');
     <% end %>
