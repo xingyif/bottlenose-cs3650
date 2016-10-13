@@ -109,7 +109,12 @@ $(function (){
   });
   var filesTreeview = $("#files").treeview(true);
   filesTreeview.expandAll({ silent: true });
-  $("#files-sidebar").data("offset-top", $("#files").offset().top);
+  $(window).resize(function() {
+    $("#files-sidebar").data("offset-top", $("#files").offset().top);
+    $("#files-sidebar").height($(window).height() * 0.75);
+    $("#files").height($(window).height() * 0.75);
+  });
+  $(window).resize();
   var fileMap = {}
   filesTreeview.findNodes('', 'href').forEach(function(n, i) {
     fileMap[n.href] = n;
