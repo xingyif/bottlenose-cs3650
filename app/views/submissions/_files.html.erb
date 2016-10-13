@@ -16,6 +16,11 @@
   <% rescue Exception %>
   <p>Could not render <%= f[:name] %></p>
   <p><%= link_to "Download #{f[:name]}", f[:link] %></p>
+  <div style="display: none;">
+    <textarea class="sourceCode" data-lang="<%= f[:type] %>"
+              data-source="<%= f[:link] %>"
+              id="contents_<%= i %>"></textarea>
+  </div>
   <% end %>
   <% end %>
 </div>
