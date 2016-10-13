@@ -1,5 +1,6 @@
 <% @submission_files.each_with_index do |f, i| %>
-<div class="tab-pane panel-tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="file_<%= i + 1 %>">
+<% index = "file_" + (i + 1).to_s.rjust(@submission_files.count.to_s.length, '0') %>
+<div class="tab-pane panel-tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="<%= index %>">
   <% if f[:ftype] == "image" %>
   <%= image_tag f[:link], alt: f[:name] %>
   <% elsif f[:ftype] == "zip" || f[:ftype] == "jar" %>

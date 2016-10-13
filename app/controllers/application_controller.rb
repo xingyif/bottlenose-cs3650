@@ -125,7 +125,7 @@ class ApplicationController < ActionController::Base
                 else
                   "text/unknown"
                 end,
-          href: "#file_#{@submission_files.count + 1}",
+          href: @submission_files.count + 1,
           lineComments: comments
           })
         deductions =
@@ -152,7 +152,7 @@ class ApplicationController < ActionController::Base
             else
               item[:path]
             end,
-          href: "#file_#{@submission_files.count}",
+          href: @submission_files.count,
           #icon: @lineCommentsByFile[item[:public_link].to_s] ? "glyphicon glyphicon-flash" : ""
         }
       else
@@ -166,6 +166,20 @@ class ApplicationController < ActionController::Base
     end
     
     @submission_dirs = sub.upload.extracted_files.map{|i| with_extracted(i)}.compact
+
+    @count = @submission_files.count.to_s.length
+
+    def fix_hrefs(node)
+      if node[:href].is_a? Integer
+        node[:href] = "#file_" + node[:href].to_s.rjust(@count, '0')
+      end
+      if node[:nodes]
+        node[:nodes].each do |n| fix_hrefs(n) end
+      end
+    end
+    fix_hrefs({nodes: @submission_dirs})
+    fix_hrefs({nodes: @submission_files})
+    
   end
 
 end
