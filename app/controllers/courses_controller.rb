@@ -16,7 +16,8 @@ class CoursesController < ApplicationController
   end
 
   def show
-    if current_user_prof_for?(@course)
+    # For now, show all grading to all staff
+    if current_user_staff_for?(@course)
       @pending_grading =
         # only use submissions that are being used for grading, but this may produce duplicates for team submissions
         # only pick submissions from this course
@@ -37,9 +38,9 @@ class CoursesController < ApplicationController
         .to_a.uniq
         .group_by{|r| r.assignment_id}
       @assignments = Assignment.where(id: @pending_grading.keys).map{|a| [a.id, a]}.to_h
-    elsif @registration.staff?
-      @pending_grading = []
-      @assignment = []
+    # elsif @registration.staff?
+    #   @pending_grading = []
+    #   @assignments = []
     end
   end
 
