@@ -37,7 +37,7 @@
           <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
           <td><span class="local-time"><%= assignment.due_date %></span></td>
           <td><%= show_score(score, assignment) %></td>
-          <td>
+          <td style="white-space: nowrap;">
             <% submissions.limit(5).each do |submission| %>
              <%= link_to course_assignment_submission_path(assignment.course, assignment, submission) do %>
               <% if used and submission.id == used.id %>
