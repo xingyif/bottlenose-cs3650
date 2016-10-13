@@ -65,7 +65,8 @@
         </label>
         <span id="current_file" class="btn">Current file:
           <%= @assignment.assignment_file.empty? ? "nothing" :
-              @assignment.assignment_file %></span>
+              link_to(@assignment.assignment_file,
+              Upload.upload_path_for(@assignment.assignment_full_path)) %></span>
         <%= f.hidden_field "removefile", value: "" %>
         <button type="button"
                 <% if @assignment.assignment_file.empty? %>
