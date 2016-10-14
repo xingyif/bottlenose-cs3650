@@ -1,6 +1,4 @@
 require 'junit_grader'
-require 'submission'
-require 'assignment'
 
 class MainController < ApplicationController
   # GET /
@@ -44,7 +42,7 @@ class MainController < ApplicationController
     now = DateTime.now
 
     @backlog = backlog.map{|b|
-      job_info = YAML.load(b.handler)
+      job_info = b.payload_object
       if job_info.is_a? Delayed::PerformableMethod
         w = now.to_time - b.created_at.to_time
         {

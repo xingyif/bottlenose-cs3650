@@ -194,6 +194,12 @@ class CoursesController < ApplicationController
       return
     end
 
+    # not sure why this is needed, given that require_current_user ought to have been called :(
+    if current_user.nil?
+      redirect_to root_path, alert: "You need to log in first"
+      return
+    end
+
     @registration = current_user.registration_for(@course)
     if @registration.nil?
       redirect_to courses_url, alert: "You're not registered for that course."

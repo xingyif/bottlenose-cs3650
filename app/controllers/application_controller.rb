@@ -28,8 +28,7 @@ class ApplicationController < ActionController::Base
   # logged in.
   def require_current_user
     if current_user.nil?
-      msg = "You need to log in first."
-      redirect_to root_path, alert: msg
+      redirect_to root_path, alert: "You need to log in first."
       return
     end
   end
