@@ -56,7 +56,7 @@
                     <div class="radio">
                     <label>
                       <input name="grades[<%= index %>][score-preset]" id="grades_<%= index %>_<%= e_i %>"
-                             type="radio" value="<%= val %>"><span><b><%= val %>:</b> <%= hint %></span>
+                             type="radio" value="<%= val %>"><span><b><%= val %>:</b> <span><%= hint %></span></span>
                     </label>
                     </div>
                     <% end %>
@@ -70,8 +70,10 @@
               </div>
             </div>
             <script>
-              $("input[name^='grades[<%= index %>][score-preset]'").on("change",
-                function() { $("input#grades_<%= index %>_score").val($(this).val()).change(); });
+              $("input[name^='grades[<%= index %>][score-preset]'").on("change", function() { 
+                $("input#grades_<%= index %>_score").val($(this).val()).change(); 
+                $("textarea#grades_<%= index %>_comment").val($(this).next("span").find("span").text()).change();
+              });
               $("input#grades_<%= index %>_score").on("change",
                 function() { 
                   var checked = $("input[name^='grades[<%= index %>][score-preset]']:checked");
