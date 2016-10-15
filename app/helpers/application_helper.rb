@@ -73,19 +73,19 @@ module ApplicationHelper
       end
     end
 
-    if grade_pct < 0.1
+    if grade_pct >= 90.0
+      return image_tag("check-plus.png", height: 32)
+    elsif grade_pct >= 80
+      return image_tag("check-mark.png", height: 32)
+    elsif grade_pct >= 70
+      return image_tag("c-mark.png", height: 32)
+    elsif grade_pct >= 60
+      return image_tag("cminus-mark.png", height: 32)
+    elsif grade_pct >= 20
+      return image_tag("sad-mark.png", height: 32)
+    else
       return image_tag("cross-mark.png", height: 32)
     end
-
-    if grade_pct >= 100.0
-      return image_tag("check-mark.png", height: 32)
-    end
-
-    if grade_pct < 50.0
-      return image_tag("sad-mark.png", height: 32)
-    end
-
-    return image_tag("cminus-mark.png", height: 32)
   end
 
   def registration_assignment_submissions_path(reg, assign)
