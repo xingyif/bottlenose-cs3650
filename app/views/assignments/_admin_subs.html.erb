@@ -58,7 +58,7 @@
         <td><%= link_to sub.user.name, user_path(sub.user) %></td>
         <td><span class="local-time"><%= sub.created_at %></span></td>
         <% scores = grade[:staff_scores] %>
-        <td><%= status_image(sub, scores[:raw_score] / @gradesheet.max_score) %></td>
+        <td><%= status_image(sub, 100.0 * scores[:raw_score] / @gradesheet.max_score) %></td>
         <% scores[:scores].each do |s| %>
         <td class="text-right">
           <% if s.kind_of?(Array) %>

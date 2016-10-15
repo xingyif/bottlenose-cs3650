@@ -45,7 +45,7 @@
       <td><span class="local-time"><%= sub.created_at %></span></td>
       <% scores = if cur_reg.staff? then grade[:staff_scores] else grade[:blind_scores] end %>
       <% if scores[:raw_score]
-         score = scores[:raw_score]
+         score = scores[:raw_score] / gradesheet.max_score
          else
          score = (scores[:scores].reduce([0, 0]) do |acc, s|
            if s.kind_of?(Array)
@@ -56,7 +56,7 @@
          end)
          score = (score[1] == 0 ? 0 : score[0] / score[1])
          end %>
-      <td><%= status_image(sub, score) %></td>
+      <td><%= status_image(sub, 100.0 * score) %></td>
       <% scores[:scores].each do |s| %>
       <td class="text-right">
         <% if s.kind_of?(Array) %>
