@@ -10,6 +10,10 @@ class CheckerGrader < GraderConfig
     true
   end
 
+  def display_type
+    "Checker tests"
+  end
+  
   def to_s
     if self.upload
       filename = self.upload.file_name

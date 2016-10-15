@@ -7,6 +7,10 @@ class JavaStyleGrader < GraderConfig
     true
   end
 
+  def display_type
+    "Java Style"
+  end
+  
   def to_s
     if self.upload
       "#{self.avail_score} points: Run Java style checker, using #{self.upload.file_name}"

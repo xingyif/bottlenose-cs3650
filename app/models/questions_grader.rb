@@ -12,6 +12,10 @@ class QuestionsGrader < GraderConfig
     return nil
   end
 
+  def display_type
+    "Manual Grading"
+  end
+
   def to_s
     "Question grading"
   end

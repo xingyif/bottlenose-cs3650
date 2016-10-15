@@ -10,6 +10,10 @@ class JunitGrader < GraderConfig
     true
   end
 
+  def display_type
+    "JUnit Tests"
+  end
+  
   def to_s
     if self.upload
       filename = self.upload.file_name

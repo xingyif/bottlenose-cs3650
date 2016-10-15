@@ -27,7 +27,7 @@ class Gradesheet
     @missing_graders = (raw_graders.count < @configs.count * @submissions.count)
 
     @raw_score = 0
-    @grades = {names: @configs.map(&:type), grades: []}
+    @grades = {names: @configs.map(&:display_type), grades: []}
     @submissions.each do |s|
       s_scores = {raw_score: 0.0, scores: []}
       b_scores = {raw_score: 0.0, scores: []}

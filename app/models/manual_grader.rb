@@ -12,6 +12,10 @@ class ManualGrader < GraderConfig
     return nil
   end
 
+  def display_type
+    "Manual Feedback"
+  end
+  
   def to_s
     "#{self.avail_score} points: Manual grading"
   end

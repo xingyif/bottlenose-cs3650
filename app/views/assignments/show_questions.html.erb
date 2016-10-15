@@ -1,5 +1,11 @@
 <% @page_title = "#{@course.name} / #{@gradesheet.assignment.name}" %>
-
+<style>
+  h3 i.glyphicon { font-size: 80%; margin-left: 0.5em; }
+  h3 i.glyphicon-chevron-up { display: none; }
+  h3 i.glyphicon-chevron-down { display: initial; }
+  h3.collapsed i.glyphicon-chevron-up { display: initial; }
+  h3.collapsed i.glyphicon-chevron-down { display: none; }
+</style>
 <% cur_reg = current_user.registration_for(@course) %>
 <% if cur_reg.professor? %>
 <p class="pull-right">
@@ -10,8 +16,12 @@
 
 <%= render 'assignment_questions_info', gradesheet: @gradesheet,
     cur_reg: cur_reg %>
-<h3 data-toggle="collapse" data-target="#questions">Questions</h3>
-<div id="questions" class="collapse in">
+<h3 data-toggle="collapse" class="collapsed" data-target="#questions">
+  Questions
+  <i class="glyphicon glyphicon-chevron-down"></i>
+  <i class="glyphicon glyphicon-chevron-up"></i>
+</h3>
+<div id="questions" class="collapse">
 <% count = 1 %>
 <% @questions.each do |section| %>
   <% section.each do |name, qs| %>
