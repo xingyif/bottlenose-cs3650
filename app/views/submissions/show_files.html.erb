@@ -134,16 +134,25 @@
     </td>
     <td></td>
   </tr>
-  <% if @submission.late? %>
+  <% if @submission.late? or @submission.ignore_late_penalty %>
   <tr>
     <td>Days Late:</td>
-    <td><%= @submission.days_late %></td>
+    <td><%= @submission.days_late(true) %></td>
     <td></td>
   </tr>
   <tr>
     <td>Late Penalty:</td>
     <td><%= to_fixed(@submission.late_penalty) %>%</td>
-    <td><%= if @submission.ignore_late_penalty then "(penalty ignored)" end %></td>
+    <td>
+      <%= if @submission.ignore_late_penalty
+            "(penalty ignored)"
+          elsif @submission.days_late > 0
+            link_to("Rescind lateness penalty",
+              rescind_lateness_course_assignment_submission_path(@course, @assignment, @submission),
+              class: "btn btn-default", method: "patch")
+          end
+          %>
+    </td>
   </tr>
   <% end %>
   <tr>

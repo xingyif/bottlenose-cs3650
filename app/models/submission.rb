@@ -61,8 +61,8 @@ class Submission < ActiveRecord::Base
     self.assignment.sub_late?(self)
   end
 
-  def days_late
-    self.assignment.sub_days_late(self)
+  def days_late(raw = false)
+    self.assignment.sub_days_late(self, raw)
   end
 
   def late_penalty

@@ -19,8 +19,8 @@ class LatenessConfig < ActiveRecord::Base
     fail NotImplementedError, "Each lateness config should implement this"
   end
   
-  def days_late(assignment, submission)
-    return 0 unless late?(assignment, submission)
+  def days_late(assignment, submission, raw = false)
+    return 0 unless raw or late?(assignment, submission)
     due_on = assignment.due_date
     sub_on = submission.created_at || DateTime.current
     late_days = (sub_on.to_time - due_on.to_time) / 1.day

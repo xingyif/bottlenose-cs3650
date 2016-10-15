@@ -6,6 +6,7 @@ class SubmissionsController < CoursesController
   prepend_before_action :find_course_assignment
   before_action :require_current_user, only: [:show, :files, :new, :create]
   before_action :require_admin_or_staff, only: [:recreate_grader, :use_for_grading, :publish]
+  before_action :require_admin_or_prof, only: [:rescind_lateness]
   def show
     unless @submission.visible_to?(current_user)
       redirect_to course_assignment_path(@course, @assignment), alert: "That's not your submission."
@@ -84,6 +85,11 @@ class SubmissionsController < CoursesController
     redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission))
   end
 
+  def rescind_lateness
+    @submission.update_attribute(:ignore_late_penalty, true)
+    redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission))
+  end
+
   def publish
     @submission.graders.where(score: nil).each do |g| g.grade(assignment, used) end
     @submission.graders.update_all(:available => true)
@@ -116,6 +122,14 @@ class SubmissionsController < CoursesController
     unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
                   alert: "Must be an admin or staff."
+      return
+    end
+  end
+
+  def require_admin_or_prof
+    unless current_user_site_admin? || current_user_prof_for?(@course)
+      redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
+                  alert: "Must be an admin or professor."
       return
     end
   end

@@ -44,8 +44,8 @@ class Assignment < ActiveRecord::Base
     self.lateness_config.late?(self, sub)
   end
 
-  def sub_days_late(sub)
-    self.lateness_config.days_late(self, sub)
+  def sub_days_late(sub, raw = false)
+    self.lateness_config.days_late(self, sub, raw)
   end
   
   def sub_late_penalty(sub)

@@ -52,6 +52,7 @@ Bottlenose::Application.routes.draw do
           get :details
           get :use, to: 'submissions#use_for_grading', as: 'use'
           patch :publish, to: 'submissions#publish', as: 'publish'
+          patch :rescind_lateness, to: 'submissions#rescind_lateness', as: 'rescind_lateness'
           post 'recreate/:grader_config_id', to: 'submissions#recreate_grader', as: 'recreate_grader'
         end
         resources :graders, only: [:show, :edit, :update] do
