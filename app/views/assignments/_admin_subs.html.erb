@@ -131,7 +131,7 @@
         headerTemplate: "{content} {icon}",
         headers: {
           2: { sorter: false },
-          8: { sorter: false },
+          <%= 5 + @gradesheet.grades[:names].count %>: { sorter: false },
         },
         theme: "bootstrap",
         widgets: ['uitheme']
