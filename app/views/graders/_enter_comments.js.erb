@@ -21,8 +21,11 @@ $(function() {
 
   var maxScore = <%= @grader.out_of %>;
   function updateScore() {
-    var deductions = $(".deduction").map(function() { return parseFloat($(this).val()); })
-        .get().reduce(function(a,b) { return a + b; }, 0.0);
+    var deductions = 0;
+    for (var i = 0; i < commentObjs.length; i++) {
+      if (commentObjs[i].shouldDelete) continue;
+      deductions += commentObjs[i].deduction;
+    }
     var ans = Math.max(maxScore - deductions, 0).toFixed(2);
     $("#score").text(ans);
     $("input#finalScore").val(ans);
