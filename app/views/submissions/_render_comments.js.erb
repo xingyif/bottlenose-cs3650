@@ -1,3 +1,4 @@
+<% vertical = false if local_assigns[:vertical].nil? %>
 function renderComments(lineComments) {
   $(".CodeMirror").each(function(index) {
     var theseComments = lineComments[index] || {};
@@ -84,8 +85,6 @@ $(function (){
         lineNumbers: true, lineWrapping: false,
         styleActiveLine: true
       });
-      var height = 75 * cm.heightAtLine(1, "local");
-      cm.setSize(null, height + 30);
     }
     $(code).addClass("cm-s-mdn-like cm-s-default");
   });
@@ -109,11 +108,31 @@ $(function (){
   });
   var filesTreeview = $("#files").treeview(true);
   filesTreeview.expandAll({ silent: true });
+  var footerHeight = $(".footer").outerHeight();
+  var divSurround = $(".CodeMirror").first().closest(".tab-pane");
+  var parentBulk = $(divSurround).outerHeight() - $(divSurround).height();    
+  $("#files-sidebar").data("offset-top", $("#files").offset().top);
+  <% if vertical %>
   $(window).resize(function() {
-    $("#files-sidebar").data("offset-top", $("#files").offset().top);
-    $("#files-sidebar").height($(window).height() * 0.75);
-    $("#files").height($(window).height() * 0.75);
+    var windowHeight = $(window).height();
+    var height = (windowHeight - footerHeight) * 0.8 - parentBulk;
+    $(".CodeMirror").each(function(index, cm) {
+      cm.CodeMirror.setSize(null, height);
+    });
+    $("#files-sidebar").height((windowHeight - footerHeight) * 0.2);
+    $("#files").height((windowHeight - footerHeight) * 0.2);
   });
+  <% else %>
+  $(window).resize(function() {
+    var windowHeight = $(window).height();
+    var height = windowHeight - footerHeight - parentBulk;
+    $(".CodeMirror").each(function(index, cm) {
+      cm.CodeMirror.setSize(null, height);
+    });
+    $("#files-sidebar").height(windowHeight - footerHeight);
+    $("#files").height(windowHeight - footerHeight);
+  });
+  <% end %>
   $(window).resize();
   var fileMap = {}
   filesTreeview.findNodes('', 'href').forEach(function(n, i) {

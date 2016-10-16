@@ -15,14 +15,16 @@
 <% if (allowed && not_following && !rate_limit) || staff_override %>
 <% if @assignment.related_assignment_id %>
 <div class="col-sm-6">
-  <div id="files-sidebar">
-    <div id="files" class="nav treeview condensed"></div>
-  </div>
-  <div class="tab-content">
-    <%= render "files", sub_files: @submission_files %>
+  <div id="files-sidebar" data-spy="affix">
+    <div id="files-treeview">
+      <div id="files" class="nav treeview condensed"></div>
+    </div>
+    <div class="tab-content">
+      <%= render "files", sub_files: @submission_files %>
+    </div>
   </div>
   <script>
-    <%= render partial: "render_comments.js" %>
+    <%= render partial: "render_comments.js", locals: {vertical: true} %>
   </script>
 </div>
 <% end %>
@@ -75,16 +77,13 @@
       <% count += qs.count %>
     <% end %>
   <% end %>
+
+  <%= f.label :student_notes %>
+  <%= f.text_area :student_notes, class: 'form-control' %>
+  <%= f.submit "Submit response", class: "btn btn-primary" %>
 </div>
 
 <div class="container">
-  <div class="form-group col-sm-12">
-    <%= f.label :student_notes %>
-    <%= f.text_area :student_notes, class: 'form-control' %>
-  </div>
-  <div class="form-group col-sm-12">
-    <%= f.submit "Submit response", class: "btn btn-primary" %>
-  </div>
 </div>
 <script>
   <%= render partial: "new_questions.js", locals: {count: (count - 1)} %>

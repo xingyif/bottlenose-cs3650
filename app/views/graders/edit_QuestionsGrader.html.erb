@@ -28,14 +28,16 @@
 <%= form_for [@course, @assignment, @submission, @grader] do |f| %>
 <% if @assignment.related_assignment_id %>
 <div class="col-sm-6">
-  <div id="files-sidebar">
-    <div id="files" class="nav treeview condensed"></div>
-  </div>
-  <div class="tab-content">
-    <%= render "submissions/files", sub_files: @submission_files %>
+  <div id="files-sidebar" data-spy="affix">
+    <div id="files-treeview">
+      <div id="files" class="nav treeview condensed"></div>
+    </div>
+    <div class="tab-content">
+      <%= render "submissions/files", sub_files: @submission_files %>
+    </div>
   </div>
   <script>
-    <%= render partial: "submissions/render_comments.js" %>
+    <%= render partial: "submissions/render_comments.js", locals: {vertical: true} %>
   </script>
   </div>
 <% end %>
