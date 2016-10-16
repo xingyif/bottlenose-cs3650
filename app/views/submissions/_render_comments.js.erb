@@ -110,7 +110,12 @@ $(function (){
   filesTreeview.expandAll({ silent: true });
   var footerHeight = $(".footer").outerHeight();
   var divSurround = $(".CodeMirror").first().closest(".tab-pane");
-  var parentBulk = $(divSurround).outerHeight() - $(divSurround).height();    
+  var parentBulk = $(divSurround).outerHeight() - $(divSurround).height();
+  var toggleComments = $("#toggle-comments");
+  var toggleCommentsHeight = 0;
+  if (toggleComments.length > 0) {
+    toggleCommentsHeight = toggleComments.first().closest("p").outerHeight();
+  }
   $("#files-sidebar").data("offset-top", $("#files").offset().top);
   <% if vertical %>
   $(window).resize(function() {
@@ -129,8 +134,8 @@ $(function (){
     $(".CodeMirror").each(function(index, cm) {
       cm.CodeMirror.setSize(null, height);
     });
-    $("#files-sidebar").height(windowHeight - footerHeight);
-    $("#files").height(windowHeight - footerHeight);
+    $("#files-sidebar").height(windowHeight - footerHeight - toggleCommentsHeight);
+    $("#files").height(windowHeight - footerHeight - toggleCommentsHeight);
   });
   <% end %>
   $(window).resize();
