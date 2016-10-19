@@ -7,9 +7,9 @@
    [X] junit
    [X] java-style
    [X] checker
-[ ] background tasks
-   [ ] defered running of grading scripts
-   [ ] delayed jobs?
+[X] background tasks
+   [X] defered running of grading scripts
+   [X] delayed jobs?
 [X] configuring graders for assignments
 [ ] assigning tutors to grade particular students
 [X] NUID
@@ -48,6 +48,8 @@
    [X] affect exporting?
 [ ] export course spreadsheet
    [X] initial grade support
+   [ ] fix gradesheet construction
+   [ ] exam export
    [ ] letter-grade computation
 [X] test with syntactically invalid inputs / compile-error inputs
 [X] bulk random teams
@@ -57,4 +59,6 @@
    [X] in export
    [X] in course creation
 [ ] sub-assignments (i.e. assignments in parts)
-[ ] why are the status icons all weird, and when are grades nil versus 0?
+[X] why are the status icons all weird
+[ ] when are grades nil versus 0?
+[ ] let students see their own running grade (on the assignments page?, course page?)

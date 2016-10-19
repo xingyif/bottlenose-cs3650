@@ -13,9 +13,13 @@ class ExamGrader < GraderConfig
   end
 
   def to_s
-    "Question grading"
+    "Exam grading"
   end
 
+  def display_type
+    "Exam score"
+  end
+  
   def expect_num_questions(num)
     @num_questions = num
   end
