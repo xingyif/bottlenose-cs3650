@@ -182,6 +182,9 @@ div.CodeMirror-linewidget > div span {
 div.CodeMirror-linewidget > div span.label {
    vertical-align: middle;
 }
+div.CodeMirror-linewidget > div span.description {
+   white-space: pre-line;
+}
 div.CodeMirror-linewidget > div span.glyphicon {
    vertical-align: middle;
 }
