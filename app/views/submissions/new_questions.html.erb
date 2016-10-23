@@ -8,7 +8,7 @@
      staff_override = true_user.course_staff?(@course)
      %>
 <div class="container">
-  <%= render "common", f: f, type: {noun: "response", verb: "respond", gerund: "responding" },
+  <%= render "new_common", f: f, type: {noun: "response", verb: "respond", gerund: "responding" },
       not_following: not_following, allowed: allowed, rate_limit: rate_limit, staff_override: staff_override %>
 </div>
 
