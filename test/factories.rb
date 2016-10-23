@@ -103,6 +103,7 @@ FactoryGirl.define do
   factory :reg_request do
     user
     course
+    association :section, factory: :course_section
 
     notes "Let me in!"
   end
