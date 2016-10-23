@@ -5,6 +5,7 @@ class Assignment < ActiveRecord::Base
   def self.inheritance_column
     nil # TODO: For now; I might want to subclass this after all
   end
+
   enum assignment_kind: [:files, :questions, :exam]
   enum question_kind: [:yes_no, :true_false, :multiple_choice, :numeric, :text]
   
@@ -207,7 +208,7 @@ class Assignment < ActiveRecord::Base
       section.each do |name, qs|
         qs.each do |question|
           question.each do |type, q|
-            q["type"] = type;
+            q["type"] = type
             flat.push q
           end
         end

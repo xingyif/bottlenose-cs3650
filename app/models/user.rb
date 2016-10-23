@@ -4,8 +4,8 @@ require 'audit'
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :ldap_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable
+  devise :ldap_authenticatable, :database_authenticatable, 
+         :recoverable, :rememberable, :trackable, :registerable 
   has_many :courses, through: :registrations
   has_many :registrations, dependent: :destroy
 
@@ -32,7 +32,6 @@ class User < ActiveRecord::Base
   def email_changed?
     false
   end
-
 
   attr_accessor :nuid_safe
   def nuid_safe(who)
@@ -85,15 +84,13 @@ class User < ActiveRecord::Base
     end
   end
 
-  if ::Rails.env == "development"
-    def valid_ldap_authentication?(pwd)
-      if self.username == "justin.case@fallback.ccs.neu" && 
-          Devise::Encryptor.compare(self.class, self.encrypted_password, pwd)
-        Audit.log("Letting Justin in!")
-        true
-      else
-        super
-      end
+  def valid_ldap_authentication?(pwd)
+    if self.encrypted_password != "" && 
+        Devise::Encryptor.compare(self.class, self.encrypted_password, pwd)
+      Audit.log("DB auth for #{self.name}")
+      true
+    else
+      super
     end
   end
 

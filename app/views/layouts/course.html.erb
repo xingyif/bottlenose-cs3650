@@ -23,10 +23,10 @@
         <div>
             <%= link_to "Teams", course_teams_path(@course), class: "btn btn-sm btn-default" %>
             <%= link_to "Assignments", course_assignments_path(@course), class: "btn btn-sm btn-default" %>
-            <% if cur_reg && cur_reg.staff? %>
+            <% if current_user.site_admin? || (cur_reg && cur_reg.staff?) %>
                 <%= link_to "Registrations", course_registrations_path(@course), class: "btn btn-sm btn-default" %>
             <% end %>
-            <% if current_user.course_professor?(@course) %>
+            <% if current_user.site_admin? || current_user.course_professor?(@course) %>
               <%= link_to "Student Facebook", facebook_course_path(@course), class: "btn btn-sm btn-default" %>
               <%= link_to "Edit Course Settings", edit_course_path(@course), class: "btn btn-sm btn-default" %>
               <div class="dropdown btn btn-link pull-right">
