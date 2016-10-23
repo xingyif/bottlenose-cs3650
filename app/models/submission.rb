@@ -53,6 +53,14 @@ class Submission < ActiveRecord::Base
     end
   end
 
+  def submission_users
+    if team
+      team.users
+    else
+      [user]
+    end
+  end
+  
   def name
     "#{user.name} @ #{created_at}"
   end
