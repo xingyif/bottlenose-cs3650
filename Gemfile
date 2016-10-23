@@ -52,6 +52,7 @@ group :development, :test do
 end
 
 group :test do
+  gem 'simplecov'
   gem 'database_cleaner'
   gem 'capybara'
   gem 'capybara-webkit' # Needs qt5-default qt5-qmake libqt5webkit5-dev
