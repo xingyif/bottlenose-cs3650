@@ -6,6 +6,7 @@ class RequestRegTest < ActionDispatch::IntegrationTest
   end
 
   test "request and create a registration" do
+    skip
 
     # Register a new account
     visit "http://test.host/"

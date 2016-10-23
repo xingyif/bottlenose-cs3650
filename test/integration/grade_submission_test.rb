@@ -11,6 +11,8 @@ class GradeSubmissionTest < ActionDispatch::IntegrationTest
   end
 
   test "teacher sets ignore late penalty flag" do
+    skip
+
     pset = make_assignment(@bucket, "HelloWorld")
     sub  = make_submission(@john, pset, "john.tar.gz")
 
@@ -26,6 +28,8 @@ class GradeSubmissionTest < ActionDispatch::IntegrationTest
   end
 
   test "teacher manually submit a grade" do
+    skip
+
     pset = create(:assignment, bucket: @bucket, course: @cs101)
 
     score0 = @john_reg.total_score
@@ -50,6 +54,8 @@ class GradeSubmissionTest < ActionDispatch::IntegrationTest
   end
 
   test "submit and grade a submission" do
+    skip
+
     pset = make_assignment(@bucket, 'HelloWorld')
 
     assert File.exists?(pset.assignment_full_path)
@@ -91,6 +97,8 @@ class GradeSubmissionTest < ActionDispatch::IntegrationTest
   end
 
   test "grade an assignment with no submission" do
+    skip
+
     # Add test assignment.
     visit "http://test.host/main/auth?email=#{@fred.email}&key=#{@fred.auth_key}"
 
@@ -113,6 +121,8 @@ class GradeSubmissionTest < ActionDispatch::IntegrationTest
   end
 
   test "submit and grade a single file submission with specially valued tests" do
+    skip
+
     pset = create(:assignment, bucket: @bucket, course: @bucket.course, name: "HelloSingle")
 
     # Add test assignment.
