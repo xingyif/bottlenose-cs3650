@@ -187,6 +187,7 @@ class SubmissionsController < CoursesController
     unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to back_or_else(course_assignment_path(@course, @assignment)),
                   alert: "Must be an admin or staff to enter exam grades."
+      return
     end
     @grader_config = @assignment.grader_configs.first
     redirect_to bulk_course_assignment_grader_config_path(@course, @assignment, @grader_config)
