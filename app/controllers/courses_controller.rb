@@ -87,7 +87,6 @@ class CoursesController < ApplicationController
     if set_default_lateness_config and @course.save and create_sections
       redirect_to course_path(@course), notice: 'Course was successfully created.'
     else
-      binding.pry
       @course.destroy unless @course.new_record?
       new_with_errors @course.errors
       return

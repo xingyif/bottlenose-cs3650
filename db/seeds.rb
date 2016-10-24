@@ -11,17 +11,6 @@ end
 case Rails.env
 when "development"
   # Create four users.
-  nat = User.new(
-                     username: "ntuck",
-                     name: "Nat Tuck",
-                     first_name: "Nat",
-                     last_name: "Tuck",
-                     nickname: "Nat",
-                     site_admin: true,
-                     )
-  nat.encrypted_password = Devise::Encryptor.digest(nat.class, "bacon88")
-  nat.save!
- 
   ben = User.create!(
                      username: "blerner",
                      name: "Benjamin Lerner",
@@ -81,8 +70,7 @@ when "development"
                           meeting_time: "MWTh 10:30--11:45"
                          )
   ]
- 
- <<'EOF' 
+  
   0.upto(5).each do |i|
     assignment = Assignment.create!(
                                     name: "Homework #{i}",
@@ -123,6 +111,7 @@ when "development"
     manual = ManualGrader.create!(avail_score: 42)
     AssignmentGrader.create!(assignment_id: assignment.id, grader_config_id: manual.id, order: 3)
   end
+
   
   [ben, olin, amal].each do |professor|
     Registration.create!(
@@ -227,7 +216,6 @@ when "development"
       end
     end
   end
-EOF
 when "production"
   ben = User.create!(
                      username: "blerner",
