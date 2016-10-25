@@ -13,7 +13,7 @@
       </tr>
     </thead>
     <tbody>
-      <% users.sort_by(&:name).each do |user| %>
+      <% users.order("LOWER(name)").each do |user| %>
       <tr>
         <td width="1em"><%= mail_to "#{user.name} <#{user.email}>", "@" %></td>
         <td><%= link_to user.name, user_path(user) %></td>

@@ -1,31 +1,47 @@
-<% col_count = @questions.count %>
+<% questions = @assignment.questions %>
+<% flat_questions = @assignment.flattened_questions %>
+<% col_count = flat_questions.count %>
+<% total_score = questions.map do |q| q["weight"] end.sum %>
 <table id="grades-table" class="table col-sm-12">
   <thead>
-    <tr>
-      <th>Last name</th>
-      <th>First name</th>
-      <% @questions.each do |q| %>
-      <th><%= q["name"].gsub("Problem ", "") %><% if q["extra"] %> (Extra Credit)<% end %></th>
+    <tr style="vertical-align: top;">
+      <th>Last name<br>&nbsp;</th>
+      <th>First name<br>&nbsp;</th>
+      <% questions.each do |q| %>
+        <% if q["parts"] %>
+        <% q["parts"].each_with_index do |p, i| %>
+          <th><%= if i == 0 then q["name"] else "" end %><br><%= p["name"] %></th>
+        <% end %>
+        <% else %>
+        <th><%= q["name"] %><br>&nbsp;</th>
+        <% end %>
       <% end %>
+      <th>Curved grade<br>&nbsp;</th>  
     </tr>
   </thead>
   <tbody id="grades">
-    <% @student_info.sort_by(&:last_name).each do |u| %>
+    <% @student_info.order("LOWER(last_name)").each do |u| %>
     <tr>
       <td><%= u.last_name %></td>
       <td><%= u.first_name %></td>
       <% sub = @used_subs.find_by(user_id: u.id) %>
-      <% grades = @grade_comments[sub.id].sort_by(&:line) if sub %>
+      <% grades = @grade_comments[sub.id] if sub %>
+      <% grades = (0..col_count).map do |i|
+           (grades and grades.find do |g| g.line == i end) or {weight: nil}
+         end %>
       <% col_count.times do |i| %>
       <td>
-        <% if grades %>
+        <% if grades and grades[i] %>
         <% val = grades[i]["weight"] %>
         <% else %>
         <% val = "" %>
         <% end %>
-        <%= spinner_tag "student[#{u.id}][#{i}]", val, min: 0, max: @questions[i]["weight"], delta: 0.5 %>
+        <%= spinner_tag "student[#{u.id}][#{i}]", val, min: 0, max: flat_questions[i]["weight"], delta: 0.5 %>
       </td>
       <% end %>
+      <% curved = "" %>
+      <% if grades[flat_questions.count] then curved = grades[flat_questions.count]["weight"] end %>
+      <td><%= spinner_tag "student[#{u.id}][#{col_count}]", curved, min: 0, max: total_score %></td>
     </tr>
     <% end %>
   </tbody>

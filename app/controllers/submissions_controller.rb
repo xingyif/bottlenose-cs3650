@@ -348,25 +348,10 @@ class SubmissionsController < CoursesController
     end
   end
   def show_Exam
-    @questions = []
-    @assignment.questions.each_with_index do |q, i|
-      if q["parts"]
-        @part_name = "a"
-        q["parts"].each do |p|
-          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
-          @questions.push p
-          @part_name.next!
-        end
-      else
-        q["name"] = "Problem #{i + 1}" unless q["name"]
-        @questions.push q
-      end
-    end
-
     @student_info = @course.students.select(:username, :last_name, :first_name, :id)
     @grader_config = @assignment.grader_configs.first
     @grader = Grader.find_by(grader_config_id: @grader_config.id, submission_id: @submission.id)
-    @grade_comments = InlineComment.where(submission_id: @submission.id)
+    @grade_comments = InlineComment.where(submission_id: @submission.id).order(:line).to_a
   end
 
   # DETAILS
