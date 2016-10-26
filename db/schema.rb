@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160830135950) do
+ActiveRecord::Schema.define(version: 20161026130748) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -128,6 +128,7 @@ ActiveRecord::Schema.define(version: 20160830135950) do
   end
 
   add_index "inline_comments", ["filename"], name: "index_inline_comments_on_filename", using: :btree
+  add_index "inline_comments", ["submission_id", "grader_id", "line"], name: "index_inline_comments_on_submission_id_and_grader_id_and_line", using: :btree
 
   create_table "lateness_configs", force: :cascade do |t|
     t.string  "type"
