@@ -13,9 +13,9 @@
        (@grade_comments.find do |g| g.line == i end) or InlineComment.new
      end %>
   <% i = 0 %>
-  <% @assignment.questions.each_with_index do |q, i| %>
+  <% @assignment.questions.each_with_index do |q, q_num| %>
   <tr>
-    <td>Problem <%= i + 1 %>: <%= q["name"] %><% if q["extra"] %> (Extra Credit)<% end %></td>
+    <td>Problem <%= q_num + 1 %>: <%= q["name"] %><% if q["extra"] %> (Extra Credit)<% end %></td>
     <% if q["parts"] %>
     <% q_score = (grades[i .. (i - 1 + q["parts"].length)]).map do |g|
          ((g and g["weight"]) or 0.0).to_f
