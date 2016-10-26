@@ -3,10 +3,13 @@ class FixedDaysConfig < LatenessConfig
 
   def allow_submission?(assignment, submission)
     late_days = days_late(assignment, submission)
+    return true if late_days == 0
     return false if late_days > self.days_per_assignment
     max_late_days = assignment.course.total_late_days
     return true if max_late_days.nil?
-    submission.users.all? do |u|
+    # NOTE: Cannot use .users here because the assignment isn't yet submitted
+    # so it doesn't show up in the UserSubmissions relation
+    submission.submission_users.all? do |u|
       (u.late_days_used(assignment.course.assignments) + late_days <= max_late_days)
     end
   end

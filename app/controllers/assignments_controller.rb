@@ -279,26 +279,16 @@ class AssignmentsController < CoursesController
       end
       questions.each_with_index do |q, q_num|
         if q["parts"].is_a? Array
-          @part_name = "a"
-          q["parts"].each do |part|
+          q["parts"].each_with_index do |part, p_num|
             if !is_float(part["weight"])
-              if part["name"]
-                make_err "Question #{part['name']} has an invalid weight"
-              else
-                make_err "Question #{q_num}#{@part_name} has an invalid weight"
-              end
+              make_err "Question #{part['name']} has an invalid weight"
               next
             elsif !part["extra"]
               @total_weight += Float(part["weight"])
             end
-            @part_name.next!
           end
         elsif !is_float(q["weight"])
-          if q["name"]
-            make_err "Question #{q['name']} has an invalid weight"
-          else
-            make_err "Question #{q_num} has an invalid weight"
-          end
+          make_err "Question #{q['name']} has an invalid weight"
           next
         elsif !q["extra"]
           @total_weight += Float(q["weight"])

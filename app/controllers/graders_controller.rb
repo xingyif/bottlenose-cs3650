@@ -432,21 +432,6 @@ HEADER
 
   ##############################
   def edit_exam_grades_for(students)
-    @questions = []
-    @assignment.questions.each_with_index do |q, i|
-      if q["parts"]
-        @part_name = "a"
-        q["parts"].each do |p|
-          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
-          @questions.push p
-          @part_name.next!
-        end
-      else
-        q["name"] = "Problem #{i + 1}" unless q["name"]
-        @questions.push q
-      end
-    end
-
     @student_info = students.select(:username, :last_name, :first_name, :id)
     @used_subs = @assignment.used_submissions
     @grade_comments = InlineComment.where(submission_id: @used_subs.map(&:id)).group_by(&:submission_id)
@@ -458,21 +443,6 @@ HEADER
     @grader_config = @assignment.grader_configs.first # and only config
     # @used_subs = @assignment.used_submissions
     # @grade_comments = InlineComment.where(submission_id: @used_subs.map(&:id)).group_by(&:user_id)
-
-    @questions = []
-    @assignment.questions.each_with_index do |q, i|
-      if q["parts"]
-        @part_name = "a"
-        q["parts"].each do |p|
-          p["name"] = "Problem #{i + 1}#{@part_name}" unless p["name"]
-          @questions.push p
-          @part_name.next!
-        end
-      else
-        q["name"] = "Problem #{i + 1}" unless q["name"]
-        @questions.push q
-      end
-    end
     
     @student_info.each do |student|
       @sub = @assignment.used_sub_for(student)
@@ -487,20 +457,28 @@ HEADER
         @grader.out_of = @grader_config.avail_score
       end
       grades = all_grades[student.id]
+      flattened = @assignment.flattened_questions
       grades.each_with_index do |g, q_num|
         comment = InlineComment.find_or_initialize_by(submission_id: @sub.id, grader_id: @grader.id, line: q_num)
-        next if g.to_s.empty? and comment.new_record? # no need to save blanks
-        comment.update(label: "Exam question",
-                       filename: @assignment.name,
-                       severity: InlineComment.severities["info"],
-                       user_id: current_user.id,
-                       weight: g,
-                       comment: "",
-                       suppressed: false,
-                       title: "",
-                       info: nil)
+        if g.to_s.empty?
+          if comment.new_record?
+            next # no need to save blanks
+          else
+            comment.delete
+          end
+        else
+          comment.update(label: "Exam question",
+                         filename: @assignment.name,
+                         severity: InlineComment.severities["info"],
+                         user_id: current_user.id,
+                         weight: g,
+                         comment: "",
+                         suppressed: false,
+                         title: "",
+                         info: nil)
+        end
       end
-      @grader_config.expect_num_questions(@questions.count)
+      @grader_config.expect_num_questions(flattened.count)
       @grader_config.grade(@assignment, @sub)
     end
   end
