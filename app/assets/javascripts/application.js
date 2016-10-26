@@ -191,6 +191,7 @@ function activateSpinner(obj, options) {
     downInterval = undefined;
     return false;
   });
+  return input;
 }
 
 function makeSpinner(options) {

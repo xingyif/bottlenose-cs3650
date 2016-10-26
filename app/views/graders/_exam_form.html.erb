@@ -16,7 +16,8 @@
         <th><%= q["name"] %><br>&nbsp;</th>
         <% end %>
       <% end %>
-      <th>Curved grade<br>&nbsp;</th>  
+      <th>Curved grade<br>&nbsp;</th>
+      <th>Final grade</th>
     </tr>
   </thead>
   <tbody id="grades">
@@ -41,7 +42,9 @@
       <% end %>
       <% curved = "" %>
       <% if grades[flat_questions.count] then curved = grades[flat_questions.count]["weight"] end %>
-      <td><%= spinner_tag "student[#{u.id}][#{col_count}]", curved, min: 0, max: total_score %></td>
+      <td><%= spinner_tag "student[#{u.id}][#{col_count}]", curved,
+              class: "curve", min: 0, max: total_score %></td>
+      <td></td>
     </tr>
     <% end %>
   </tbody>

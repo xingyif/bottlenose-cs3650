@@ -21,7 +21,26 @@ $(function() {
     theme: "bootstrap",
     widgets: ['uitheme']
   });
-  $('.spinner').each(function() { activateSpinner(this, {precision: 1}) });
+  $('.spinner').each(function() {
+    activateSpinner(this, {precision: 1})
+      .change(function() {
+        var row = $(this).closest("tr");
+        var scores = $(row).find("div.spinner input").toArray();
+        var curved = Number.parseFloat($(scores[scores.length - 1]).val());
+        if (curved && curved !== "")
+          row.find("td:last").text(curved);
+        else {
+          var sum = 0;
+          for (var i = 0; i < scores.length - 1; i++) {
+            var val = $(scores[i]).val();
+            if (val && val !== "") {
+              sum += Number.parseFloat(val);
+            }
+          }
+          row.find("td:last").text(sum);
+        }
+      }).change();
+  });
 });
 
 $("form").submit(function() {
