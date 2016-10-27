@@ -30,10 +30,12 @@ gem 'bootstrap-datepicker-rails'
 gem 'momentjs-rails', '>= 2.9.0'
 gem 'bootstrap3-datetimepicker-rails', '~> 4.17.37'
 gem 'font-awesome-rails'
-gem 'zipruby'
+gem 'zipruby-compat', :require => 'zipruby', :git => "https://github.com/jawspeak/zipruby-compatibility-with-rubyzip-fork.git", :tag => "v0.3.7" # needed instead of zipruby because write_xlsx needs rubyzip, and they conflict
 
 gem 'delayed_job_active_record'
 gem 'daemons'
+
+gem 'write_xlsx'
 
 gem 'whenever', :require => false
 

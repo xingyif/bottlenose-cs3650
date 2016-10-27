@@ -1,4 +1,7 @@
 require 'gradesheet'
+require 'write_xlsx'
+require 'stringio'
+
 
 def col_index(name)
   @columns.find_index{|c| c.name == name}
@@ -65,9 +68,9 @@ class CourseSpreadsheet
     attr_accessor :to_col
     attr_accessor :to_row
     def initialize(from_col, from_row, to_col, to_row)
-      @from_col = from_col.capitalize
+      @from_col = from_col
       @from_row = from_row
-      @to_col = to_col.capitalize
+      @to_col = to_col
       @to_row = to_row
     end
     def to_s
@@ -353,5 +356,52 @@ class CourseSpreadsheet
     end
     
     sheet
+  end
+
+  def to_xlsx
+    io = StringIO.new
+    workbook = WriteXLSX.new(io)
+
+    twoPct = workbook.add_format
+    twoPct.set_num_format("0.00%")
+    @sheets.each do |s|
+      ws = workbook.add_worksheet(s.name)
+      row_offset = 0
+      s.columns.each_with_index do |c, c_num|
+        ws.write(0 + row_offset, c_num, c.name)
+      end
+      row_offset += 1
+      s.header_rows.each_with_index do |r, r_num|
+        r.each_with_index do |c, c_num|
+          if c.value
+            to_write = c.value.to_s
+          else
+            to_write = "=#{c.formula}"
+          end
+          if s.columns[c_num].type == "Percent"
+            ws.write(r_num + row_offset, c_num, to_write, twoPct)
+          else
+            ws.write(r_num + row_offset, c_num, to_write)
+          end
+        end
+      end
+      row_offset += s.header_rows.count
+      s.rows.each_with_index do |r, r_num|
+        r.each_with_index do |c, c_num|
+          if c.value
+            to_write = c.value.to_s
+          else
+            to_write = "=#{c.formula}"
+          end
+          if s.columns[c_num].type == "Percent"
+            ws.write(r_num + row_offset, c_num, to_write, twoPct)
+          else
+            ws.write(r_num + row_offset, c_num, to_write)
+          end
+        end
+      end
+    end
+    workbook.close
+    io.string
   end
 end

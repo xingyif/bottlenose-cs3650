@@ -55,7 +55,7 @@ class Upload < ActiveRecord::Base
 
     if upload.content_type == "application/zip" ||
        upload.original_filename.ends_with?(".zip")
-      Zip::Archive.open(submission_path.to_s) do |ar|
+      ZipRuby::Archive.open(submission_path.to_s) do |ar|
         raise Exception.new("Too many files in zip!") if ar.num_files > 100
         ar.each do |zf|
           if zf.directory?
