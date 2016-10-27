@@ -1,20 +1,90 @@
 require 'gradesheet'
 
+def col_index(name)
+  @columns.find_index{|c| c.name == name}
+end
+def col_delta(from, to)
+  col_index(from) - col_index(to)
+end
+def row_index(col_name, value)
+  ci = col_index(col_name)
+  @rows.find_index{|r| r[ci] == value} + @header_rows.length
+end
+def col_name(index)
+  # zero-based, so col_name(0) == "A", col_name(26) == "AA"
+  alph = ("A".."Z").to_a
+  s, q = "", index + 1
+  (q, r = (q - 1).divmod(26)) && s.prepend(alph[r]) until q.zero?
+  s
+end
+
+
+
 class CourseSpreadsheet
   attr_reader :sheets
 
   class Col
     attr_reader :name
     attr_reader :type
+    attr_accessor :col
     def initialize(name, type=nil)
       @name = name
       @type = type || "String"
     end
   end
 
+  class Formula
+    attr_accessor :function
+    attr_accessor :args
+    def initialize(function, *args)
+      @function = function
+      @args = args
+    end
+    def to_s
+      "#{@function}(#{@args.map(&:to_s).join(',')})"
+    end
+  end
+
+  class CellRef
+    attr_accessor :sheet_name
+    attr_accessor :col
+    attr_accessor :row
+    def initialize(sheet_name, col, row)
+      @sheet_name = sheet_name
+      @col = col
+      @row = row
+    end
+    def to_s
+      "#{@sheet_name}!$#{@col}$#{@row}"
+    end
+  end
+
+  class Range
+    attr_accessor :from_col
+    attr_accessor :from_row
+    attr_accessor :to_col
+    attr_accessor :to_row
+    def initialize(from_col, from_row, to_col, to_row)
+      @from_col = from_col.capitalize
+      @from_row = from_row
+      @to_col = to_col.capitalize
+      @to_row = to_row
+    end
+    def to_s
+      "$#{@from_col}$#{@from_row}:$#{@to_col}$#{@from_row}"
+    end
+    def contains(col, row)
+      print "col: #{col}, row: #{row}, from_col/row: #{@from_col}/#{@from_row}, to_col/row: #{@to_col}/#{@to_row}\n"
+      (@from_row <= row) and (row <= @to_row) and (@from_col <= col) and (col <= @to_col)
+    end
+  end
+  
   class Cell
     attr_reader :value
     attr_reader :formula
+    attr_accessor :sheet_name
+    attr_accessor :row
+    attr_accessor :col
     def initialize(value=nil, formula=nil)
       debugger if value.nil? and formula.nil?
       @value = value
@@ -23,13 +93,13 @@ class CourseSpreadsheet
 
     def as_cell(expectedType)
       if @formula
-        ans = "<Cell".html_safe
+        ans = "<!-- #{@col}#{@row} --><Cell".html_safe
         if expectedType == "Percent"
           ans << " ss:StyleID=\"TwoPct\"".html_safe
           expectedType = "Number"
         end
         ans << " ss:Formula=\"=".html_safe
-        ans << @formula
+        ans << @formula.to_s
         ans << "\"><Data ss:Type=\"".html_safe
         ans << expectedType
         ans << "\"></Data></Cell>".html_safe
@@ -42,7 +112,7 @@ class CourseSpreadsheet
         else
           type = "String"
         end
-        ans = "<Cell".html_safe
+        ans = "<!-- #{@col}#{@row} --><Cell".html_safe
         if expectedType == "Percent"
           ans << " ss:StyleID=\"TwoPct\"".html_safe
         end
@@ -60,6 +130,22 @@ class CourseSpreadsheet
         ans
       end
     end
+
+    def sanity_check
+      return if @value
+      return unless @row and @col
+      if @formula.is_a? Formula
+        @formula.args.each do |a|
+          if a.is_a? Range and a.contains(@col, @row)
+            raise RangeError, "Cell at #{@sheet_name}!#{@col}#{@row} contains formula #{@formula} that overlaps itself"
+          end
+        end
+      elsif @formula.is_a? CellRef
+        if @sheet_name == @formula.sheet_name and @row == @formula.row and @col == @formula.col
+          raise RangeError, "CellRef at #{@formula} refers to itself"
+        end
+      end
+    end
   end
 
   class Sheet
@@ -73,16 +159,6 @@ class CourseSpreadsheet
       @header_rows = header_rows || []
       @rows = rows || []
     end
-    def col_index(name)
-      @columns.find_index{|c| c.name == name}
-    end
-    def col_delta(from, to)
-      col_index(from) - col_index(to)
-    end
-    def row_index(col_name, value)
-      ci = col_index(col_name)
-      @rows.find_index{|r| r[ci] == value} + @header_rows.length
-    end
 
     def push_row(i, values)
       push_into(@rows, i, values)
@@ -91,6 +167,36 @@ class CourseSpreadsheet
     def push_header_row(i, values)
       push_into(@header_rows, i, values)
     end
+
+    def assign_coords
+      @columns.each_with_index do |cell, c|
+        cell.col = col_name(c)
+      end
+      @header_rows.each_with_index do |row, r|
+        row.each_with_index do |cell, c|
+          cell.sheet_name = @name
+          cell.row = r + 1 + 1 # 1 for header row, and 1 for 1-based indexing
+          cell.col = col_name(c)
+        end
+      end
+      @rows.each_with_index do |row, r|
+        row.each_with_index do |cell, c|
+          cell.sheet_name = @name
+          cell.row = r + @header_rows.length + 1 + 1 # 1 for header row, and 1 for 1-based indexing
+          cell.col = col_name(c)
+        end
+      end
+    end
+
+    def sanity_check
+      @header_rows.each do |r|
+        r.each do |c| c.sanity_check end
+      end
+      @rows.each do |r|
+        r.each do |c| c.sanity_check end
+      end
+    end
+
 
     protected
     def to_cell(val)
@@ -114,7 +220,7 @@ class CourseSpreadsheet
         arr[i]
       end
     end
-end
+  end
 
   
   def initialize(course)
@@ -124,20 +230,21 @@ end
     hws, hw_cols = create_hws(course, Sheet.new("Homework"), exams)
     summary = create_summary(course, Sheet.new("Summary"), exams, hws, hw_cols)
     @sheets.push(summary, exams, hws)
+    @sheets.each do |s|
+      s.assign_coords
+    end
+  end
+
+  def sanity_check
+    @sheets.each do |s|
+      s.sanity_check
+    end
   end
 
   def create_exams(course, sheet)
     labels, weight, users = create_name_columns(course, sheet)
 
     sheet
-  end
-
-  def col_name(index)
-    # zero-based, so col_name(0) == "A", col_name(26) == "AA"
-    alph = ("A".."Z").to_a
-    s, q = "", index + 1
-    (q, r = (q - 1).divmod(26)) && s.prepend(alph[r]) until q.zero?
-    s
   end
 
   def create_name_columns(course, sheet)
@@ -187,7 +294,7 @@ end
       end
       sheet.columns.push(Col.new("", "Number"), Col.new("", "Number"), Col.new("", "Percent"))
       labels.push(Cell.new("Total"), Cell.new("Lateness"), Cell.new("%"))
-      weight.push(Cell.new(nil, "SUM($#{col_name(weight.count - grades.configs.count)}$3:$#{col_name(weight.count - 1)}$3)"), Cell.new(""), Cell.new(""))
+      weight.push(Cell.new(nil, Formula.new("SUM", Range.new(col_name(weight.count - grades.configs.count), 3, col_name(weight.count - 1), 3))), Cell.new(""), Cell.new(""))
       hw_cols.push [assn, weight.count - 1]
       
       users.each_with_index do |u, i|
@@ -221,7 +328,9 @@ end
   def create_summary(course, sheet, exams, hws, hw_cols)
     labels, weight, users = create_name_columns(course, sheet)
 
-    start_col = sheet.columns.count - 1
+    hw_headers = hws.header_rows.count + 1 + 1 # 1 for the header labels, and one because 1-indexed
+
+    start_col = sheet.columns.count
 
     hw_cols.each do |assn, col|
       sheet.columns.push(Col.new(assn.name, "Percent"))
@@ -229,18 +338,18 @@ end
       weight.push(Cell.new(""))
 
       users.each_with_index do |u, i|
-        sheet.push_row(i, Cell.new(nil, "#{hws.name}!$#{col_name(col)}$#{i + 4}"))
+        sheet.push_row(i, Cell.new(nil, CellRef.new(hws.name, col_name(col), i + hw_headers)))
       end
     end
+
+    end_col = sheet.columns.count - 1
 
     sheet.columns.push(Col.new("Total", "Percent"))
     labels.push(Cell.new(""))
     weight.push(Cell.new(""))
-
-    end_col = sheet.columns.count - 1
     
     users.each_with_index do |u, i|
-      sheet.push_row(i, Cell.new(nil, "SUMPRODUCT($#{col_name(start_col)}$2:$#{col_name(end_col)}$2,$#{col_name(start_col)}#{i + 4}:$#{col_name(end_col)}#{i + 4})"))
+      sheet.push_row(i, Cell.new(nil, Formula.new("SUMPRODUCT", Range.new(col_name(start_col), 2, col_name(end_col), 2), Range.new(col_name(start_col), i + hw_headers, col_name(end_col), i + hw_headers))))
     end
     
     sheet
