@@ -431,12 +431,12 @@ class CourseSpreadsheet
     io = StringIO.new
     workbook = WriteXLSX.new(io)
 
-    twoPct = workbook.add_format
-    twoPct.set_num_format("0.00%")
+    @twoPct = workbook.add_format
+    @twoPct.set_num_format("0.00%")
     def render_row(ws, s, r, r_num, row_offset)
       r.each_with_index do |c, c_num|
         if s.columns[c_num].type == "Percent"
-          format = twoPct
+          format = @twoPct
         else
           format = nil
         end
