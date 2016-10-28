@@ -433,7 +433,7 @@ class CourseSpreadsheet
 
     twoPct = workbook.add_format
     twoPct.set_num_format("0.00%")
-    def render_row(s, r, r_num, row_offset)
+    def render_row(ws, s, r, r_num, row_offset)
       r.each_with_index do |c, c_num|
         if s.columns[c_num].type == "Percent"
           format = twoPct
@@ -459,11 +459,11 @@ class CourseSpreadsheet
       end
       row_offset += 1
       s.header_rows.each_with_index do |r, r_num|
-        render_row(s, r, r_num, row_offset)
+        render_row(ws, s, r, r_num, row_offset)
       end
       row_offset += s.header_rows.count
       s.rows.each_with_index do |r, r_num|
-        render_row(s, r, r_num, row_offset)
+        render_row(ws, s, r, r_num, row_offset)
       end
     end
     workbook.close
