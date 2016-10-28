@@ -1,6 +1,7 @@
 require 'gradesheet'
 require 'write_xlsx'
 require 'stringio'
+require 'audit'
 
 
 def col_index(name)
@@ -240,10 +241,19 @@ class CourseSpreadsheet
 
       users.each_with_index do |u, i|
         sub_id = subs_for_grading.find{|sfg| sfg.user_id == u.id}
-        sub = grades.grades[:grades].find{|grade_row| grade_row[:sub].id == sub_id.submission_id} unless sub_id.nil?
+        begin
+          sub = grades.grades[:grades].find{|grade_row| grade_row[:sub].id == sub_id.submission_id} unless sub_id.nil?
+        rescue Exception => e
+          sub = nil
+          Audit.log("Failed in query: #{grades.grades} and #{sub_id and sub_id.submission_id}\n#{e}\n"
+        end
         if sub.nil?
           questions.each do |g| sheet.push_row(i, "") end
-          sheet.push_row(i, [0, "No submission", 0])
+          sheet.push_row(i, [0, "No submission"])
+          curved = Cell.new(nil,
+                            CellRef.new(nil,
+                                        col_name(weight.count - 3), i + sheet.header_rows.length + 2, nil))
+          sheet.push_row(i, [curved, 0])
         else
           grade_comments = InlineComment.where(submission_id: sub_id.submission_id)
           grades = (0..questions.count-1).map{|i| grade_comments.find{|g| g.line == i}}.map{|c| (c && c["weight"])}
@@ -260,9 +270,10 @@ class CourseSpreadsheet
                                   sum_grade, CellRef.new(nil, col_name(weight.count - 4), 3, tot_weight))
 
           sheet.push_row(i, Cell.new(nil, sum_grade))
-          sheet.push_row(i, Cell.new(nil,
-                                     CellRef.new(nil,
-                                                 col_name(weight.count - 3), i + sheet.header_rows.length + 2, nil)))
+          curved = Cell.new(nil,
+                            CellRef.new(nil,
+                                        col_name(weight.count - 3), i + sheet.header_rows.length + 2, nil))
+          sheet.push_row(i, curved)
           if sub[:sub].score
             sheet.push_row(i, sub[:sub].score / 100.0)
           else
@@ -331,7 +342,7 @@ class CourseSpreadsheet
         sub = grades.grades[:grades].find{|grade_row| grade_row[:sub].id == sub_id.submission_id} unless sub_id.nil?
         if sub.nil?
           grades.configs.each do |g| sheet.push_row(i, "") end
-          sheet.push_row(i, [0, "No submission", 0])
+          sheet.push_row(i, [0, "No submission", 0, 0])
         else
           sub[:staff_scores][:scores].each do |ss|
             sheet.push_row(i, ss[0] || "<none>")
@@ -422,6 +433,24 @@ class CourseSpreadsheet
 
     twoPct = workbook.add_format
     twoPct.set_num_format("0.00%")
+    def render_row(r, r_num, row_offset)
+      r.each_with_index do |c, c_num|
+        if s.columns[c_num].type == "Percent"
+          format = twoPct
+        else
+          format = nil
+        end
+        if c.formula
+          ws.write_formula(r_num + row_offset, c_num, "=#{c.formula}", format)
+        elsif c.value.is_a? Numeric
+          ws.write_number(r_num + row_offset, c_num, c.value, format)
+        elsif c.value.is_a? DateTime or c.value.is_a? Time
+          ws.write_date_time(r_num + row_offset, c_num, c.value.to_formatted_s(:db), format)
+        else
+          ws.write(r_num + row_offset, c_num, c.value, format)
+        end
+      end
+    end
     @sheets.each do |s|
       ws = workbook.add_worksheet(s.name)
       row_offset = 0
@@ -430,41 +459,11 @@ class CourseSpreadsheet
       end
       row_offset += 1
       s.header_rows.each_with_index do |r, r_num|
-        r.each_with_index do |c, c_num|
-          if s.columns[c_num].type == "Percent"
-            format = twoPct
-          else
-            format = nil
-          end
-          if c.formula
-            ws.write_formula(r_num + row_offset, c_num, "=#{c.formula}", format)
-          elsif c.value.is_a? Numeric
-            ws.write_number(r_num + row_offset, c_num, c.value, format)
-          elsif c.value.is_a? DateTime
-            ws.write_date_time(r_num + row_offset, c_num, c.value.to_formatted_s(:db), format)
-          else
-            ws.write(r_num + row_offset, c_num, c.value, format)
-          end
-        end
+        render_row(r, r_num, row_offset)
       end
       row_offset += s.header_rows.count
       s.rows.each_with_index do |r, r_num|
-        r.each_with_index do |c, c_num|
-          if s.columns[c_num].type == "Percent"
-            format = twoPct
-          else
-            format = nil
-          end
-          if c.formula
-            ws.write_formula(r_num + row_offset, c_num, "=#{c.formula.to_s}", format, c.formula.value)
-          elsif c.value.is_a? Numeric
-            ws.write_number(r_num + row_offset, c_num, c.value, format)
-          elsif c.value.is_a? DateTime
-            ws.write_date_time(r_num + row_offset, c_num, c.value.to_formatted_s(:db), format)
-          else
-            ws.write(r_num + row_offset, c_num, c.value, format)
-          end
-        end
+        render_row(r, r_num, row_offset)
       end
     end
     workbook.close
