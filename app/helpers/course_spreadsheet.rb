@@ -245,7 +245,7 @@ class CourseSpreadsheet
           sub = grades.grades[:grades].find{|grade_row| grade_row[:sub].id == sub_id.submission_id} unless sub_id.nil?
         rescue Exception => e
           sub = nil
-          Audit.log("Failed in query: #{grades.grades} and #{sub_id and sub_id.submission_id}\n#{e}\n"
+          Audit.log("Failed in query: #{grades.grades} and #{sub_id and sub_id.submission_id}\n#{e}\n")
         end
         if sub.nil?
           questions.each do |g| sheet.push_row(i, "") end
@@ -256,8 +256,8 @@ class CourseSpreadsheet
           sheet.push_row(i, [curved, 0])
         else
           grade_comments = InlineComment.where(submission_id: sub_id.submission_id)
-          grades = (0..questions.count-1).map{|i| grade_comments.find{|g| g.line == i}}.map{|c| (c && c["weight"])}
-          grades.each do |g|
+          q_grades = (0..questions.count-1).map{|i| grade_comments.find{|g| g.line == i}}.map{|c| (c && c["weight"])}
+          q_grades.each do |g|
             sheet.push_row(i, g || "<none>")
           end
           sum_grade = Formula.new(nil, "SUM",
