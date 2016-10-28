@@ -39,26 +39,37 @@ class CourseSpreadsheet
   class Formula
     attr_accessor :function
     attr_accessor :args
-    def initialize(function, *args)
+    attr_accessor :value
+    def initialize(value, function, *args)
+      @value = value
       @function = function
       @args = args
     end
     def to_s
-      "#{@function}(#{@args.map(&:to_s).join(',')})"
+      if @function.length == 1 and @args.length == 2
+        "(#{@args[0]} #{@function} #{@args[1]})"
+      else
+        "#{@function}(#{@args.map(&:to_s).join(',')})"
+      end
     end
   end
 
   class CellRef
     attr_accessor :sheet_name
+    attr_accessor :value
     attr_accessor :col
     attr_accessor :row
-    def initialize(sheet_name, col, row)
+    def initialize(sheet_name, col, row, value)
       @sheet_name = sheet_name
       @col = col
       @row = row
     end
     def to_s
-      "#{@sheet_name}!$#{@col}$#{@row}"
+      if @sheet_name.nil?
+        "$#{@col}$#{@row}"
+      else
+        "#{@sheet_name}!$#{@col}$#{@row}"
+      end
     end
   end
 
@@ -92,46 +103,6 @@ class CourseSpreadsheet
       debugger if value.nil? and formula.nil?
       @value = value
       @formula = formula
-    end
-
-    def as_cell(expectedType)
-      if @formula
-        ans = "<!-- #{@col}#{@row} --><Cell".html_safe
-        if expectedType == "Percent"
-          ans << " ss:StyleID=\"TwoPct\"".html_safe
-          expectedType = "Number"
-        end
-        ans << " ss:Formula=\"=".html_safe
-        ans << @formula.to_s
-        ans << "\"><Data ss:Type=\"".html_safe
-        ans << expectedType
-        ans << "\"></Data></Cell>".html_safe
-        ans
-      else
-        if @value.is_a? Numeric
-          type = "Number"
-        elsif (@value == true) or (@value == false)
-          type = "Boolean"
-        else
-          type = "String"
-        end
-        ans = "<!-- #{@col}#{@row} --><Cell".html_safe
-        if expectedType == "Percent"
-          ans << " ss:StyleID=\"TwoPct\"".html_safe
-        end
-        ans << "><Data ss:Type=\"".html_safe
-        ans << type
-        ans << "\">".html_safe
-        if type == "Boolean"
-          ans << (if @value then "1" else "0" end)
-        elsif type == "DateTime"
-          ans << @value.to_formatted_s(:db)
-        else
-          ans << @value.to_s
-        end
-        ans << "</Data></Cell>".html_safe
-        ans
-      end
     end
 
     def sanity_check
@@ -229,9 +200,9 @@ class CourseSpreadsheet
   def initialize(course)
     @sheets = []
 
-    exams = create_exams(course, Sheet.new("Exams"))
+    exams, exam_cols = create_exams(course, Sheet.new("Exams"))
     hws, hw_cols = create_hws(course, Sheet.new("Homework"), exams)
-    summary = create_summary(course, Sheet.new("Summary"), exams, hws, hw_cols)
+    summary = create_summary(course, Sheet.new("Summary"), exams, exam_cols, hws, hw_cols)
     @sheets.push(summary, exams, hws)
     @sheets.each do |s|
       s.assign_coords
@@ -247,7 +218,61 @@ class CourseSpreadsheet
   def create_exams(course, sheet)
     labels, weight, users = create_name_columns(course, sheet)
 
-    sheet
+    exam_cols = []
+    
+    course.assignments.where(type: "exam").order(:due_date).each do |exam|
+      used_subs = exam.all_used_subs.to_a
+      grades = Gradesheet.new(exam, used_subs)
+      subs_for_grading = SubsForGrading.where(assignment: exam).to_a
+
+      sheet.columns.push(Col.new(exam.name, "Number"))
+      questions = exam.flattened_questions
+      questions.each_with_index do |q, i|
+        sheet.columns.push(Col.new("", "Number")) if i > 0
+        labels.push(Cell.new(q["name"]))
+        weight.push(Cell.new(q["weight"]))
+      end
+      sheet.columns.push(Col.new("", "Number"), Col.new("", "Percent"), Col.new("", "Percent"), Col.new("", "Percent"))
+      labels.push(Cell.new("Total"), Cell.new("Computed%"), Cell.new("Curved"), Cell.new("OnServer%"))
+      tot_weight = questions.map{|q| q["weight"]}.sum()
+      weight.push(Cell.new(nil, Formula.new(tot_weight, "SUM", Range.new(col_name(weight.count - questions.count), 3, col_name(weight.count - 1), 3))), Cell.new(""), Cell.new(""), Cell.new(""))
+      exam_cols.push [exam, weight.count - 2]
+
+      users.each_with_index do |u, i|
+        sub_id = subs_for_grading.find{|sfg| sfg.user_id == u.id}
+        sub = grades.grades[:grades].find{|grade_row| grade_row[:sub].id == sub_id.submission_id} unless sub_id.nil?
+        if sub.nil?
+          questions.each do |g| sheet.push_row(i, "") end
+          sheet.push_row(i, [0, "No submission", 0])
+        else
+          grade_comments = InlineComment.where(submission_id: sub_id.submission_id)
+          grades = (0..questions.count-1).map{|i| grade_comments.find{|g| g.line == i}}.map{|c| (c && c["weight"])}
+          grades.each do |g|
+            sheet.push_row(i, g || "<none>")
+          end
+          sum_grade = Formula.new(nil, "SUM",
+                                  Range.new(col_name(weight.count - questions.count - 4),
+                                            i + sheet.header_rows.length + 2,
+                                            col_name(weight.count - 5),
+                                            i + sheet.header_rows.length + 2))
+          sheet.push_row(i, Cell.new(nil, sum_grade))
+          sum_grade = Formula.new(sub[:sub].score, "/",
+                                  sum_grade, CellRef.new(nil, col_name(weight.count - 4), 3, tot_weight))
+
+          sheet.push_row(i, Cell.new(nil, sum_grade))
+          sheet.push_row(i, Cell.new(nil,
+                                     CellRef.new(nil,
+                                                 col_name(weight.count - 3), i + sheet.header_rows.length + 2, nil)))
+          if sub[:sub].score
+            sheet.push_row(i, sub[:sub].score / 100.0)
+          else
+            sheet.push_row(i, 0)
+          end
+        end
+      end
+    end
+    
+    return sheet, exam_cols
   end
 
   def create_name_columns(course, sheet)
@@ -295,10 +320,11 @@ class CourseSpreadsheet
         labels.push(Cell.new(g.type))
         weight.push(Cell.new(g.avail_score))
       end
-      sheet.columns.push(Col.new("", "Number"), Col.new("", "Number"), Col.new("", "Percent"))
-      labels.push(Cell.new("Total"), Cell.new("Lateness"), Cell.new("%"))
-      weight.push(Cell.new(nil, Formula.new("SUM", Range.new(col_name(weight.count - grades.configs.count), 3, col_name(weight.count - 1), 3))), Cell.new(""), Cell.new(""))
-      hw_cols.push [assn, weight.count - 1]
+      sheet.columns.push(Col.new("", "Number"), Col.new("", "Percent"), Col.new("", "Percent"), Col.new("", "Percent"))
+      labels.push(Cell.new("Total"), Cell.new("Lateness"), Cell.new("Computed%"), Cell.new("OnServer%"))
+      tot_weight = grades.configs.map(&:avail_score).sum()
+      weight.push(Cell.new(nil, Formula.new(tot_weight, "SUM", Range.new(col_name(weight.count - grades.configs.count), 3, col_name(weight.count - 1), 3))), Cell.new(""), Cell.new(""), Cell.new(""))
+      hw_cols.push [assn, weight.count - 2]
       
       users.each_with_index do |u, i|
         sub_id = subs_for_grading.find{|sfg| sfg.user_id == u.id}
@@ -310,12 +336,34 @@ class CourseSpreadsheet
           sub[:staff_scores][:scores].each do |ss|
             sheet.push_row(i, ss[0] || "<none>")
           end
-          sheet.push_row(i, sub[:staff_scores][:raw_score])
+          sum_grade = Formula.new(sub[:sub].score, "SUM",
+                                  Range.new(col_name(weight.count - grades.configs.count - 4),
+                                            i + sheet.header_rows.length + 2,
+                                            col_name(weight.count - 5),
+                                            i + sheet.header_rows.length + 2))
+          #sheet.push_row(i, sub[:staff_scores][:raw_score])
+          sheet.push_row(i, Cell.new(nil, sum_grade))
+
+          sum_grade = Formula.new(sub[:sub].score, "/",
+                                  CellRef.new(nil, col_name(weight.count - 4), i + sheet.header_rows.length + 2, nil),
+                                  CellRef.new(nil, col_name(weight.count - 4), 3, nil))
+
           if sub[:sub].ignore_late_penalty
             sheet.push_row(i, "<ignore>")
           else
-            sheet.push_row(i, assn.lateness_config.late_penalty(assn, sub[:sub]))
+            lc = assn.lateness_config
+            sheet.push_row(i, lc.late_penalty(assn, sub[:sub]) / 100.0)
+            sum_grade = Formula.new(nil, "MAX", 0,
+                                    Formula.new(nil, "-", sum_grade,
+                                                CellRef.new(nil,
+                                                            col_name(weight.count - 3),
+                                                            i + sheet.header_rows.length + 2,
+                                                            lc.late_penalty(assn, sub[:sub]) / 100.0)
+                                               ))
           end
+
+
+          sheet.push_row(i, Cell.new(nil, sum_grade))
           if sub[:sub].score
             sheet.push_row(i, sub[:sub].score / 100.0)
           else
@@ -328,7 +376,7 @@ class CourseSpreadsheet
     return sheet, hw_cols
   end
 
-  def create_summary(course, sheet, exams, hws, hw_cols)
+  def create_summary(course, sheet, exams, exam_cols, hws, hw_cols)
     labels, weight, users = create_name_columns(course, sheet)
 
     hw_headers = hws.header_rows.count + 1 + 1 # 1 for the header labels, and one because 1-indexed
@@ -341,7 +389,17 @@ class CourseSpreadsheet
       weight.push(Cell.new(""))
 
       users.each_with_index do |u, i|
-        sheet.push_row(i, Cell.new(nil, CellRef.new(hws.name, col_name(col), i + hw_headers)))
+        sheet.push_row(i, Cell.new(nil, CellRef.new(hws.name, col_name(col), i + hw_headers, "Please Recalculate")))
+      end
+    end
+
+    exam_cols.each do |exam, col|
+      sheet.columns.push(Col.new(exam.name, "Percent"))
+      labels.push(Cell.new(exam.points_available / 100.0))
+      weight.push(Cell.new(""))
+
+      users.each_with_index do |u, i|
+        sheet.push_row(i, Cell.new(nil, CellRef.new(exams.name, col_name(col), i + hw_headers, "Please Recalculate")))
       end
     end
 
@@ -352,7 +410,7 @@ class CourseSpreadsheet
     weight.push(Cell.new(""))
     
     users.each_with_index do |u, i|
-      sheet.push_row(i, Cell.new(nil, Formula.new("SUMPRODUCT", Range.new(col_name(start_col), 2, col_name(end_col), 2), Range.new(col_name(start_col), i + hw_headers, col_name(end_col), i + hw_headers))))
+      sheet.push_row(i, Cell.new(nil, Formula.new("Please recalculate", "SUMPRODUCT", Range.new(col_name(start_col), 2, col_name(end_col), 2), Range.new(col_name(start_col), i + hw_headers, col_name(end_col), i + hw_headers))))
     end
     
     sheet
@@ -373,30 +431,38 @@ class CourseSpreadsheet
       row_offset += 1
       s.header_rows.each_with_index do |r, r_num|
         r.each_with_index do |c, c_num|
-          if c.value
-            to_write = c.value.to_s
-          else
-            to_write = "=#{c.formula}"
-          end
           if s.columns[c_num].type == "Percent"
-            ws.write(r_num + row_offset, c_num, to_write, twoPct)
+            format = twoPct
           else
-            ws.write(r_num + row_offset, c_num, to_write)
+            format = nil
+          end
+          if c.formula
+            ws.write_formula(r_num + row_offset, c_num, "=#{c.formula}", format)
+          elsif c.value.is_a? Numeric
+            ws.write_number(r_num + row_offset, c_num, c.value, format)
+          elsif c.value.is_a? DateTime
+            ws.write_date_time(r_num + row_offset, c_num, c.value.to_formatted_s(:db), format)
+          else
+            ws.write(r_num + row_offset, c_num, c.value, format)
           end
         end
       end
       row_offset += s.header_rows.count
       s.rows.each_with_index do |r, r_num|
         r.each_with_index do |c, c_num|
-          if c.value
-            to_write = c.value.to_s
-          else
-            to_write = "=#{c.formula}"
-          end
           if s.columns[c_num].type == "Percent"
-            ws.write(r_num + row_offset, c_num, to_write, twoPct)
+            format = twoPct
           else
-            ws.write(r_num + row_offset, c_num, to_write)
+            format = nil
+          end
+          if c.formula
+            ws.write_formula(r_num + row_offset, c_num, "=#{c.formula.to_s}", format, c.formula.value)
+          elsif c.value.is_a? Numeric
+            ws.write_number(r_num + row_offset, c_num, c.value, format)
+          elsif c.value.is_a? DateTime
+            ws.write_date_time(r_num + row_offset, c_num, c.value.to_formatted_s(:db), format)
+          else
+            ws.write(r_num + row_offset, c_num, c.value, format)
           end
         end
       end
