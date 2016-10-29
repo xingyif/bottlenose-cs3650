@@ -101,7 +101,11 @@ $(function (){
       if (data.href !== undefined && data.href !== "#") {
         $(".tab-pane").removeClass("active");
         // make sure any comments are visible
-        $(data.href).addClass("active").find(".CodeMirror")[0].CodeMirror.refresh();
+        var cm = $(data.href).addClass("active").find(".CodeMirror");
+        if (cm.length > 0) {
+          cm = cm[0].CodeMirror;
+          cm.refresh();
+        }
       }
     },
     data: <%= raw(JSON.pretty_generate(@submission_dirs)) %>
