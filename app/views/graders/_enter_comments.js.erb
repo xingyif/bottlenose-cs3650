@@ -174,9 +174,11 @@ $(function() {
 
   var filesTree = $("#files");
   filesTree.on("nodeChecked", function(e, data) {
-    if (data.href !== undefined && data.href !== "#")
-      $(data.$el).addClass("unvisited");
-    else
+    if (data.href !== undefined && data.href !== "#") {
+      var cm = $(data.href).find(".CodeMirror");
+      if (cm.length > 0)
+        $(data.$el).addClass("unvisited");
+    } else
       filesTree.treeview("uncheckNode", data);
   });
   filesTree.on("nodeUnchecked", function(e, data) {
