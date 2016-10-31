@@ -60,17 +60,21 @@ class CourseSpreadsheet
     attr_accessor :value
     attr_accessor :col
     attr_accessor :row
-    def initialize(sheet_name, col, row, value)
+    attr_accessor :col_abs
+    attr_accessor :row_abs
+    def initialize(sheet_name, col, col_abs, row, row_abs, value)
       @sheet_name = sheet_name
       @col = col
       @row = row
+      @col_abs = "$" if col_abs
+      @row_abs = "$" if row_abs
     end
     def to_s
-      if @sheet_name.nil?
-        "$#{@col}$#{@row}"
-      else
-        "#{@sheet_name}!$#{@col}$#{@row}"
+      ans = "#{@col_abs}#{@col}#{@row_abs}#{@row}"
+      unless @sheet_name.nil?
+        ans = "#{@sheet_name}!#{ans}"
       end
+      ans
     end
   end
 
@@ -79,14 +83,22 @@ class CourseSpreadsheet
     attr_accessor :from_row
     attr_accessor :to_col
     attr_accessor :to_row
-    def initialize(from_col, from_row, to_col, to_row)
+    attr_accessor :from_col_abs
+    attr_accessor :from_row_abs
+    attr_accessor :to_col_abs
+    attr_accessor :to_row_abs
+    def initialize(from_col, from_col_abs, from_row, from_row_abs, to_col, to_col_abs, to_row, to_row_abs)
       @from_col = from_col
       @from_row = from_row
       @to_col = to_col
       @to_row = to_row
+      @from_col_abs = "$" if from_col_abs
+      @from_row_abs = "$" if from_row_abs
+      @to_col_abs = "$" if to_col_abs
+      @to_row_abs = "$" if to_row_abs
     end
     def to_s
-      "$#{@from_col}$#{@from_row}:$#{@to_col}$#{@from_row}"
+      "#{@from_col_abs}#{@from_col}#{@from_row_abs}#{@from_row}:#{@to_col_abs}#{@to_col}#{@to_row_abs}#{@from_row}"
     end
     def contains(col, row)
       print "col: #{col}, row: #{row}, from_col/row: #{@from_col}/#{@from_row}, to_col/row: #{@to_col}/#{@to_row}\n"
@@ -236,7 +248,10 @@ class CourseSpreadsheet
       sheet.columns.push(Col.new("", "Number"), Col.new("", "Percent"), Col.new("", "Percent"), Col.new("", "Percent"))
       labels.push(Cell.new("Total"), Cell.new("Computed%"), Cell.new("Curved"), Cell.new("OnServer%"))
       tot_weight = questions.map{|q| q["weight"]}.sum()
-      weight.push(Cell.new(nil, Formula.new(tot_weight, "SUM", Range.new(col_name(weight.count - questions.count), 3, col_name(weight.count - 1), 3))), Cell.new(""), Cell.new(""), Cell.new(""))
+      weight.push(Cell.new(nil, Formula.new(tot_weight, "SUM",
+                                            Range.new(col_name(weight.count - questions.count), true, 3, true,
+                                                      col_name(weight.count - 1), true, 3, true))),
+                  Cell.new(""), Cell.new(""), Cell.new(""))
       exam_cols.push [exam, weight.count - 2]
 
       users.each_with_index do |u, i|
@@ -252,7 +267,8 @@ class CourseSpreadsheet
           sheet.push_row(i, [0, "No submission"])
           curved = Cell.new(nil,
                             CellRef.new(nil,
-                                        col_name(weight.count - 3), i + sheet.header_rows.length + 2, nil))
+                                        col_name(weight.count - 3), true, i + sheet.header_rows.length + 2, false,
+                                        nil))
           sheet.push_row(i, [curved, 0])
         else
           grade_comments = InlineComment.where(submission_id: sub_id.submission_id)
@@ -261,18 +277,19 @@ class CourseSpreadsheet
             sheet.push_row(i, g || "<none>")
           end
           sum_grade = Formula.new(nil, "SUM",
-                                  Range.new(col_name(weight.count - questions.count - 4),
-                                            i + sheet.header_rows.length + 2,
-                                            col_name(weight.count - 5),
-                                            i + sheet.header_rows.length + 2))
+                                  Range.new(col_name(weight.count - questions.count - 4), true,
+                                            i + sheet.header_rows.length + 2, false,
+                                            col_name(weight.count - 5), true,
+                                            i + sheet.header_rows.length + 2, false))
           sheet.push_row(i, Cell.new(nil, sum_grade))
           sum_grade = Formula.new(sub[:sub].score, "/",
-                                  sum_grade, CellRef.new(nil, col_name(weight.count - 4), 3, tot_weight))
+                                  sum_grade, CellRef.new(nil, col_name(weight.count - 4), true, 3, true, tot_weight))
 
           sheet.push_row(i, Cell.new(nil, sum_grade))
           curved = Cell.new(nil,
                             CellRef.new(nil,
-                                        col_name(weight.count - 3), i + sheet.header_rows.length + 2, nil))
+                                        col_name(weight.count - 3), true, i + sheet.header_rows.length + 2, false,
+                                        nil))
           sheet.push_row(i, curved)
           if sub[:sub].score
             sheet.push_row(i, sub[:sub].score / 100.0)
@@ -334,7 +351,10 @@ class CourseSpreadsheet
       sheet.columns.push(Col.new("", "Number"), Col.new("", "Percent"), Col.new("", "Percent"), Col.new("", "Percent"))
       labels.push(Cell.new("Total"), Cell.new("Lateness"), Cell.new("Computed%"), Cell.new("OnServer%"))
       tot_weight = grades.configs.map(&:avail_score).sum()
-      weight.push(Cell.new(nil, Formula.new(tot_weight, "SUM", Range.new(col_name(weight.count - grades.configs.count), 3, col_name(weight.count - 1), 3))), Cell.new(""), Cell.new(""), Cell.new(""))
+      weight.push(Cell.new(nil, Formula.new(tot_weight, "SUM",
+                                            Range.new(col_name(weight.count - grades.configs.count), true, 3, true,
+                                                      col_name(weight.count - 1), true, 3, true))),
+                  Cell.new(""), Cell.new(""), Cell.new(""))
       hw_cols.push [assn, weight.count - 2]
       
       users.each_with_index do |u, i|
@@ -348,16 +368,19 @@ class CourseSpreadsheet
             sheet.push_row(i, ss[0] || "<none>")
           end
           sum_grade = Formula.new(sub[:sub].score, "SUM",
-                                  Range.new(col_name(weight.count - grades.configs.count - 4),
-                                            i + sheet.header_rows.length + 2,
-                                            col_name(weight.count - 5),
-                                            i + sheet.header_rows.length + 2))
+                                  Range.new(col_name(weight.count - grades.configs.count - 4), true,
+                                            i + sheet.header_rows.length + 2, false,
+                                            col_name(weight.count - 5), true,
+                                            i + sheet.header_rows.length + 2, false))
           #sheet.push_row(i, sub[:staff_scores][:raw_score])
           sheet.push_row(i, Cell.new(nil, sum_grade))
 
           sum_grade = Formula.new(sub[:sub].score, "/",
-                                  CellRef.new(nil, col_name(weight.count - 4), i + sheet.header_rows.length + 2, nil),
-                                  CellRef.new(nil, col_name(weight.count - 4), 3, nil))
+                                  CellRef.new(nil,
+                                              col_name(weight.count - 4), true,
+                                              i + sheet.header_rows.length + 2, false,
+                                              nil),
+                                  CellRef.new(nil, col_name(weight.count - 4), true, 3, true, nil))
 
           if sub[:sub].ignore_late_penalty
             sheet.push_row(i, "<ignore>")
@@ -367,8 +390,8 @@ class CourseSpreadsheet
             sum_grade = Formula.new(nil, "MAX", 0,
                                     Formula.new(nil, "-", sum_grade,
                                                 CellRef.new(nil,
-                                                            col_name(weight.count - 3),
-                                                            i + sheet.header_rows.length + 2,
+                                                            col_name(weight.count - 3), true,
+                                                            i + sheet.header_rows.length + 2, false,
                                                             lc.late_penalty(assn, sub[:sub]) / 100.0)
                                                ))
           end
@@ -400,7 +423,8 @@ class CourseSpreadsheet
       weight.push(Cell.new(""))
 
       users.each_with_index do |u, i|
-        sheet.push_row(i, Cell.new(nil, CellRef.new(hws.name, col_name(col), i + hw_headers, "Please Recalculate")))
+        sheet.push_row(i, Cell.new(nil, CellRef.new(hws.name, col_name(col), true, i + hw_headers, false,
+                                                    "Please Recalculate")))
       end
     end
 
@@ -410,7 +434,8 @@ class CourseSpreadsheet
       weight.push(Cell.new(""))
 
       users.each_with_index do |u, i|
-        sheet.push_row(i, Cell.new(nil, CellRef.new(exams.name, col_name(col), i + hw_headers, "Please Recalculate")))
+        sheet.push_row(i, Cell.new(nil, CellRef.new(exams.name, col_name(col), true, i + hw_headers, false,
+                                                    "Please Recalculate")))
       end
     end
 
@@ -421,7 +446,11 @@ class CourseSpreadsheet
     weight.push(Cell.new(""))
     
     users.each_with_index do |u, i|
-      sheet.push_row(i, Cell.new(nil, Formula.new("Please recalculate", "SUMPRODUCT", Range.new(col_name(start_col), 2, col_name(end_col), 2), Range.new(col_name(start_col), i + hw_headers, col_name(end_col), i + hw_headers))))
+      sheet.push_row(i, Cell.new(nil, Formula.new("Please recalculate", "SUMPRODUCT",
+                                                  Range.new(col_name(start_col), true, 2, true,
+                                                            col_name(end_col), true, 2, true),
+                                                  Range.new(col_name(start_col), true, i + hw_headers, false,
+                                                            col_name(end_col), true, i + hw_headers, false))))
     end
     
     sheet
