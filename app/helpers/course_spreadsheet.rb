@@ -286,10 +286,15 @@ class CourseSpreadsheet
                                   sum_grade, CellRef.new(nil, col_name(weight.count - 4), true, 3, true, tot_weight))
 
           sheet.push_row(i, Cell.new(nil, sum_grade))
-          curved = Cell.new(nil,
-                            CellRef.new(nil,
-                                        col_name(weight.count - 3), true, i + sheet.header_rows.length + 2, false,
-                                        nil))
+          curve = grade_comments.find_by(line: questions.count)
+          if curve
+            curved = Cell.new(nil, Formula.new(sub[:sub].score, "/", curve["weight"], tot_weight))
+          else
+            curved = Cell.new(nil,
+                              CellRef.new(nil,
+                                          col_name(weight.count - 3), true, i + sheet.header_rows.length + 2, false,
+                                          nil))
+          end
           sheet.push_row(i, curved)
           if sub[:sub].score
             sheet.push_row(i, sub[:sub].score / 100.0)
