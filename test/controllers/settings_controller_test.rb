@@ -7,21 +7,23 @@ class SettingsControllerTest < ActionController::TestCase
   end
 
   test "non-admin should not get settings" do
-    get :index, {}, { user_id: @prof.id }
+    sign_in @prof
+    get :edit
     assert_response :redirect
   end
 
   test "index should show defaults" do
     Settings.clear_test!
 
-    get :index, {}, { user_id: @admin.id }
+    sign_in @admin
+    get :edit
     assert_response :success
     assert_match "noreply@example.com", @response.body
   end
 
   test "should save_settings" do
-    post :save, { site_email: "somebody@example.com", backup_login: "" },
-      { user_id: @admin.id }
+    sign_in @admin
+    post :update, { site_email: "somebody@example.com", backup_login: "" }
 
     assert_response :redirect
     assert_match "Settings Saved", flash[:notice]

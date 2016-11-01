@@ -1,14 +1,11 @@
 class SettingsController < ApplicationController
+  before_filter :require_site_admin
+
   def edit
     @cfg = Settings.load_json
   end
 
   def update
-    unless current_user_site_admin?
-      redirect_to root_path, alert: "Must be an admin or staff."
-      return
-    end
-
     @cfg = Settings.defaults
 
     @cfg.each_key do |kk|
@@ -17,6 +14,6 @@ class SettingsController < ApplicationController
 
     Settings.save_json(@cfg)
 
-    redirect_to root_path, notice: "Settings Saved"
+    redirect_to edit_settings_path, notice: "Settings Saved"
   end
 end

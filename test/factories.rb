@@ -10,7 +10,8 @@ FactoryGirl.define do
   factory :user do
     name  { generate(:user_name) }
     password "password"
-    email { name.downcase.gsub(/\W/, '_') + "@example.com" }
+    username { name.downcase.gsub(/\W/, '_') }
+    email { username + "@example.com" }
     site_admin false
 
     factory :admin_user do
@@ -23,24 +24,50 @@ FactoryGirl.define do
     archived false
   end
 
+  factory :lateness_config do
+    type "LatePerDayConfig"
+    days_per_assignment 365
+    percent_off 50
+    frequency 1
+    max_penalty 100
+  end
+
   factory :course do
     term
+    lateness_config
 
     sequence(:name) {|n| "Computing #{n}" }
     footer "Link to Piazza: *Link*"
   end
 
+  factory :course_section do
+    course
+    sequence(:crn) {|n| 1000 + n }
+    sequence(:meeting_time) {|n| "Tuesday #{n}:00" }
+    association :instructor, factory: :user
+  end
+
+  factory :grader_config do
+    type "ManualGrader"
+    avail_score 100.0
+    params ""
+  end
+
+  factory :assignment_grader do
+    grader_config
+    assignment
+    order 0
+  end
+
   factory :assignment do
     course
-    bucket
     association :blame, factory: :user
+    lateness_config
+    available (Time.now - 10.days)
+    points_available 100
 
     sequence(:name) {|n| "Homework #{n}" }
     due_date (Time.now + 7.days)
-
-    after(:build) do |asg|
-      asg.bucket.course_id = asg.course_id
-    end
   end
 
   factory :upload do
@@ -67,22 +94,18 @@ FactoryGirl.define do
   factory :registration do
     user
     course
+    association :section, factory: :course_section
 
-    teacher false
+    role 0
     show_in_lists true
   end
 
   factory :reg_request do
     user
     course
+    association :section, factory: :course_section
 
     notes "Let me in!"
-  end
-
-  factory :bucket do
-    course
-    name "Default"
-    weight 0.375
   end
 
   factory :team do
@@ -100,3 +123,4 @@ FactoryGirl.define do
     end
   end
 end
+

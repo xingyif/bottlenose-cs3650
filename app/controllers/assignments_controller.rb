@@ -90,6 +90,7 @@ class AssignmentsController < CoursesController
       ap[:assignment_file] = nil
       @assignment.assignment_upload_id = nil
     end
+
     if @assignment.update_attributes(ap)
       @assignment.save_uploads! if ap[:assignment_file]
       redirect_to course_assignment_path(@course, @assignment), notice: 'Assignment was successfully updated.'
@@ -205,9 +206,9 @@ class AssignmentsController < CoursesController
       params[:graders].map do |k, v|
         [k, v.permit([:id, :type, :removed,
                       :JavaStyleGrader => [:avail_score, :upload_file, :params, :type],
-                      :CheckerGrader => [:avail_score, :upload_file, :params, :type],
-                      :JunitGrader => [:avail_score, :upload_file, :params, :type],
-                    :ManualGrader => [:avail_score, :upload_file, :params, :type]])]
+                      :CheckerGrader   => [:avail_score, :upload_file, :params, :type],
+                      :JunitGrader     => [:avail_score, :upload_file, :params, :type],
+                      :ManualGrader    => [:avail_score, :upload_file, :params, :type]])]
       end.to_h
     end
   end
@@ -218,6 +219,7 @@ class AssignmentsController < CoursesController
       return
     end
   end
+
   def require_admin_or_staff
     unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to root_path, alert: "Must be an admin or staff."

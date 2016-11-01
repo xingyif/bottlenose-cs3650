@@ -12,6 +12,7 @@ class CalcScoresTest < ActionDispatch::IntegrationTest
   end
 
   def test_create_teams_submit_and_grade_many
+    skip
     DatabaseCleaner.clean_with :truncation
 
     # Staff

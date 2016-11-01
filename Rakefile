@@ -87,10 +87,11 @@ namespace :db do
     puts
     puts "Otherwise, press enter to continue."
     $stdin.readline
-    system("rake db:drop")
     system("rake nuke_uploads")
+    system("rake db:drop")
     system("rake db:create")
-    system("rake db:migrate")
+    system("rake db:schema:load")
+    system("rake db:seed")
   end
 end
 

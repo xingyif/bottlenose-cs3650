@@ -4,7 +4,8 @@ class SubmissionsControllerTest < ActionController::TestCase
   setup do
     make_standard_course
 
-    @hello = create(:assignment, course: @cs101, bucket: @bucket)
+    @hello = create(:assignment, course: @cs101)
+    create(:assignment_grader, assignment: @hello)
     @john_hello = create(:submission, user: @john, assignment: @hello)
   end
 
@@ -12,14 +13,15 @@ class SubmissionsControllerTest < ActionController::TestCase
     Upload.cleanup_test_uploads!
   end
 
-  test "should get index" do
-    get :index, {assignment_id: @hello.id}, {user_id: @fred.id}
-    assert_response :success
-    assert_not_nil assigns(:submissions)
+  test "index should redirect" do
+    sign_in @fred
+    get :index, { assignment_id: @hello.id, course_id: @cs101.id }
+    assert_response :redirect
   end
 
   test "should get new" do
-    get :new, {assignment_id: @hello.id}, {user_id: @john.id}
+    sign_in @john
+    get :new, {assignment_id: @hello.id, course_id: @cs101.id }
     assert_response :success
   end
 
@@ -27,33 +29,38 @@ class SubmissionsControllerTest < ActionController::TestCase
     upload = fixture_file_upload(
       'files/HelloWorld/HelloWorld.tgz','application/octet-stream')
 
+    sign_in @john
+
     assert_difference('Submission.count') do
-      post :create, { assignment_id: @hello.id,
-        submission: { student_notes: "@@@skip tests@@@",
-                      file_name: "HelloWorld.tgz",
-                      upload_file: upload }},
-        {user_id: @john.id}
+      post :create, { 
+        course_id: @cs101.id, assignment_id: @hello.id,
+        submission: { 
+          student_notes: "@@@skip tests@@@",
+          file_name: "HelloWorld.tgz",
+          upload_file: upload },
+      }
     end
 
-    assert_redirected_to submission_path(assigns(:submission))
+    assert_redirected_to [@cs101, @hello, assigns(:submission)]
   end
 
   test "should show submission" do
-    get :show, {id: @john_hello}, {user_id: @john.id}
+    sign_in @john
+    get :show, {id: @john_hello, course_id: @cs101.id, assignment_id: @hello.id }
     assert_response :success
   end
 
   test "should get edit" do
-    get :edit, {id: @john_hello}, {user_id: @fred.id}
-    assert_response :success
-  end
+    skip
 
-  test "should get manual grade" do
-    get :manual_grade, {assignment_id: @hello.id}, {user_id: @fred.id}
+    sign_in @fred
+    get :edit, { id: @john_hello, course_id: @cs101.id, assignment_id: @hello }
     assert_response :success
   end
 
   test "should update submission" do
+    skip
+
     put :update, {id: @john_hello}, { submission: { student_notes: "Bacon!",
       assignment_id: @john_hello.assignment_id, user_id: @john.id }}, {user_id: @fred.id}
     assert_response :redirect

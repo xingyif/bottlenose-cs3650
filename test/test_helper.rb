@@ -2,6 +2,8 @@ ENV["RAILS_ENV"] = "test"
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 require 'capybara/rails'
+require 'simplecov'
+SimpleCov.start
 
 class ActionController::TestCase
   include Devise::TestHelpers
@@ -22,9 +24,10 @@ class ActiveSupport::TestCase
     @fred     = create(:user, name: "Fred McTeacher")
     @john     = create(:user, name: "John McStudent")
     @cs101    = create(:course, public: true)
-    @bucket   = create(:bucket, course: @cs101)
-    @fred_reg = create(:registration, course: @cs101, user: @fred, teacher: true)
-    @john_reg = create(:registration, course: @cs101, user: @john)
+    @section  = create(:course_section, course: @cs101, instructor: @fred)
+    @fred_reg = create(:registration, course: @cs101, user: @fred, section_id: @section.crn,
+                       role: Registration::roles[:professor])
+    @john_reg = create(:registration, course: @cs101, user: @john, section_id: @section.crn)
   end
 
   def assign_upload(assign, suffix)

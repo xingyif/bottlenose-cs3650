@@ -62,6 +62,7 @@ class CoursesController < ApplicationController
                 .select("users.*", "registrations.dropped_date", "registrations.section_id")
                 .order("users.last_name", "users.first_name")
   end
+
   def prep_sections
     @sections = CourseSection.where(course: @course).to_a
     if @sections.count == 0
@@ -75,9 +76,7 @@ class CoursesController < ApplicationController
       return
     end
 
-              
     @course = Course.new(course_params)
-
 
     unless course_section_params.count > 0
       @course.errors[:base] << "Need to create at least one section"
@@ -227,6 +226,7 @@ class CoursesController < ApplicationController
 
   def set_default_lateness_config
     lateness = params[:lateness]
+
     if lateness.nil?
       @course.errors.add(:lateness, "Lateness parameter is missing")
       return false
@@ -247,6 +247,8 @@ class CoursesController < ApplicationController
       late_config.save
       @course.total_late_days = course_params[:total_late_days]
     end
+
+    return true
   end
 
   def create_sections
