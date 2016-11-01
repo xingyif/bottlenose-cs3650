@@ -1,3 +1,4 @@
+<% show_weight = false if show_weight.nil? %>
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
@@ -10,7 +11,8 @@
       <tr>
         <th>Name</th>
         <th>Due Date</th>
-        <th>Score (%)</th>
+        <% if show_weight %><th>Weight</th><% end %>
+        <th>Score&nbsp;(%)</th>
         <th>Submissions</th>
       </tr>
     </thead>
@@ -36,6 +38,7 @@
         <tr>
           <td><%= link_to assignment.name, course_assignment_path(assignment.course, assignment) %></td>
           <td><span class="local-time"><%= assignment.due_date %></span></td>
+          <% if show_weight %><td><%= show_score(assignment.points_available, assignment, true) %></td><% end %>
           <td><%= show_score(score, assignment) %></td>
           <td style="white-space: nowrap;">
             <% submissions.limit(5).each do |submission| %>
