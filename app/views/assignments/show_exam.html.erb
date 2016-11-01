@@ -15,7 +15,8 @@
 </p>
 <% end %>
 
-<%= render 'assignment_questions_info', gradesheet: @gradesheet %>
+<%= render 'assignment_questions_info', gradesheet: @gradesheet,
+    cur_reg: cur_reg %>
 <div>
 <div class="pull-right">
 <%= link_to "Enter all grades",
