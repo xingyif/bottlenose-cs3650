@@ -79,7 +79,7 @@ class TeamsController < CoursesController
 
   def students_without_active_team
     # TODO: Optimize.
-    @course.students.reject do |student|
+    @course.students_with_drop_info.where("registrations.dropped_date": nil).reject do |student|
       student.teams.where(course: @course).any? { |t| t.active? }
     end
   end
