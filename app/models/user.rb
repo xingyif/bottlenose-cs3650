@@ -4,7 +4,7 @@ require 'audit'
 class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :ldap_authenticatable, :database_authenticatable, 
+  devise :ldap_authenticatable, :database_authenticatable,
          :recoverable, :rememberable, :trackable, :registerable 
   has_many :courses, through: :registrations
   has_many :registrations, dependent: :destroy
@@ -52,6 +52,7 @@ class User < ActiveRecord::Base
 
   def ldap_before_save
     res = Devise::LDAP::Adapter.get_ldap_entry(self.username)
+    return unless res
     self.name = res[:displayname][0]
     if res[:sn]
       self.last_name = res[:sn][0]
@@ -85,8 +86,9 @@ class User < ActiveRecord::Base
   end
 
   def valid_ldap_authentication?(pwd)
-    if self.encrypted_password != "" && 
-        Devise::Encryptor.compare(self.class, self.encrypted_password, pwd)
+    if !self.new_record? &&
+       self.encrypted_password != "" && 
+       Devise::Encryptor.compare(self.class, self.encrypted_password, pwd)
       Audit.log("DB auth for #{self.name}")
       true
     else
