@@ -1,6 +1,6 @@
 <% sub_files.each_with_index do |f, i| %>
 <% index = "file_" + (i + 1).to_s.rjust(sub_files.count.to_s.length, '0') %>
-<div class="tab-pane panel-tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="<%= index %>">
+<div class="file-pane tab-pane panel-tab-pane active<%= if i > 0; ' hideAfterRender' end %>" id="<%= index %>">
   <% if f[:type] == "image" %>
   <div class="nonCMwrapper"><%= image_tag f[:link], alt: f[:name], style: "max-width: 100%;" %></div>
   <% elsif f[:type] == "zip" || f[:type] == "jar" %>
@@ -17,11 +17,6 @@
   <div class="nonCMwrapper">
     <p>Could not render <%= f[:name] %></p>
     <p><%= link_to "Download #{f[:name]}", f[:link] %></p>
-  </div>
-  <div style="display: none;">
-    <textarea class="sourceCode" data-lang="<%= f[:type] %>"
-              data-source="<%= f[:link] %>"
-              id="contents_<%= i %>"></textarea>
   </div>
   <% end %>
   <% end %>

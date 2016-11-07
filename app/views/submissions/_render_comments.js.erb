@@ -1,9 +1,9 @@
 <% vertical = false if local_assigns[:vertical].nil? %>
 function renderComments(lineComments) {
-  $(".CodeMirror").each(function(index) {
+  $(".file-pane").each(function(index) {
     var theseComments = lineComments[index] || {};
     if (theseComments["noCommentsFor"]) return;
-    var cm = this.CodeMirror;
+    var cm = $(this).find(".CodeMirror")[0].CodeMirror;
     cm.operation(function() {
       Object.keys(theseComments).forEach(function(type, _) {
         var commentsByType = theseComments[type] || {};
