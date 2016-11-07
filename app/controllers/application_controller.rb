@@ -121,7 +121,7 @@ class ApplicationController < ActionController::Base
           link: item[:public_link],
           name: item[:public_link].sub(/^.*extracted\//, ""),
           contents: File.read(item[:full_path].to_s),
-          type: case File.extname(item[:full_path].to_s)
+          type: case File.extname(item[:full_path].to_s).downcase
                 when ".java"
                   "text/x-java"
                 when ".arr"
