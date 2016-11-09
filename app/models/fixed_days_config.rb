@@ -9,8 +9,11 @@ class FixedDaysConfig < LatenessConfig
     return true if max_late_days.nil?
     # NOTE: Cannot use .users here because the assignment isn't yet submitted
     # so it doesn't show up in the UserSubmissions relation
+    # NOTE: Cannot just use assignment.course.assignments because the student might've
+    # submitted late to this assignment already, so don't re-penalize that late submission
+    all_but_current = assignment.course.assignments.where.not(id: assignment.id)
     submission.submission_users.all? do |u|
-      (u.late_days_used(assignment.course.assignments) + late_days <= max_late_days)
+      (u.late_days_used(all_but_current) + late_days <= max_late_days)
     end
   end
 
