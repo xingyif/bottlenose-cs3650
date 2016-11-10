@@ -119,7 +119,12 @@ class User < ActiveRecord::Base
   end
 
   def used_submissions_for(assignments)
-    SubsForGrading.where(user: self, assignment_id: assignments.pluck(:id)).joins(:submission)
+    if assignments.is_a? Array
+      assn_ids = assignments.map(&:id)
+    else
+      assn_ids = assignments.pluck(:id)
+    end
+    SubsForGrading.where(user: self, assignment_id: assn_ids).joins(:submission)
   end
 
   def course_staff?(course)

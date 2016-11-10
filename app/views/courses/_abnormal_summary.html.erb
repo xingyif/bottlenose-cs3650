@@ -1,0 +1,19 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Abnormal submissions summary</h3>
+  </div>
+  <div class="panel-body">
+    <% if @abnormals.count == 0 %>
+    None
+    <% else %>
+    <% @abnormals.each do |assn, s| %>
+    <h4><%= link_to assn.name, course_assignment_path(@course,
+            assn.id) %></h4>
+    <ul>
+      <li><%= s.name %>: <%= link_to "View all submissions",
+              course_assignment_user_path(@course, assn, s) %></li>
+      <% end %>
+    </ul>
+    <% end %>
+  </div>
+</div>

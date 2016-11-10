@@ -42,6 +42,19 @@ class CoursesController < ApplicationController
     #   @pending_grading = []
     #   @assignments = []
     end
+
+    if current_user_prof_for?(@course)
+      @abnormals = {}
+      @people = @course.users.to_a
+      @course.assignments.each do |a|
+        @people.each do |s|
+          subs = s.submissions_for(a)
+          if (subs.count > 0) and (s.used_submissions_for([a]).count == 0)
+            @abnormals[a] = s
+          end
+        end
+      end
+    end
   end
 
   def new

@@ -1,11 +1,16 @@
+<% cur_reg = current_user.registration_for(@course) %>
 <% @page_title = @course.name %>
 
 <div class="row">
   <div class="col-md-6">
     <%= render "assignments/table", assignments: @course.assignments,
-        for_user: current_user, show_all: current_user.course_professor?(@course) %>
+        for_user: current_user, show_all: cur_reg.professor? %>
     <%= render "lateness_summary", assignments: @course.assignments,
-        for_user: current_user, show_all: current_user.course_professor?(@course) %>
+        for_user: current_user, show_all:
+        cur_reg.professor? %>
+    <% if cur_reg.professor? %>
+    <%= render "abnormal_summary", abnormals: @abnormals %>
+    <% end %>
   </div>
   <div class="col-md-6">
     <div class="panel panel-default">
@@ -21,9 +26,9 @@
       <div class="panel-body">No active team.</div>
       <% end %>
     </div>
-    <% if current_user.course_staff?(@course) %>
+    <% if cur_reg.staff? %>
     <%= render "grading_due", assignments: @course.assignments,
-        show_all: current_user.course_professor?(@course) %>
+        show_all: cur_reg.professor? %>
     <% end %>
   </div>
 </div>
