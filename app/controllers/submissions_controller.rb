@@ -58,7 +58,7 @@ class SubmissionsController < CoursesController
       @submission.user ||= current_user
       @submission.ignore_late_penalty = (submission_params[:ignore_late_penalty].to_i > 0)
       if submission_params[:created_at] and !@submission.ignore_late_penalty
-        @submission.created_at = DateTime.parse(submission_params[:created_at])
+        @submission.created_at = submission_params[:created_at]
       end
     else
       @submission.user = current_user

@@ -81,18 +81,18 @@
       </div>
       <script type="text/javascript">
         $(function () {
-        $('#submission_created_at').datetimepicker({
-        sideBySide: true,
-        format: "YYYY/MM/DD h:mm A",
-        minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
-        defaultDate: "<%= DateTime.current.strftime("%Y-%m-%d %H:%M") %>"
-        });
-        $('#submission_ignore_late_penalty').on("change", function() {
-        if ($(this).prop("checked"))
-        $('#submission_created_at').prop("disabled", true);
-        else
-        $('#submission_created_at').prop("disabled", false);
-        });
+          $('#submission_created_at').datetimepicker({
+            sideBySide: true,
+            format: "YYYY/MM/DD h:mm A",
+            minDate: "<%= @course.created_at.strftime("%Y-%m-%d") %>",
+            defaultDate: "<%= DateTime.current.strftime("%Y-%m-%d %H:%M %Z") %>"
+          });
+          $('#submission_ignore_late_penalty').on("change", function() {
+            if ($(this).prop("checked"))
+              $('#submission_created_at').prop("disabled", true);
+            else
+              $('#submission_created_at').prop("disabled", false);
+          });
         });
       </script>
     </div>      
