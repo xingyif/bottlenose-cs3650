@@ -9,9 +9,10 @@
       (<%= graders.count %> remaining)
     </h4>
     <ul>
-      <% graders.each do |g| %>
-      <li><%= link_to g.name,
-              edit_course_assignment_submission_grader_path(@course, assn_id, g.submission_id, g) %></li>
+      <% graders.group_by(&:id).each do |g_id, gs| %>
+      <% usernames = gs.map(&:user_name).join(", ") %>
+      <li><%= link_to usernames,
+              edit_course_assignment_submission_grader_path(@course, assn_id, gs.first.submission_id, g_id) %></li>
       <% end %>
     </ul>
     <% end %>

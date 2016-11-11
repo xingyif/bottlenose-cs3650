@@ -25,7 +25,6 @@ class CoursesController < ApplicationController
         # hang on to the assignment id
         # only keep unfinished graders
         # sort the assignments
-        # remove duplicates
         Grader
         .joins("INNER JOIN subs_for_gradings ON graders.submission_id = subs_for_gradings.submission_id")
         .joins("INNER JOIN assignments ON subs_for_gradings.assignment_id = assignments.id")
@@ -33,11 +32,10 @@ class CoursesController < ApplicationController
         .where("assignments.course_id": @course.id)
         .select("graders.*", "subs_for_gradings.assignment_id")
         .joins("INNER JOIN users ON subs_for_gradings.user_id = users.id")
-        .select("users.name")
+        .select("users.name AS user_name")
         .where(score: nil)
         .where("registrations.role": Registration::roles["student"])
         .order("assignments.due_date", "users.name")
-        .to_a.uniq
         .group_by{|r| r.assignment_id}
       @assignments = Assignment.where(id: @pending_grading.keys).map{|a| [a.id, a]}.to_h
     # elsif @registration.staff?
