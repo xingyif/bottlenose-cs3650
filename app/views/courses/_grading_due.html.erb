@@ -10,7 +10,7 @@
     </h4>
     <ul>
       <% graders.each do |g| %>
-      <li><%= link_to g.submission.user.name,
+      <li><%= link_to g.name,
               edit_course_assignment_submission_grader_path(@course, assn_id, g.submission_id, g) %></li>
       <% end %>
     </ul>

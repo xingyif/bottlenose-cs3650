@@ -32,10 +32,10 @@ class Submission < ActiveRecord::Base
   def add_user_submissions!
     if team
       team.users.each do |u|
-        UserSubmission.create!(user: u, submission: self)
+        UserSubmission.find_or_create_by!(user: u, submission: self)
       end
     elsif user
-      UserSubmission.create!(user: user, submission: self)
+      UserSubmission.find_or_create_by!(user: user, submission: self)
     end
   end
 

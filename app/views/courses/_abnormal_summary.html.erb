@@ -6,14 +6,16 @@
     <% if @abnormals.count == 0 %>
     None
     <% else %>
-    <% @abnormals.each do |assn, s| %>
+    <% @abnormals.each do |assn, people| %>
     <h4><%= link_to assn.name, course_assignment_path(@course,
             assn.id) %></h4>
     <ul>
+      <% people.each do |s| %>
       <li><%= s.name %>: <%= link_to "View all submissions",
               course_assignment_user_path(@course, assn, s) %></li>
       <% end %>
     </ul>
+    <% end %>
     <% end %>
   </div>
 </div>

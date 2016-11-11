@@ -30,8 +30,10 @@ class CoursesController < ApplicationController
         .joins("INNER JOIN subs_for_gradings ON graders.submission_id = subs_for_gradings.submission_id")
         .joins("INNER JOIN assignments ON subs_for_gradings.assignment_id = assignments.id")
         .joins("INNER JOIN registrations ON subs_for_gradings.user_id = registrations.user_id")
-        .where("assignments.course_id = ?", @course.id)
+        .where("assignments.course_id": @course.id)
         .select("graders.*", "subs_for_gradings.assignment_id")
+        .joins("INNER JOIN users ON subs_for_gradings.user_id = users.id")
+        .select("users.name")
         .where(score: nil)
         .where("registrations.role": Registration::roles["student"])
         .order("assignments.due_date")
@@ -45,12 +47,18 @@ class CoursesController < ApplicationController
 
     if current_user_prof_for?(@course)
       @abnormals = {}
-      @people = @course.users.to_a
-      @course.assignments.each do |a|
-        @people.each do |s|
-          subs = s.submissions_for(a)
-          if (subs.count > 0) and (s.used_submissions_for([a]).count == 0)
-            @abnormals[a] = s
+      people = @course.users.to_a
+      assns = @course.assignments.to_a
+      all_subs = Assignment.submissions_for(people, assns).group_by(&:assignment_id)
+      used_subs = SubsForGrading.where(assignment_id: assns.map(&:id)).group_by(&:assignment_id)
+      assns.each do |a|
+        a_subs = all_subs[a.id].group_by(&:user_id)
+        used = used_subs[a.id]
+        people.each do |p|
+          subs = a_subs[p.id]
+          if (subs and subs.count > 0) and (used.nil? or used.find{|us| us.user_id == p.id}.nil?)
+            @abnormals[a] = [] unless @abnormals[a]
+            @abnormals[a].push p
           end
         end
       end

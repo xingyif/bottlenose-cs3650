@@ -153,19 +153,24 @@ class Assignment < ActiveRecord::Base
   end
 
   def submissions_for(user)
-    if team_subs?
-      # This version of the query is slower, according to SQL explain
-      # user.submissions.where(assignment_id: self.id).order(created_at: :desc)
-      Submission.
-        joins(:team).
-        joins("JOIN team_users ON team_users.team_id = teams.id").
-        where("team_users.user_id = ? and submissions.assignment_id = ?", user.id, self.id).
-        order(created_at: :desc)
-    else
-      submissions.where(user_id: user.id).order(created_at: :desc)
-    end
+    Assignment.submissions_for([user], [self])
   end
 
+  def self.submissions_for(users, assns)
+    team_assns, solo_assns = assns.to_a.partition(&:team_subs?)
+    user_ids = users.map(&:id)
+    solo_subs = Submission
+                .where(user_id: user_ids)
+                .where(assignment_id: solo_assns.map(&:id))
+    team_subs = Submission
+                .joins(:team)
+                .joins("JOIN team_users ON team_users.team_id = teams.id")
+                .where("team_users.user_id": user_ids).where("submissions.assignment_id": team_assns.map(&:id))
+    Submission.from("(#{solo_subs.to_sql} UNION #{team_subs.to_sql}) AS submissions")
+      .order(created_at: :desc)
+  end
+
+    
   def used_submissions
     # Only those unique submissions that are marked as used-for-grading for this assignment
     all_used_subs.distinct
