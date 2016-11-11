@@ -62,6 +62,16 @@ class CoursesController < ApplicationController
           end
         end
       end
+      @unpublished =
+        Submission
+        .joins("INNER JOIN subs_for_gradings ON submissions.id = subs_for_gradings.submission_id")
+        .where("subs_for_gradings.assignment_id": assns.map(&:id))
+        .joins("INNER JOIN graders ON graders.submission_id = submissions.id")
+        .where.not("graders.score": nil)
+        .where("graders.available": false)
+        .includes(:users)
+        .includes(:assignment)
+        .group_by(&:assignment)
     end
   end
 
