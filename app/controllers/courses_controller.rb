@@ -48,10 +48,10 @@ class CoursesController < ApplicationController
     if current_user_prof_for?(@course)
       @abnormals = {}
       people = @course.users.to_a
-      assns = @course.assignments.to_a
-      all_subs = Assignment.submissions_for(people, assns).group_by(&:assignment_id)
-      used_subs = SubsForGrading.where(assignment_id: assns.map(&:id)).group_by(&:assignment_id)
-      assns.each do |a|
+      @assns = @course.assignments.to_a
+      all_subs = Assignment.submissions_for(people, @assns).group_by(&:assignment_id)
+      used_subs = SubsForGrading.where(assignment_id: @assns.map(&:id)).group_by(&:assignment_id)
+      @assns.each do |a|
         a_subs = all_subs[a.id].group_by(&:for_user)
         used = used_subs[a.id]
         people.each do |p|
@@ -65,13 +65,12 @@ class CoursesController < ApplicationController
       @unpublished =
         Submission
         .joins("INNER JOIN subs_for_gradings ON submissions.id = subs_for_gradings.submission_id")
-        .where("subs_for_gradings.assignment_id": assns.map(&:id))
+        .where("subs_for_gradings.assignment_id": @assns.map(&:id))
         .joins("INNER JOIN graders ON graders.submission_id = submissions.id")
         .where.not("graders.score": nil)
         .where("graders.available": false)
-        .includes(:users)
-        .includes(:assignment)
-        .group_by(&:assignment)
+        .joins("INNER JOIN users ON subs_for_gradings.user_id = users.id")
+        .select("DISTINCT submissions.*", "users.name AS user_name")
     end
   end
 
