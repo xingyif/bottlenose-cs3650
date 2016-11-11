@@ -451,6 +451,8 @@ HEADER
                                   user: student,
                                   type: "Exam")
       end
+      @sub.created_at = @assignment.due_date - 1.minute
+      @sub.save!
       @sub.set_used_sub!
       @grader = Grader.find_or_create_by(grader_config_id: @grader_config.id, submission_id: @sub.id)
       if @grader.new_record?
