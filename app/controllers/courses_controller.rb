@@ -36,7 +36,7 @@ class CoursesController < ApplicationController
         .select("users.name")
         .where(score: nil)
         .where("registrations.role": Registration::roles["student"])
-        .order("assignments.due_date")
+        .order("assignments.due_date", "users.name")
         .to_a.uniq
         .group_by{|r| r.assignment_id}
       @assignments = Assignment.where(id: @pending_grading.keys).map{|a| [a.id, a]}.to_h
@@ -48,7 +48,7 @@ class CoursesController < ApplicationController
     if current_user_prof_for?(@course)
       @abnormals = {}
       people = @course.users.to_a
-      @assns = @course.assignments.to_a
+      @assns = @course.assignments.to_a.sort_by(&:due_date)
       all_subs = Assignment.submissions_for(people, @assns).group_by(&:assignment_id)
       used_subs = SubsForGrading.where(assignment_id: @assns.map(&:id)).group_by(&:assignment_id)
       @assns.each do |a|
@@ -70,6 +70,7 @@ class CoursesController < ApplicationController
         .where.not("graders.score": nil)
         .where("graders.available": false)
         .joins("INNER JOIN users ON subs_for_gradings.user_id = users.id")
+        .order("users.name")
         .select("DISTINCT submissions.*", "users.name AS user_name")
     end
   end
