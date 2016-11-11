@@ -162,10 +162,12 @@ class Assignment < ActiveRecord::Base
     solo_subs = Submission
                 .where(user_id: user_ids)
                 .where(assignment_id: solo_assns.map(&:id))
+                .select("submissions.*", "submissions.user_id AS for_user")
     team_subs = Submission
                 .joins(:team)
                 .joins("JOIN team_users ON team_users.team_id = teams.id")
                 .where("team_users.user_id": user_ids).where("submissions.assignment_id": team_assns.map(&:id))
+                .select("submissions.*", "team_users.user_id AS for_user")
     Submission.from("(#{solo_subs.to_sql} UNION #{team_subs.to_sql}) AS submissions")
       .order(created_at: :desc)
   end
