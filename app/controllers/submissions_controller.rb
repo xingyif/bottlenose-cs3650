@@ -361,7 +361,8 @@ class SubmissionsController < CoursesController
         render "details_#{@assignment.type.underscore}"
       }
       f.text {
-        render :text => GradersController.pretty_print_comments(InlineComment.where(submission_id: @submission.id))
+        comments = @submission.graders.where(available: true).map(&:inline_comments).flatten
+        render :text => GradersController.pretty_print_comments(comments)
       }
     end
   end
