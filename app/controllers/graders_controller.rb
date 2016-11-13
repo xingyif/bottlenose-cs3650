@@ -16,6 +16,11 @@ class GradersController < ApplicationController
   end
 
   def show
+    if !(current_user_site_admin? || current_user_staff_for?(@course)) and !@grader.available
+      redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
+                  alert: "That grader is not yet available"
+      return
+    end
     self.send("show_#{@grader.grader_config.type}")
   end
 
@@ -48,6 +53,11 @@ class GradersController < ApplicationController
   end
 
   def details
+    if !(current_user_site_admin? || current_user_staff_for?(@course)) and !@grader.available
+      redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
+                  alert: "That grader is not yet available"
+      return
+    end
     respond_to do |f|
       f.text {
         render :text => self.send("details_#{@grader.grader_config.type}")
