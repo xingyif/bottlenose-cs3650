@@ -361,7 +361,12 @@ class SubmissionsController < CoursesController
         render "details_#{@assignment.type.underscore}"
       }
       f.text {
-        comments = @submission.graders.where(available: true).map(&:inline_comments).flatten
+        show_hidden = (current_user_site_admin? || current_user_staff_for?(@course))
+        comments = @submission.graders
+        unless show_hidden
+          comments = comments.where(available: true)
+        end
+        comments = comments.map(&:inline_comments).flatten
         render :text => GradersController.pretty_print_comments(comments)
       }
     end
