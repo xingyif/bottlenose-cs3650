@@ -4,7 +4,7 @@ class GradersController < ApplicationController
   prepend_before_action :find_grader
   prepend_before_action :find_submission, except: [:bulk_edit, :bulk_update]
   prepend_before_action :find_course_assignment
-  before_action :require_admin_or_staff, except: [:show, :update]
+  before_action :require_admin_or_staff, except: [:show, :update, :details]
   def edit
     if @grader.grader_config.autograde?
       redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
@@ -46,8 +46,25 @@ class GradersController < ApplicationController
       end
     end
   end
-  
 
+  def details
+    respond_to do |f|
+      f.text {
+        render :text => self.send("details_#{@grader.grader_config.type}")
+      }
+    end
+  end
+  
+  def self.pretty_print_comments(comments)
+    by_file = comments.group_by(&:upload_filename)
+    ans = by_file.map do |fn, cs|
+      fn.gsub(Regexp.new(".*extracted/?"), "") + ":\n" + cs.sort_by(&:line).map do |c|
+        c.to_s(true, false)
+      end.join("\n")        
+    end
+    ans.join("\n==================================================\n")
+  end
+  
   protected 
   def comments_params
     if params[:comments].is_a? String
@@ -293,6 +310,9 @@ HEADER
   def edit_JavaStyleGrader
     redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
   end
+  def details_JavaStyleGrader
+    GradersController.pretty_print_comments(@grader.inline_comments)
+  end
 
   # JunitGrader
   def show_JunitGrader
@@ -333,6 +353,9 @@ HEADER
 
     render "show_JunitGrader"
   end
+  def details_JunitGrader
+    "No details to show for Junit grader"
+  end
 
   # CheckerGrader
   def show_CheckerGrader
@@ -372,6 +395,9 @@ HEADER
 
     render "show_CheckerGrader"
   end
+  def details_CheckerGrader
+    GradersController.pretty_print_comments(@grader.inline_comments)
+  end
 
   # QuestionsGrader
   def edit_QuestionsGrader
@@ -405,6 +431,9 @@ HEADER
     @answers = YAML.load(File.open(@submission.upload.submission_path))
     redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
   end
+  def details_QuestionsGrader
+    "No details to show for Questions grader"
+  end
 
   # ManualGrader
   def edit_ManualGrader
@@ -419,6 +448,9 @@ HEADER
     render "submissions/details_files"
 #    redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
   end
+  def details_ManualGrader
+    GradersController.pretty_print_comments(@grader.inline_comments)
+  end
 
   # ExamGrader
   def edit_ExamGrader
@@ -427,6 +459,9 @@ HEADER
   end
   def show_ExamGrader
     redirect_to course_assignment_submission_path(@course, @assignment, @submission)
+  end
+  def details_QuestionsGrader
+    "No details to show for Exam grader"
   end
   
 

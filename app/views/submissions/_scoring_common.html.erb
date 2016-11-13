@@ -28,12 +28,10 @@
               recreate_grader_course_assignment_submission_path(@course, @assignment, @submission, @gradesheet.configs[i]),
               method: 'post', class: "btn btn-warning" %>
         <% else %>
-          <% if grader.grading_output %>
           <%= link_to "Grader output", 
               course_assignment_submission_grader_path(@course, @assignment, @submission, grader) %>
           <%= if !grader.available then " (unavailable)"
               elsif !grader.complete? then " (hidden)" end %>
-          <% end %>
           <% if c.autograde? %>
             <%= link_to "Rerun autograder", 
                 regrade_course_assignment_submission_grader_path(@course, @assignment, @submission, grader),

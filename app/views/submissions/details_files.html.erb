@@ -14,6 +14,21 @@
 <h1>Submission</h1>
 
 <%= render 'submissions/sub_info', cur_reg: cur_reg %>
+<h3>
+  <% if @grader %>
+  <%= link_to details_course_assignment_submission_grader_path(@course, @assignment, @submission, @grader),
+      class: "btn btn-default" do %>
+  <i class="glyphicon glyphicon-download-alt"></i> Download comments
+  <% end %>
+<% else %>
+  <%= link_to details_course_assignment_submission_path(@course, @assignment, @submission, :format => :text),
+      class: "btn btn-default" do %>
+  <i class="glyphicon glyphicon-download-alt"></i> Download all comments
+  <% end %>  
+<% end %>
+</h3>
+  
+
 <% end %>
 
 <% content_for :wide_content do %>

@@ -58,6 +58,7 @@ Bottlenose::Application.routes.draw do
         resources :graders, only: [:show, :edit, :update] do
           member do
             post :regrade
+            get :details, defaults: {format: 'text'}
           end
         end
       end

@@ -28,7 +28,6 @@ class SubmissionsController < CoursesController
     end
 
     self.send("details_#{@assignment.type.capitalize}")
-    render "details_#{@assignment.type.underscore}"
   end
 
   def new
@@ -356,7 +355,15 @@ class SubmissionsController < CoursesController
 
   # DETAILS
   def details_Files
-    get_submission_files(@submission, nil, true)
+    respond_to do |f|
+      f.html {
+        get_submission_files(@submission, nil, true)
+        render "details_#{@assignment.type.underscore}"
+      }
+      f.text {
+        render :text => GradersController.pretty_print_comments(InlineComment.where(submission_id: @submission.id))
+      }
+    end
   end
   def details_Questions
     @questions = @assignment.questions

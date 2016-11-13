@@ -34,4 +34,24 @@ class InlineComment < ActiveRecord::Base
     ans[:editable] = (self.user and comment_author and comment_author.id == self.user.id)
     ans
   end
+  def to_s(pretty = false, show_file = true)
+    if pretty
+      ans = ""
+      ans += "#{self.filename}, " if show_file
+      ans += "#{self.line}:"
+      ans += " #{self.user.name} --" if self.user
+      ans += " #{self.title}" if self.title.to_s != ""
+      ans += self.label if self.user and self.user.name != self.label
+      ans += " (#{self.severity.humanize}) "
+      if self.suppressed
+        ans += "[#{0 - self.weight} (ignored)]"
+      else
+        ans += "[#{0 - self.weight}]"
+      end
+      ans += "\n\t"
+      ans += self.comment
+    else
+      self.to_json
+    end
+  end
 end
