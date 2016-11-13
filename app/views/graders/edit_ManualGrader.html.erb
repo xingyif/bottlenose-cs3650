@@ -84,8 +84,10 @@
       delete lineComments[i].ManualGrader;
     }
     renderComments(lineComments);
-    $(".CodeMirror").each(function(index) {
-      var cm = this.CodeMirror;
+    $(".file-pane").each(function(index) {
+      var theseComments = lineComments[index] || {};
+      if (theseComments["noCommentsFor"]) return;
+      var cm = $(this).find(".CodeMirror")[0].CodeMirror;
       cm.operation(function() {
         var theseComments = manualComments[index];
         Object.keys(theseComments).forEach(function(line, _) {
