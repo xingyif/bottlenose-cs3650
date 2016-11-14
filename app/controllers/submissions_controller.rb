@@ -397,7 +397,9 @@ class SubmissionsController < CoursesController
       @submission_files = []
       @answers_are_newer = true
     end
+    render "details_questions"
   end
   def details_Exam
+    render "details_exam"
   end
 end
