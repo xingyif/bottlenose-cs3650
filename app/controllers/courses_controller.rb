@@ -50,6 +50,7 @@ class CoursesController < ApplicationController
       all_subs = Assignment.submissions_for(people, @assns).group_by(&:assignment_id)
       used_subs = SubsForGrading.where(assignment_id: @assns.map(&:id)).group_by(&:assignment_id)
       @assns.each do |a|
+        next unless all_subs[a.id]
         a_subs = all_subs[a.id].group_by(&:for_user)
         used = used_subs[a.id]
         people.each do |p|
