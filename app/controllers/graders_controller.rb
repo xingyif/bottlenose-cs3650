@@ -147,8 +147,11 @@ class GradersController < ApplicationController
   def do_save_comments(cp, cp_to_comment)
     # delete the ones marked for deletion
     deletable, commentable = cp.partition{|c| c["shouldDelete"]}
-    to_delete = InlineComment.where(user: current_user, submission_id: params[:submission_id])
+    to_delete = InlineComment.where(submission_id: params[:submission_id])
                 .where(id: deletable.map{|c| c["id"].to_i}.select{|i| i < (1 << 31)})
+    unless current_user_prof_for?(@course)
+      to_delete = to_delete.where(user: current_user)  # Only professors can delete other grader's comments
+    end
     to_delete.destroy_all
     deleted = deletable.map do |c| [c["id"], "deleted"] end.to_h
     # create the others
