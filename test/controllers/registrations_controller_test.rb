@@ -28,7 +28,7 @@ class RegistrationsControllerTest < ActionController::TestCase
   end
 
   test "should create registration" do
-    skip
+    skip # fails without a LDAP connection for now
 
     sign_in @fred
     assert_difference('Registration.count') do
@@ -40,7 +40,7 @@ class RegistrationsControllerTest < ActionController::TestCase
   end
 
   test "should show registration" do
-    skip
+    skip # no :show action for registrations
 
     sign_in @fred
     get :show, {:course_id => @cs301.id, id: @john_reg.id}
@@ -48,7 +48,7 @@ class RegistrationsControllerTest < ActionController::TestCase
   end
 
   test "should get edit" do
-    skip
+    skip # no :edit action for registrations
 
     sign_in @fred
     get :edit, {:course_id => @cs301.id, id: @john_reg.id}
@@ -56,7 +56,7 @@ class RegistrationsControllerTest < ActionController::TestCase
   end
 
   test "should update registration" do
-    skip
+    skip # no :update action for registrations
 
     sign_in @fred
     put :update, {course_id: @cs301.id, id: @john_reg.id,
@@ -66,7 +66,7 @@ class RegistrationsControllerTest < ActionController::TestCase
   end
 
   test "should set tags" do
-    skip
+    skip # no :update action for registrations
 
     sign_in @fred
     put :update, {course_id: @cs301.id, id: @john_reg.id,

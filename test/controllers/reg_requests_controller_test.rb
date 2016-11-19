@@ -13,7 +13,7 @@ class RegRequestsControllerTest < ActionController::TestCase
   end
 
   test "should get index" do
-    skip
+    skip  # No index page for reg requests
 
     sign_in @fred
     get :index, {course_id: @cs301.id}
@@ -58,7 +58,7 @@ class RegRequestsControllerTest < ActionController::TestCase
   end
 
   test "should show reg_request" do
-    skip
+    skip # no :show action for reg_requests -- Users can see them from their user page
 
     sign_in @fred
     get :show, { id: @mike_req.id, course: @cs301 }
@@ -66,13 +66,12 @@ class RegRequestsControllerTest < ActionController::TestCase
   end
 
   test "should destroy reg_request" do
-    skip
 
     sign_in @fred
     assert_difference('RegRequest.count', -1) do
-      delete :destroy, {id: @mike_req.id}
+      delete :reject, {id: @mike_req.id, course_id: @cs301}
     end
 
-    assert_redirected_to course_reg_requests_path(@cs301)
+    assert_redirected_to course_registrations_path(@cs301)
   end
 end

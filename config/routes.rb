@@ -20,7 +20,7 @@ Bottlenose::Application.routes.draw do
   resources :terms
 
   resources :courses, except: [:destroy] do
-    resources :registrations, except: [:edit, :update] do
+    resources :registrations, except: [:show, :edit, :update] do
       collection do
         post :bulk
       end

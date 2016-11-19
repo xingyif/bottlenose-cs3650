@@ -91,7 +91,7 @@ class CoursesControllerTest < ActionController::TestCase
   end
 
   test "updating late penalties should change scores" do
-    skip
+    skip # refers to teacher_scores, rather than the newer score model
 
     a1  = create(:assignment, course: @course1, due_date: (Time.now - 5.days))
     sub = create(:submission, assignment: a1, user: @john, teacher_score: 100)
@@ -114,7 +114,7 @@ class CoursesControllerTest < ActionController::TestCase
   end
 
   test "should destroy course" do
-    skip
+    skip # currently no route to destroying courses (deliberately)
 
     sign_in @ken
     assert_difference('Course.count', -1) do
@@ -125,7 +125,7 @@ class CoursesControllerTest < ActionController::TestCase
   end
 
   test "non-admin should not be able to destroy course" do
-    skip
+    skip # currently no route to destroying courses (deliberately)
 
     sign_in @john
     assert_difference('Course.count', 0) do
@@ -137,18 +137,16 @@ class CoursesControllerTest < ActionController::TestCase
   end
 
   test "should export gradesheet" do
-    skip
-
-    a1 = create(:assignment, course: @course1)
+    a1 = create(:assignment, course: @course1, name: "Assignment 1")
     sub1 = create(:submission, assignment: a1, user: @john, score: 20)
 
     sign_in @fred
-    get :gradesheet, {:id => @course1.id}
+    get :gradesheet, {:id => @course1.id, :format => :xlsx}
     assert_response :ok
   end
 
   test "should get public page if public" do
-    skip
+    skip # the public page still refers to buckets
 
     get :public, { id: @course1 }
     assert_response :ok

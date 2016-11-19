@@ -10,15 +10,6 @@ class RegistrationsController < CoursesController
     @requests = @course.reg_requests.joins(:user).order('role desc', 'name').includes(:user)
   end
 
-  def show
-    unless current_user_prof_for?(@course) or current_user_has_id?(@registration.user.id)
-      redirect_to @course, alert: "You don't have permission to access that page."
-      return
-    end
-
-    @score = @registration.total_score
-  end
-
   def new
     @registration = Registration.new
   end
