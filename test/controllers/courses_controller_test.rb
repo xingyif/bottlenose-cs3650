@@ -63,6 +63,21 @@ class CoursesControllerTest < ActionController::TestCase
     assert_response :success
   end
 
+  test "should show course with assignments, with no submissions" do
+    sign_in @fred
+
+    lateness = create(:lateness_config, type: "FixedDaysConfig", days_per_assignment: 1)
+    gc = create(:grader_config, type: "ManualGrader", avail_score: 50)
+    a1 = create(:assignment,
+                course: @course1,
+                due_date: (Time.now + 5.days),
+                name: "Dummy assignment",
+                lateness_config: lateness
+               )
+    get :show, {id: @course1}
+    assert_response :success
+  end
+  
   test "should get edit" do
     sign_in @fred
     get :edit, {id: @course1}
