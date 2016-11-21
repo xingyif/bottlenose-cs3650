@@ -96,7 +96,9 @@
       <%= f.label :related_assignment_id %>
       <p>If this assignment is a reflection on a previous one, please
         select it</p>
-      <% related_assns = @course.assignments.where(type: "files").where.not(id: @assignment.id) %>
+      <% related_assns = @course.assignments
+                                .where(type: "files").where.not(id: @assignment.id)
+                                .order(due_date: :desc) %>
       <%= f.select :related_assignment_id,
           [["<none>", nil]] + (related_assns.to_a.map do |a| [a.name, a.id] end) %>
     </div>
