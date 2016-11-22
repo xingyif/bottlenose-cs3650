@@ -48,6 +48,9 @@ Bottlenose::Application.routes.draw do
         end
       end
       resources :submissions, except: [:edit, :update, :destroy] do
+        collection do
+          post 'rerun/:grader_config_id', to: 'submissions#rerun_grader', as: 'rerun_grader'
+        end
         member do
           get :details
           get :use, to: 'submissions#use_for_grading', as: 'use'

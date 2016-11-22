@@ -50,7 +50,8 @@ class MainController < ApplicationController
           job_start: b.created_at,
           wait: w,
           wait_s: "#{(w / 60).to_i} minutes, #{(w % 60).to_i} seconds",
-          method: job_info.method_name
+          method: job_info.method_name,
+          args: job_info.args
         }
       else
         nil

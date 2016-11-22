@@ -2,10 +2,10 @@ require 'tempfile'
 require 'audit'
 
 class SubmissionsController < CoursesController
-  prepend_before_action :find_submission, except: [:index, :new, :create]
+  prepend_before_action :find_submission, except: [:index, :new, :create, :rerun_grader]
   prepend_before_action :find_course_assignment
   before_action :require_current_user, only: [:show, :files, :new, :create]
-  before_action :require_admin_or_staff, only: [:recreate_grader, :use_for_grading, :publish]
+  before_action :require_admin_or_staff, only: [:recreate_grader, :rerun_grader, :use_for_grading, :publish]
   before_action :require_admin_or_prof, only: [:rescind_lateness]
   def show
     unless @submission.visible_to?(current_user)
@@ -77,6 +77,17 @@ class SubmissionsController < CoursesController
       redirect_to back_or_else(course_assignment_submission_path(@course, @assignment, @submission)),
                   alert: "Grader already exists; use Regrade to modify it instead"
     end
+  end
+
+  def rerun_grader
+    @grader_config = GraderConfig.find(params[:grader_config_id])
+    count = 0
+    @assignment.used_submissions.each do |sub|
+      @grader_config.delay.grade(@assignment, sub)
+      count += 1
+    end
+    redirect_to back_or_else(course_assignment_path(@course, @assignment)),
+                notice: "Regraded #{@grader_config.display_type} for #{plural(count, 'submission')}"
   end
 
   def use_for_grading

@@ -22,7 +22,8 @@
 @import "button-file-inputs";
 @import "questions";
 
-table.row-vcenter > tbody > tr > td {
+table.row-vcenter > tbody > tr > td,
+table.row-vcenter > thead > tr > th {
    vertical-align: middle;
 }
 

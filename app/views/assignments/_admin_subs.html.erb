@@ -39,8 +39,17 @@
         <th>Submitter</th>
         <th>Date</th>
         <th>Status</th>
-        <% @gradesheet.grades[:names].each do |c| %>
-        <th class="text-right"><%= c %></th>
+
+        <% @gradesheet.grades[:configs].each do |c| %>
+        <th class="text-right">
+          <% if c.autograde? %>
+          <%= link_to "#",
+              class: "btn btn-default",
+              title: "Rerun #{c.display_type} for all used submissions",
+              method: :post do %><i class="glyphicon glyphicon-refresh"></i><% end %>
+          <% end %>
+          <%= c.display_type %>
+        </th>
         <% end %>
         <th class="text-right">Total</th>
         <th>Grade</th>
@@ -131,7 +140,7 @@
         headerTemplate: "{content} {icon}",
         headers: {
           2: { sorter: false },
-          <%= 5 + @gradesheet.grades[:names].count %>: { sorter: false },
+          <%= 5 + @gradesheet.grades[:configs].count %>: { sorter: false },
         },
         theme: "bootstrap",
         widgets: ['uitheme']
