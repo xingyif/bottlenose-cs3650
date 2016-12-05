@@ -174,8 +174,6 @@ class Upload < ActiveRecord::Base
     end
   end
 
-  protected
-  
   def store_meta!(meta)
     if File.exists?(metadata_path)
       raise Exception.new("Attempt to reset metadata on upload.")
@@ -199,5 +197,4 @@ class Upload < ActiveRecord::Base
       raise Exception.new("Duplicate secret key (2). That's unpossible!")
     end
   end
-
 end

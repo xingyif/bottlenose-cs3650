@@ -1,4 +1,6 @@
 Bottlenose::Application.routes.draw do
+  resources :sandboxes
+
   # Using devise for user auth.
   devise_for :users, :skip => [:registrations, :passwords]
 
@@ -90,6 +92,8 @@ Bottlenose::Application.routes.draw do
 
 
   Bottlenose::Application.routes.draw do
+  resources :sandboxes
+
     match "/500", :to => "errors#internal_server_error", :via => :all
     get "*any", via: :all, to: "errors#not_found"
   end

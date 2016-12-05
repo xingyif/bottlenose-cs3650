@@ -2,6 +2,7 @@ require 'yaml'
 
 class TapParser
   attr_reader :text, :test_count, :tests, :commentary, :passed_count
+
   def initialize(text)
     @text = text
     @test_count = 0
@@ -77,7 +78,8 @@ class TapParser
       while lines.length > 0 && lines[0].match(/^# /)
         directives.push(lines.shift[2..-1])
       end
-      test = {num: num + 1, passed: passed, missing: false, comment: comment, directives: directives}
+      test = { num: num + 1, passed: passed, missing: false, info: {},
+               comment: comment, directives: directives }
       if lines.length > 0
         mm = lines[0].match(/^(\s+)---\s*$/)
         if mm

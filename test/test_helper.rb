@@ -2,6 +2,7 @@ ENV["RAILS_ENV"] = "test"
 require File.expand_path('../../config/environment', __FILE__)
 require 'rails/test_help'
 require 'capybara/rails'
+require 'fake_upload'
 require 'simplecov'
 SimpleCov.start
 
@@ -28,6 +29,12 @@ class ActiveSupport::TestCase
     @fred_reg = create(:registration, course: @cs101, user: @fred, section_id: @section.crn,
                        role: Registration::roles[:professor])
     @john_reg = create(:registration, course: @cs101, user: @john, section_id: @section.crn)
+  end
+
+  def simulated_upload(user, file)
+    upload = build(:upload, user: user)
+    upload.store_upload!(FakeUpload.new(file), {note: "Test: Simulated Upload"})
+    upload
   end
 
   def assign_upload(assign, suffix)

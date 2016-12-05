@@ -216,7 +216,9 @@ class Submission < ActiveRecord::Base
       begin
         complete = complete and c.autograde?
         c.autograde!(assignment, self) # make sure we create all needed graders
-      rescue Exception
+      rescue Exception => e
+        puts e.inspect
+        puts e.backtrace
         complete = false
       end
     end

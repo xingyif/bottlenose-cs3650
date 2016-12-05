@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161112214353) do
+ActiveRecord::Schema.define(version: 20161124170753) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -162,6 +162,13 @@ ActiveRecord::Schema.define(version: 20161112214353) do
 
   add_index "registrations", ["course_id"], name: "index_registrations_on_course_id", using: :btree
   add_index "registrations", ["user_id"], name: "index_registrations_on_user_id", using: :btree
+
+  create_table "sandboxes", force: :cascade do |t|
+    t.string   "name"
+    t.integer  "submission_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+  end
 
   create_table "submissions", force: :cascade do |t|
     t.integer  "assignment_id",                         null: false

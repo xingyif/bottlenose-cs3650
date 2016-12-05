@@ -18,6 +18,7 @@
     <li><%= tab_if_type("CheckerGrader", "Checker tests") %></li>
     <li><%= tab_if_type("JunitGrader", "JUnit tests") %></li>
     <li><%= tab_if_type("ManualGrader", "Manual grading") %></li>
+    <li><%= tab_if_type("SandboxGrader", "Sandboxed tests") %></li>
     <li><%= tab_if_type("reuse", "Copy existing settings") %></li>
     <li class="pull-right">
       <% if @in_use %>
@@ -103,6 +104,29 @@
       </div>
     </div>
     <% end %>
+    <%= f_grader.fields_for "SandboxGrader" do |sg| %>
+    <div id="<%= new_grader %>_SandboxGrader" class="tab-pane equal-height-group form-group">
+      <table class="table" style="margin-bottom: 0px;">
+        <tr class="form-group">
+          <td><%= sg.label "avail_score", "Points available:" %></td>
+          <td><%= sg.spinner "avail_score", target.avail_score || 50, :min => 0, :delta => 5 %></td>
+        </tr>
+        <tr class="form-group">
+          <td><%= sg.label "upload_file", "Grading file:" %></td>
+          <td><%= sg.file_field "upload_file" %>
+            <% if cur_file %>
+            <br>Current file: <%= link_to target.upload_file, cur_file %>
+            <% end %>
+          </td>
+        </tr>
+        <tr class="form-group">
+          <td><%= sg.label "params", "Grading driver:" %></td>
+          <td><%= sg.text_field "params", value: "lazy.rb" %></td>
+        </tr>
+      </table>
+    </div>
+    <% end %>
+
     <div id="<%= new_grader %>_reuse" class="tab-pane equal-height-group form-group">
       <label for="sel1">Select existing grader configuration:</label>
       <select class="form-control" id="<%= new_grader %>_grader-config-options">

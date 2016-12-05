@@ -87,7 +87,9 @@ FactoryGirl.define do
         create(:registration, user: sub.user, course: sub.course)
       end
 
-      sub.upload.user_id = sub.user_id
+      if sub.upload
+        sub.upload.user_id = sub.user_id
+      end
     end
   end
 

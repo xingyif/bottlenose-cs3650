@@ -9,6 +9,7 @@
     <li><a data-toggle="tab" href="#<%= f_late.object_name %>_UseCourseDefaultConfig">Course default</a></li>
     <% end %>
     <li><a data-toggle="tab" href="#<%= f_late.object_name %>_LatePerDayConfig">Late-per-day</a></li>
+    <li><a data-toggle="tab" href="#<%= f_late.object_name %>_LatePerHourConfig">Late-per-hour</a></li>
     <li><a data-toggle="tab" href="#<%= f_late.object_name %>_FixedDaysConfig">Limited number</a></li>
     <li><a data-toggle="tab" href="#<%= f_late.object_name %>_reuse-lateness">Copy existing settings</a></li>
   </ul>
@@ -19,6 +20,7 @@
       <p><%= @course.lateness_config.to_s %></p>
     </div>
     <% end %>
+
     <%= f_late.fields_for :LatePerDayConfig do |lpd| %>
     <div id="<%= f_late.object_name %>_LatePerDayConfig" class="tab-pane equal-height-group form-group">
       <div class="form-inline">
@@ -38,6 +40,26 @@
       </div>
     </div>
     <% end %>
+
+    <%= f_late.fields_for :LatePerHourConfig do |lpd| %>
+    <div id="<%= f_late.object_name %>_LatePerHourConfig" class="tab-pane equal-height-group form-group">
+      <div class="form-inline">
+        <%= lpd.hidden_field "frequency", value: "1" %>
+        Deduct
+        <%= lpd.spinner "percent_off", 1, :min => 0, :max => 100, :delta => 1 %>
+        percent every hour to a maximum of
+        <%= lpd.spinner "max_penalty", 100, :min => 0, :max => 100, :delta => 5 %>
+        percent off.
+      </div>
+      <br>
+      <div class="form-inline">
+        Stop accepting assignments after
+        <%= lpd.spinner "days_per_assignment", 10, :min => 0, :max => 5 %>
+        days.
+      </div>
+    </div>
+    <% end %>
+
     <%= f_late.fields_for :FixedDaysConfig do |fd| %>
     <div id="<%= f_late.object_name %>_FixedDaysConfig" class="tab-pane equal-height-group form-group">
       <div class="form-inline">

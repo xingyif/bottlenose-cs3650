@@ -177,6 +177,7 @@ class SubmissionsController < CoursesController
   def new_Files
     render "new_#{@assignment.type.underscore}"
   end
+
   def new_Questions
     @questions = @assignment.questions
     @submission_dirs = []
@@ -193,6 +194,7 @@ class SubmissionsController < CoursesController
     end
     render "new_#{@assignment.type.underscore}"
   end
+
   def new_Exam
     unless current_user_site_admin? || current_user_staff_for?(@course)
       redirect_to back_or_else(course_assignment_path(@course, @assignment)),
@@ -224,6 +226,7 @@ class SubmissionsController < CoursesController
       new_Files
     end
   end
+
   def create_Questions
     @answers = answers_params
     questions = @assignment.questions.reduce([]) do |acc, section|
@@ -328,6 +331,7 @@ class SubmissionsController < CoursesController
       new_Questions
     end
   end
+
   def create_Exam
     # No graders are created here, because we shouldn't ever get to this code
     # The graders are configured in the GradersController, in update_exam_grades
