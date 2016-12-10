@@ -208,7 +208,9 @@ class AssignmentsController < CoursesController
                       :JavaStyleGrader => [:avail_score, :upload_file, :params, :type],
                       :CheckerGrader   => [:avail_score, :upload_file, :params, :type],
                       :JunitGrader     => [:avail_score, :upload_file, :params, :type],
-                      :ManualGrader    => [:avail_score, :upload_file, :params, :type]])]
+                      :ManualGrader    => [:avail_score, :upload_file, :params, :type],
+                      :SandboxGrader   => [:avail_score, :upload_file, :params, :type],
+        ])]
       end.to_h
     end
   end
