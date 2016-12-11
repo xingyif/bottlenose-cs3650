@@ -121,7 +121,7 @@
         </tr>
         <tr class="form-group">
           <td><%= sg.label "params", "Grading driver:" %></td>
-          <td><%= sg.text_field "params", value: "lazy.rb" %></td>
+          <td><%= sg.select("params", grading_drivers.map { |dd| [dd, dd] }, selected: 'lazy.rb' )%></td>
         </tr>
       </table>
     </div>

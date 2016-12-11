@@ -1,0 +1,18 @@
+<% @page_title = "Checker Grader" %>
+<% cur_reg = current_user.registration_for(@course) %>
+
+<p>
+  <%= link_to "Back to submission",
+      course_assignment_submission_path(@course, @assignment, @submission) %>
+</p>
+
+<h1>Submission</h1>
+
+<%= render 'submissions/sub_info', cur_reg: cur_reg %>
+
+
+<h1>Scoring Details: Sandbox Grader</h1>
+
+<pre>
+<%= @grader.notes %>
+</pre>

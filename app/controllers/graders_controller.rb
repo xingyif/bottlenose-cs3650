@@ -476,6 +476,17 @@ HEADER
   def details_QuestionsGrader
     "No details to show for Exam grader"
   end
+
+  def edit_SandboxGrader
+    redirect_to details_course_assignment_submission_path(@course, @assignment, @submission)
+  end
+  def show_SandboxGrader
+    render "show_SandboxGrader"
+  end
+  def details_SanboxGrader
+    @grader.notes
+  end
+
   
 
   ##############################

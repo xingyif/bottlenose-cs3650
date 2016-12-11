@@ -105,4 +105,9 @@ module ApplicationHelper
     new_course_assignment_path(ch.course) + "?chapter_id=#{ch.id}"
   end
 
+  def grading_drivers
+    Dir.entries(Rails.root.join('sandbox', 'drivers')).find_all do |ent|
+      ent =~ /\.rb$/
+    end
+  end
 end
