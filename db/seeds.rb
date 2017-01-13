@@ -217,12 +217,12 @@ when "development"
     end
   end
 when "production"
-  ben = User.create!(
-                     username: "blerner",
-                     name: "Benjamin Lerner",
-                     first_name: "Benjamin",
-                     last_name: "Lerner",
-                     nickname: "Ben",
+  nat = User.create!(
+                     username: "ntuck",
+                     name: "Nat Tuck",
+                     first_name: "Nat",
+                     last_name: "Tuck",
+                     nickname: "Nat",
                      site_admin: true,
                      )
 end

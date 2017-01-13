@@ -8,13 +8,13 @@ require File.expand_path('../config/application', __FILE__)
 Bottlenose::Application.load_tasks
 
 task :upgrade do
-  system("bin/delayed_job stop")
+  #system("bin/delayed_job stop")
   system("rake db:migrate")
   system("bundle exec rake assets:precompile")
   system("whenever -i")
-  system("rake install")
+  #system("rake install")
   system("rake restart")
-  system("bin/delayed_job start")
+  #system("bin/delayed_job run")
 end
 
 task :restart do
