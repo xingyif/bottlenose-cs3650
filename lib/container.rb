@@ -13,10 +13,14 @@ class Container
            -c "limits.memory=512MB" \
            -c "limits.processes=128"}
     )
-    
-    sleep(1)
+   
+    loop do
+      sleep(1)
+      state = `(lxc exec #{@name} -- runlevel) 2>&1`
+      break if state =~ /^N/;
+    end
+
     run("lxc exec #{@name} -- hostname #{@name}")
-    sleep(1)
   end
 
   def mkdir(path, mode = 0755)

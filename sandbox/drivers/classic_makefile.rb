@@ -1,13 +1,40 @@
 #!/usr/bin/env ruby
 
-require 'bn_grade'
-require 'tap_parser'
+key = ENV['BN_KEY']
+sub = ENV['BN_SUB']
+gra = ENV['BN_GRA']
+ENV['BN_KEY'] = ''
 
-ENV["BN_SUB"]   = `ls /tmp/bn/sub/*`.chomp
-ENV["BN_GRADE"] = `ls /tmp/bn/gra/*`.chomp
-ENV["BN_KEY"]   = `cat /root/bn_output_key`.chomp
+def run(cmd)
+  system(%{sudo -u student #{cmd}})
+end
 
-score = BnScore.new
+def unpack_to_home(file)
+  Dir.chdir "/home/student"
+
+  if (file =~ /\.tar\.gz$/i) || file =~ (/\.tgz$/i)
+    run(%Q{tar xzf "#{file}"})
+  elsif (file =~ /\.zip/i)
+    run(%Q{unzip "#{file}"})
+  else
+    run(%Q{cp "#{file}" .})
+  end
+end
+
+def unpack_submission
+  if ENV["BN_SUB"]
+    unpack_to_home(ENV["BN_SUB"])
+  end
+end
+
+def unpack_grading
+  if ENV["BN_GRADE"]
+    unpack_to_home(ENV["BN_GRADE"])
+    if File.directory?("grading")
+      run(%Q{cp grading/* .})
+    end
+  end
+end
 
 unpack_grading
 unpack_submission
@@ -25,12 +52,11 @@ def run_in_sub(cmd)
   run(cmd)
 end
 
-run_in_sub("sudo -u student make")
+run_in_sub("make")
 
 unpack_grading
 
-run_in_sub("sudo -u student make test | tee /root/test.out")
+puts key
+run_in_sub("make test")
+puts key
 
-tap = TapParser.new(File.read("/root/test.out"))
-score.add("make test", tap.points_earned, tap.points_available)
-score.output!
