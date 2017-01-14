@@ -16,7 +16,7 @@ class Sandbox < ActiveRecord::Base
   end
 
   def stop_container
-    @container.force_stop!
+    container.force_stop!
   end
 end
 

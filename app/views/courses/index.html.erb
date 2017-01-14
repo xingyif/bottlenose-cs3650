@@ -13,6 +13,7 @@
 <div class="row">
   <div class="col-md-12">
     <% @courses_by_term.each do |term, courses| %>
+      <% next if term.archived? %>
       <h2><%= term.name %></h2>
 
       <%= render 'table', courses: courses %>

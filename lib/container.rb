@@ -21,6 +21,7 @@ class Container
     end
 
     run("lxc exec #{@name} -- hostname #{@name}")
+    run("lxc exec #{@name} -- bash -c 'echo 127.0.0.1 $(hostname) >> /etc/hosts'")
   end
 
   def mkdir(path, mode = 0755)
@@ -59,6 +60,12 @@ class Container
                    '(cd && BN_KEY="#{secret}" BN_SUB="#{sub}" BN_GRA="#{gra}" \
                    ruby -I /tmp/bn/lib bn_driver.rb)'}
     puts "Run driver: #{command}"
+
+    Thread.new do
+      sleep 10.minutes
+      force_stop!
+    end
+
     Open3.capture3(command)
   end
 

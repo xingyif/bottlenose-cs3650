@@ -23,13 +23,25 @@ class SandboxGrader < GraderConfig
   protected
   
   def do_grading(assignment, sub)
-    file = sub.upload.submission_path
-    secret = SecureRandom.hex(16)
-
-    puts "sandbox_grader::do_grading - #1"
-
     sandbox = Sandbox.create
     cont    = sandbox.container
+
+    grade = 0.0
+
+    begin
+      grade = run_sandbox(assignment, sub, sandbox, cont)
+    rescue Exception => e
+      puts "Sandbox grader failed"
+      puts e.inspect
+    end
+    
+    sandbox.destroy!
+    return grade
+  end
+
+  def run_sandbox(assignment, sub, sandbox, cont)
+    file = sub.upload.submission_path
+    secret = SecureRandom.hex(16)
 
     cont.start!
     cont.mkdir("/tmp/bn")
@@ -38,6 +50,8 @@ class SandboxGrader < GraderConfig
     cont.push_dir(Rails.root.join('sandbox', 'lib'), "/tmp/bn")
 
     sandbox_sub_path = "/home/student/#{sub.upload.file_name}"
+    cont.push(file, sandbox_sub_path)
+    sandbox_sub_path = "/tmp/bn/#{secret}/#{sub.upload.file_name}"
     cont.push(file, sandbox_sub_path)
 
     sandbox_gra_path = "/tmp/bn/#{self.upload.file_name}"
@@ -57,7 +71,13 @@ class SandboxGrader < GraderConfig
 
     parts = stdout.split("#{secret}\n")
     if parts.size < 3
-      puts "Not enough parts"
+      puts "Can't parse sandbox output: Not enough parts"
+      puts "Expected secret: #{secret}"
+      puts "== Output =="
+      puts stdout
+      puts "== Parts =="
+      puts parts.inspect
+
       return 0.0
     end
       
@@ -73,8 +93,6 @@ class SandboxGrader < GraderConfig
     g.save!
 
     puts g.notes
-
-    sandbox.destroy!
 
     return self.avail_score.to_f * (tap.points_earned.to_f / tap.points_available.to_f)
   end

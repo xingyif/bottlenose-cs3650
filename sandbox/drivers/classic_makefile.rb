@@ -6,7 +6,8 @@ gra = ENV['BN_GRA']
 ENV['BN_KEY'] = ''
 
 def run(cmd)
-  system(%{sudo -u student #{cmd}})
+  cmd1 = %{sudo -u student #{cmd}}
+  system(cmd1)
 end
 
 def unpack_to_home(file)
@@ -28,8 +29,8 @@ def unpack_submission
 end
 
 def unpack_grading
-  if ENV["BN_GRADE"]
-    unpack_to_home(ENV["BN_GRADE"])
+  if ENV["BN_GRA"]
+    unpack_to_home(ENV["BN_GRA"])
     if File.directory?("grading")
       run(%Q{cp grading/* .})
     end
@@ -59,4 +60,4 @@ unpack_grading
 puts key
 run_in_sub("make test")
 puts key
-
+puts "classic_makefile driver done"

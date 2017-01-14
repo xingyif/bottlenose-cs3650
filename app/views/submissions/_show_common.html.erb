@@ -41,6 +41,12 @@
       <% end %>
     </td>
   </tr>
+<% if @submission.time_taken %>
+  <tr>
+    <td><strong>Time Taken</strong></td>
+    <td><%= @submission.time_taken %> hours</td>
+  </tr>
+<% end %>
   <tr>
     <td><strong>Student Notes</strong></td>
     <td>
