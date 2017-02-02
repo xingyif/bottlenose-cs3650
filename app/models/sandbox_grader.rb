@@ -25,7 +25,8 @@ class SandboxGrader < GraderConfig
   def do_grading(assignment, sub)
     sandbox = Sandbox.create
     cont    = sandbox.container
-
+    
+    self.save
     grade = 0.0
 
     begin

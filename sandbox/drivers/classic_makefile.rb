@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+require 'timeout'
 
 key = ENV['BN_KEY']
 sub = ENV['BN_SUB']
@@ -50,7 +51,14 @@ def run_in_sub(cmd)
   dir = `dirname $(find . -name "Makefile" | head -1)`.chomp
   run(%Q{chown -R student:student "#{dir}"})
   Dir.chdir dir
-  run(cmd)
+
+  begin
+    Timeout.timeout(250) do
+      run(cmd)
+    end
+  rescue Timeout::Error
+    puts 'Command timeout'
+  end
 end
 
 run_in_sub("make")

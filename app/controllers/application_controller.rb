@@ -114,6 +114,7 @@ class ApplicationController < ActionController::Base
     @submission_files = []
     @show_deductions = show_deductions
     def with_extracted(item)
+      return nil if item.nil?
       if item[:public_link]
         return nil if File.basename(item[:full_path].to_s) == ".DS_Store"
         comments = @lineCommentsByFile[item[:public_link].to_s] || {noCommentsFor: item[:public_link].to_s}
