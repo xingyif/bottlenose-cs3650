@@ -7,6 +7,6 @@ apt-get install -y openjdk-8-jdk gradle
 apt-get install -y ruby2.3
 apt-get install -y build-essential
 apt-get install -y --allow-unauthenticated sbt
-apt-get install -y clang valgrind wamerican
+apt-get install -y clang valgrind wamerican libbsd-dev
 
 adduser --disabled-password --gecos "" student

@@ -29,7 +29,8 @@ class ManualGrader < GraderConfig
     deductions = comments.pluck(:weight).reduce(0) do |sum, w| sum + w end
     
     g.out_of = self.avail_score
-    g.score = (self.avail_score - deductions).clamp(0, self.avail_score)
+    #g.score = (self.avail_score - deductions).clamp(0, self.avail_score)
+    g.score = self.avail_score - deductions
     
     g.updated_at = DateTime.now
     g.available = false

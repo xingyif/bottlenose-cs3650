@@ -35,12 +35,19 @@ class SandboxGrader < GraderConfig
       puts "Sandbox grader failed"
       puts e.inspect
     end
-    
-    sandbox.destroy!
+   
+    sandbox.stop_container
+    sandbox.destroy or puts sandbox.errors.inspect
     return grade
   end
 
   def run_sandbox(assignment, sub, sandbox, cont)
+    g = self.grader_for sub
+    g.score = 0
+    g.out_of = 50
+    g.available = false
+    g.save!
+
     file = sub.upload.submission_path
     secret = SecureRandom.hex(16)
 
@@ -71,6 +78,13 @@ class SandboxGrader < GraderConfig
     puts stdout
 
     parts = stdout.split("#{secret}\n")
+      
+    g.score = 0
+    g.out_of = 50
+    g.available = true
+    g.notes = "== stdout ==\n\n#{stdout}\n\n== stderr ==\n\n#{stderr}\n\n"
+    g.save!
+
     if parts.size < 3
       puts "Can't parse sandbox output: Not enough parts"
       puts "Expected secret: #{secret}"
@@ -78,19 +92,15 @@ class SandboxGrader < GraderConfig
       puts stdout
       puts "== Parts =="
       puts parts.inspect
-
-      return 0.0
+    else
+      tap = TapParser.new(parts[1])
+      Audit.log "Sandbox grader results: Tap: #{tap.points_earned}\n"
+    
+      g.score = tap.points_earned
+      g.out_of = tap.points_available
+      g.updated_at = DateTime.now
     end
       
-    tap = TapParser.new(parts[1])
-    Audit.log "Sandbox grader results: Tap: #{tap.points_earned}\n"
-    
-    g = self.grader_for sub
-    g.score = tap.points_earned
-    g.out_of = tap.points_available
-    g.updated_at = DateTime.now
-    g.available = true
-    g.notes = "== stdout ==\n\n#{stdout}\n\n== stderr ==\n\n#{stderr}\n\n"
     g.save!
 
     puts g.notes
