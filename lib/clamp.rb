@@ -1,5 +1,9 @@
 class Numeric
   def clamp(lo, hi)
-    [lo, [self, hi].min].max
+    if self != self
+      lo
+    else 
+      [lo, [self, hi].min].max
+    end
   end
 end

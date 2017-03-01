@@ -97,8 +97,16 @@ class SandboxGrader < GraderConfig
       Audit.log "Sandbox grader results: Tap: #{tap.points_earned}\n"
     
       g.score = tap.points_earned
-      g.out_of = tap.points_available
+      if tap.points_available >= 1.0
+        g.out_of = tap.points_available
+      end
       g.updated_at = DateTime.now
+
+      score = g.score / g.out_of
+      unless (score < 5 && score > -0.1)
+        g.score = 0
+        g.out_of = 50
+      end
     end
       
     g.save!

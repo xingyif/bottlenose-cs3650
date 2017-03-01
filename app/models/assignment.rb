@@ -191,9 +191,8 @@ class Assignment < ActiveRecord::Base
   end
 
   def main_submissions
-    regs = course.active_registrations
-    subs = regs.map do |sreg|
-      used_sub_for(sreg.user)
+    subs_for_gradings.map do |sfg|
+      sfg.submission
     end
   end
 
